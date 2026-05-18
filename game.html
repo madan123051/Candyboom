@@ -553,6 +553,7 @@ const FOOD_CHAIN = {
 };
 const ZONE_ICONS = { 'I':'🌾', 'II':'🌴', 'III':'💧', 'IV':'⛰️', 'V':'🌺' };
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const AUDIO_PREF_KEY = 'koj_audio_enabled';
 
 
 // Copyright-safe procedural audio: no external music files, samples, or licensed assets.
@@ -564,7 +565,7 @@ class JungleAudioEngine {
     this.bgm = null;
     this.ambience = null;
     this.drumBus = null;
-    this.enabled = false;
+    this.enabled = localStorage.getItem(AUDIO_PREF_KEY) === '1';
     this.started = false;
     this.loops = [];
     this.noiseBuffer = null;
@@ -576,6 +577,7 @@ class JungleAudioEngine {
     if (this.ctx.state === 'suspended') this.ctx.resume();
     if (!this.started) this.startAmbientBgm();
     this.enabled = true;
+    localStorage.setItem(AUDIO_PREF_KEY, '1');
     this.setButton();
   }
 
@@ -587,6 +589,7 @@ class JungleAudioEngine {
     }
     this.enabled = false;
     this.master.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.05);
+    localStorage.setItem(AUDIO_PREF_KEY, this.enabled ? '1' : '0');
     this.setButton();
   }
 
@@ -776,6 +779,7 @@ class JungleAudioEngine {
 }
 
 const jungleAudio = new JungleAudioEngine();
+jungleAudio.setButton();
 
 // A hand-tuned Level 1 opener: no automatic matches on load, but several
 // meaningful Tiger setups exist so the player must swipe and plan hunts.
@@ -894,6 +898,7 @@ function initLevel() {
   while (findMatches().length > 0) createBoard(cfg.animalTypes);
   renderBoard(cfg.iconSize, true);
   updateAnimationToggleUi();
+  jungleAudio.play('levelStart');
 }
 
 function createBoard(animalTypes, presetBoard=null) {
@@ -1007,13 +1012,16 @@ function getEl(r, c) {
 
 function doSwap(r1, c1, r2, c2) {
   isProcessing = true; clearSelected();
+  const pan = jungleAudio.panFromCell(Math.round((c1 + c2) / 2));
   swapCells(r1, c1, r2, c2); renderBoard();
   markCells([[r1,c1],[r2,c2]], 'swapping');
   if (findMatches().length > 0) {
+    jungleAudio.play('swap', pan);
     movesLeft--;
     document.getElementById('moves').textContent = movesLeft;
     setTimeout(() => processMatches(true), 280);
   } else {
+    jungleAudio.play('invalid', pan);
     showMsg('🌿 No hunt path there — try another swipe.');
     setTimeout(() => {
       markCells([[r1,c1],[r2,c2]], 'invalid');
@@ -1182,6 +1190,13 @@ function processMatches(playerTriggered=false) {
   });
 
   const pts = totalCnt * 10 * matches.length + huntedCells.size * 25;
+  const centerCol = matches[0]?.cells?.[0]?.c ?? Math.floor(COLS / 2);
+  const pan = jungleAudio.panFromCell(centerCol);
+  if (huntedCells.size > 0) jungleAudio.play('hunt', pan);
+  else jungleAudio.play('pop', pan);
+  if (specialLabel.includes('sweep')) jungleAudio.play('color', pan);
+  else if (specialLabel.includes('Cross')) jungleAudio.play('cross', pan);
+  else if (specialLabel.includes('blast')) jungleAudio.play('blast', pan);
   score += pts;
   updateScore();
 

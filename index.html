@@ -412,6 +412,8 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
 .auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
 .invite-box{display:none;margin-top:16px;}
 .invite-input{width:100%;padding:10px;border-radius:8px;border:1px solid #2d8a2d;background:#031206;color:#9de39c;}
+#homeAudioBtn{position:fixed;right:16px;bottom:18px;z-index:220;border:1px solid #2d8a2d;border-radius:26px;background:linear-gradient(135deg,#0f3c17,#1e6a2f);color:#8adf80;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35);}
+#homeAudioBtn.muted{color:#6f836f;border-color:#486248;background:linear-gradient(135deg,#283229,#334236);}
 
 
 @media (max-width: 768px) {
@@ -774,6 +776,60 @@ const genReferral = httpsCallable(functions, 'generateReferralCode');
 const authModal = document.getElementById('authModal');
 const authStatus = document.getElementById('authStatus');
 const inviteBox = document.getElementById('inviteBox');
+const AUDIO_PREF_KEY = 'koj_audio_enabled';
+
+class HomeJungleAudio {
+  constructor() { this.ctx = null; this.master = null; this.bus = null; this.loop = null; this.enabled = localStorage.getItem(AUDIO_PREF_KEY) === '1'; }
+  build() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx || this.ctx) return;
+    this.ctx = new Ctx();
+    this.master = this.ctx.createGain(); this.master.gain.value = 0.0001; this.master.connect(this.ctx.destination);
+    this.bus = this.ctx.createGain(); this.bus.gain.value = 0.22; this.bus.connect(this.master);
+  }
+  unlock() {
+    this.build();
+    if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    if (this.enabled) this.start();
+  }
+  tone(freq, duration = 0.4, volume = 0.03) {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(gain); gain.connect(this.bus); osc.start(now); osc.stop(now + duration + 0.04);
+  }
+  start() {
+    if (!this.ctx || !this.enabled) return;
+    this.master.gain.setTargetAtTime(0.35, this.ctx.currentTime, 0.2);
+    if (this.loop) return;
+    const notes = [261.63, 329.63, 392, 349.23];
+    let i = 0;
+    this.loop = setInterval(() => {
+      if (!this.enabled || !this.ctx) return;
+      this.tone(notes[i++ % notes.length], 0.45, 0.03);
+    }, 900);
+  }
+  stop() { if (this.ctx) this.master.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.08); }
+  toggle() {
+    this.enabled = !this.enabled;
+    localStorage.setItem(AUDIO_PREF_KEY, this.enabled ? '1' : '0');
+    this.unlock();
+    if (this.enabled) this.start(); else this.stop();
+    this.updateUi();
+  }
+  updateUi() {
+    const btn = document.getElementById('homeAudioBtn');
+    if (!btn) return;
+    btn.textContent = this.enabled ? '🔊 Home Audio On' : '🔇 Home Audio Off';
+    btn.classList.toggle('muted', !this.enabled);
+  }
+}
+const homeAudio = new HomeJungleAudio();
 
 function openAuthModal(){ authModal.classList.add('active'); }
 function closeAuthModal(){ authModal.classList.remove('active'); }
@@ -815,6 +871,9 @@ window.playNow = () => {
   location.href = `game.html?uid=${encodeURIComponent(user.uid)}`;
 };
 
+document.addEventListener('pointerdown', () => homeAudio.unlock(), { once:true });
+document.addEventListener('keydown', () => homeAudio.unlock(), { once:true });
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     authStatus.innerHTML = '<button class="btn-play" onclick="openAuthModal()">🔐 Login to Play</button>';
@@ -837,6 +896,11 @@ onAuthStateChanged(auth, async (user) => {
     inviteBox.style.display = 'block';
   } catch {}
 });
+
+document.body.insertAdjacentHTML('beforeend', '<button id="homeAudioBtn" class="muted" type="button">🔇 Home Audio Off</button>');
+document.getElementById('homeAudioBtn').addEventListener('click', () => homeAudio.toggle());
+homeAudio.updateUi();
+if (homeAudio.enabled) homeAudio.unlock();
 </script>
 
 </body>
