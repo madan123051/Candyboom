@@ -135,8 +135,40 @@ h1 {
   border:2px solid #f0c040;
   z-index:10; position:relative;
 }
-@keyframes fadeOut { to { opacity:0; transform:scale(0) rotate(20deg); } }
-.removing { animation:fadeOut 0.35s forwards; }
+@keyframes fadeOut {
+  0% { opacity:1; transform:scale(1) rotate(0); filter:brightness(1.4); }
+  45% { opacity:1; transform:scale(1.28) rotate(-8deg); filter:brightness(1.9) saturate(1.5); }
+  100% { opacity:0; transform:scale(0) rotate(24deg); filter:blur(2px); }
+}
+@keyframes pounce {
+  0%,100% { transform:scale(1) translate(0,0); }
+  35% { transform:scale(1.18) translateY(-9px); box-shadow:0 0 24px #f0c040, 0 0 10px #fff; }
+  70% { transform:scale(1.06) translateY(3px); }
+}
+@keyframes preyHit {
+  0% { transform:scale(1); filter:brightness(1); }
+  35% { transform:scale(1.24) rotate(-10deg); filter:brightness(1.9); }
+  70% { transform:scale(0.82) rotate(14deg); }
+  100% { transform:scale(0) rotate(28deg); opacity:0; }
+}
+@keyframes invalidShake {
+  0%,100% { transform:translateX(0); }
+  20% { transform:translateX(-7px); }
+  40% { transform:translateX(7px); }
+  60% { transform:translateX(-5px); }
+  80% { transform:translateX(5px); }
+}
+@keyframes dropIn {
+  0% { transform:translateY(-34px) scale(0.72); opacity:0; }
+  75% { transform:translateY(5px) scale(1.06); opacity:1; }
+  100% { transform:translateY(0) scale(1); opacity:1; }
+}
+.removing { animation:fadeOut 0.42s forwards; }
+.prey-hit { animation:preyHit 0.48s forwards; }
+.predator-strike { animation:pounce 0.48s ease; z-index:12; }
+.invalid-swap { animation:invalidShake 0.32s ease; }
+.drop-in { animation:dropIn 0.34s cubic-bezier(.2,.8,.2,1); }
+.special-glow { box-shadow:0 0 26px #f0c040, inset 0 0 16px #fff5 !important; }
 
 /* Animal tile colors */
 .candy-0 { background: linear-gradient(135deg, #6a2000, #aa4010); box-shadow:0 3px 8px rgba(0,0,0,0.5); } /* Tiger - deep orange */
@@ -213,7 +245,27 @@ h1 {
   position:fixed; pointer-events:none; font-size:16px;
   animation:floatUp 1s forwards; z-index:200;
 }
+.attack-trail {
+  position:fixed; height:4px; border-radius:999px; pointer-events:none; z-index:150;
+  transform-origin:left center;
+  background:linear-gradient(90deg, #f0c040, #ff7b1a, transparent);
+  box-shadow:0 0 12px #f0c040;
+  animation:trailFlash 0.45s ease-out forwards;
+}
+.shockwave {
+  position:fixed; width:18px; height:18px; border:2px solid #f0c040; border-radius:50%;
+  pointer-events:none; z-index:151; transform:translate(-50%,-50%);
+  animation:shockwave 0.55s ease-out forwards;
+}
+.float-text {
+  position:fixed; pointer-events:none; z-index:210;
+  color:#f0c040; font-weight:900; text-shadow:0 2px 6px #000, 0 0 10px #f0c040;
+  animation:floatText 0.9s ease-out forwards;
+}
 @keyframes floatUp { to { transform:translateY(-100px); opacity:0; } }
+@keyframes trailFlash { from{opacity:0; transform:scaleX(0)} 30%{opacity:1} to{opacity:0; transform:scaleX(1)} }
+@keyframes shockwave { to { width:92px; height:92px; opacity:0; } }
+@keyframes floatText { to { transform:translateY(-42px) scale(1.08); opacity:0; } }
 </style>
 </head>
 <body>
@@ -239,7 +291,7 @@ h1 {
   <!-- Objective display -->
   <div id="objectiveBox">
     <div id="objectiveLabel">🎯 HUNT OBJECTIVE</div>
-    <div id="objectiveText">Hunt 15 Deer before moves run out</div>
+    <div id="objectiveText">Hunt 15 Deer with Tiger attacks — deer matches do not count</div>
     <div id="huntCounter">🦌 Hunted: 0 / 15</div>
   </div>
 
@@ -254,8 +306,8 @@ h1 {
   </div>
 
   <div id="board"></div>
-  <div id="message">🌿 Match Tigers to hunt the Deer!</div>
-  <div id="hint">👆 Tiger matches hunt nearby Deer &amp; Goat — Swipe to move</div>
+  <div id="message">🌿 Build Tiger matches to hunt Deer — no auto clears!</div>
+  <div id="hint">👆 Swipe to build Tiger attacks; Deer-only matches will not count</div>
   <button id="restartBtn">🔄 Restart Jungle</button>
 </div>
 
@@ -322,8 +374,16 @@ const LEVELS = [
     objective:'hunt',          // ✅ Rule: Hunt objective for Levels 1-50
     huntAnimal:1,              // ✅ Hunt Deer (index 1)
     huntCount:15,              // ✅ Rule example: Hunt 15 Deer
-    goalText:'Hunt 15 Deer before moves run out',
+    goalText:'Hunt 15 Deer with Tiger attacks — deer matches do not count',
     target:0,
+    openingBoard:[
+      [0,1,2,0,2,1],
+      [1,2,0,1,0,2],
+      [2,0,1,2,1,0],
+      [0,1,2,0,2,1],
+      [1,2,0,1,0,2],
+      [2,0,1,2,1,0],
+    ],
   },
   // Levels 2-10 (score mode — to be upgraded per zone rules)
   { level:2,  zone:'I',  zoneName:'Starter Plains',  cols:6, rows:6, iconSize:46, moves:28, animalTypes:[0,1,2,3],     objective:'score', target:1000,  goalText:'Reach score 1,000'  },
@@ -406,22 +466,36 @@ function initLevel() {
   const boardEl = document.getElementById('board');
   boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
 
-  createBoard(cfg.animalTypes);
+  createBoard(cfg.animalTypes, cfg.openingBoard);
   while (findMatches().length > 0) createBoard(cfg.animalTypes);
-  renderBoard(cfg.iconSize);
+  renderBoard(cfg.iconSize, true);
 }
 
-function createBoard(animalTypes) {
+function createBoard(animalTypes, template) {
+  if (template) {
+    board = template.map(row => row.slice());
+    return;
+  }
+
   board = [];
   for (let r = 0; r < ROWS; r++) {
     board[r] = [];
     for (let c = 0; c < COLS; c++) {
-      board[r][c] = animalTypes[Math.floor(Math.random() * animalTypes.length)];
+      board[r][c] = pickSafeAnimal(animalTypes, r, c);
     }
   }
 }
 
-function renderBoard(iconSizeOverride) {
+function pickSafeAnimal(animalTypes, r, c) {
+  const shuffled = animalTypes.slice().sort(() => Math.random() - 0.5);
+  return shuffled.find(type => {
+    const horizontal = c >= 2 && board[r][c - 1] === type && board[r][c - 2] === type;
+    const vertical = r >= 2 && board[r - 1][c] === type && board[r - 2][c] === type;
+    return !horizontal && !vertical;
+  }) ?? shuffled[0];
+}
+
+function renderBoard(iconSizeOverride, isFresh=false) {
   const cfg = getConfig(level);
   const iSize = iconSizeOverride || cfg.iconSize;
   const el = document.getElementById('board');
@@ -432,7 +506,7 @@ function renderBoard(iconSizeOverride) {
     for (let c = 0; c < COLS; c++) {
       const animalIdx = board[r][c];
       const d = document.createElement('div');
-      d.className = `candy candy-${Math.min(animalIdx, 5)}`;
+      d.className = `candy candy-${Math.min(animalIdx, 5)}${isFresh ? ' drop-in' : ''}`;
       d.textContent = ALL_ANIMALS[animalIdx] || '🐯';
       d.style.fontSize = iSize + 'px';
       d.dataset.r = r; d.dataset.c = c;
@@ -516,12 +590,26 @@ function doSwap(r1, c1, r2, c2) {
     document.getElementById('moves').textContent = movesLeft;
     setTimeout(() => processMatches(), 300);
   } else {
-    setTimeout(() => { swapCells(r1, c1, r2, c2); renderBoard(); isProcessing = false; }, 300);
+    animateInvalidSwap(r1, c1, r2, c2);
+    setTimeout(() => {
+      swapCells(r1, c1, r2, c2);
+      renderBoard();
+      showMsg('🌿 No jungle logic there — try a Tiger hunt!');
+      isProcessing = false;
+    }, 320);
   }
 }
 
 function swapCells(r1, c1, r2, c2) {
   const t = board[r1][c1]; board[r1][c1] = board[r2][c2]; board[r2][c2] = t;
+}
+
+function animateInvalidSwap(r1, c1, r2, c2) {
+  [getEl(r1, c1), getEl(r2, c2)].forEach(el => {
+    if (!el) return;
+    el.classList.add('invalid-swap');
+    setTimeout(() => el.classList.remove('invalid-swap'), 340);
+  });
 }
 
 function findMatches() {
@@ -549,6 +637,62 @@ function findMatches() {
   return m;
 }
 
+
+function getMatchShape(match) {
+  const rows = new Map();
+  const cols = new Map();
+  match.forEach(({r, c}) => {
+    rows.set(r, (rows.get(r) || 0) + 1);
+    cols.set(c, (cols.get(c) || 0) + 1);
+  });
+  if (match.length >= 5 && (rows.size === 1 || cols.size === 1)) return '🐯 Fierce Tiger 5-in-a-row';
+  if (match.length >= 5 && rows.size > 1 && cols.size > 1) return '⚔️ Cross-Clear Strike';
+  if (match.length >= 4 && rows.size === 2 && cols.size === 2) return '💣 Expanding Blast Zone';
+  if (match.length >= 5) return '💥 Triple-Sweep Strike';
+  return '';
+}
+
+function cellCenter(key) {
+  const [r, c] = key.split(',').map(Number);
+  const el = getEl(r, c);
+  if (!el) return null;
+  const rect = el.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
+function drawAttackTrail(fromKey, toKey) {
+  const from = cellCenter(fromKey), to = cellCenter(toKey);
+  if (!from || !to) return;
+  const dx = to.x - from.x, dy = to.y - from.y;
+  const length = Math.hypot(dx, dy);
+  const trail = document.createElement('div');
+  trail.className = 'attack-trail';
+  trail.style.left = from.x + 'px';
+  trail.style.top = from.y + 'px';
+  trail.style.width = length + 'px';
+  trail.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+  document.body.appendChild(trail);
+
+  const wave = document.createElement('div');
+  wave.className = 'shockwave';
+  wave.style.left = to.x + 'px';
+  wave.style.top = to.y + 'px';
+  document.body.appendChild(wave);
+
+  setTimeout(() => { trail.remove(); wave.remove(); }, 650);
+}
+
+function spawnFloatText(el, text) {
+  const rect = el.getBoundingClientRect();
+  const f = document.createElement('div');
+  f.className = 'float-text';
+  f.textContent = text;
+  f.style.left = rect.left + rect.width * 0.2 + 'px';
+  f.style.top = rect.top + 'px';
+  document.body.appendChild(f);
+  setTimeout(() => f.remove(), 900);
+}
+
 function processMatches() {
   const cfg = getConfig(level);
   const matches = findMatches();
@@ -557,10 +701,14 @@ function processMatches() {
   let totalCnt = 0;
   const firstType = board[matches[0][0].r][matches[0][0].c];
   const cellsToRemove = new Set();
+  const huntedCells = new Set();
+  let specialLabel = '';
 
   matches.forEach(match => {
     totalCnt += match.length;
     match.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`));
+    const shape = getMatchShape(match);
+    if (shape) specialLabel = shape;
 
     // ============================================================
     // FOOD CHAIN LOGIC — per KING_OF_JUNGLE_DESIGN_RULES.md §3
@@ -571,10 +719,16 @@ function processMatches() {
     if (FOOD_CHAIN[matchType]) {
       const preyTypes = FOOD_CHAIN[matchType];
       match.forEach(({r, c}) => {
+        const predatorKey = `${r},${c}`;
+        const predatorEl = getEl(r, c);
+        if (predatorEl) predatorEl.classList.add('predator-strike', 'special-glow');
         [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr, nc]) => {
           if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
             if (preyTypes.includes(board[nr][nc])) {
-              cellsToRemove.add(`${nr},${nc}`);
+              const preyKey = `${nr},${nc}`;
+              cellsToRemove.add(preyKey);
+              huntedCells.add(preyKey);
+              drawAttackTrail(predatorKey, preyKey);
             }
           }
         });
@@ -584,10 +738,11 @@ function processMatches() {
 
   // ============================================================
   // HUNT OBJECTIVE TRACKING (Level 1 — Hunt 15 Deer)
-  // Count every huntAnimal tile destroyed this turn
+  // Only food-chain Tiger attacks count. Direct Deer matches score,
+  // but do NOT auto-complete the hunting objective.
   // ============================================================
   if (cfg.objective === 'hunt') {
-    cellsToRemove.forEach(key => {
+    huntedCells.forEach(key => {
       const [r, c] = key.split(',').map(Number);
       if (board[r][c] === cfg.huntAnimal) huntProgress++;
     });
@@ -597,10 +752,14 @@ function processMatches() {
   cellsToRemove.forEach(key => {
     const [r, c] = key.split(',').map(Number);
     const el = getEl(r, c);
-    if (el) { el.classList.add('removing'); spawnParticles(el); }
+    if (el) {
+      el.classList.add(huntedCells.has(key) ? 'prey-hit' : 'removing');
+      spawnParticles(el);
+      if (huntedCells.has(key)) spawnFloatText(el, '+HUNT');
+    }
   });
 
-  const pts = totalCnt * 10 * matches.length;
+  const pts = (totalCnt * 10 * matches.length) + (huntedCells.size * 35);
   score += pts;
   updateScore();
 
@@ -612,7 +771,8 @@ function processMatches() {
     4: '🐍 Snake slithers away!',
     5: '🐒 Monkey swings to safety!',
   };
-  if (matches.length > 1) showMsg(`🔥 COMBO x${matches.length}! +${pts}`, true);
+  if (specialLabel) showMsg(`${specialLabel}  Jungle strike! +${pts}`, true);
+  else if (matches.length > 1) showMsg(`🔥 COMBO x${matches.length}! +${pts}`, true);
   else showMsg(msgs[firstType] || `✨ Match! +${pts}`);
 
   setTimeout(() => {
@@ -623,7 +783,7 @@ function processMatches() {
     drop();
     setTimeout(() => {
       fill(cfg.animalTypes);
-      renderBoard();
+      renderBoard(undefined, true);
       setTimeout(() => processMatches(), 300);
     }, 300);
   }, 300);
@@ -646,7 +806,7 @@ function fill(animalTypes) {
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       if (board[r][c] === -1)
-        board[r][c] = types[Math.floor(Math.random() * types.length)];
+        board[r][c] = pickSafeAnimal(types, r, c);
 }
 
 function updateScore() {

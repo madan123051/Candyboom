@@ -7,15 +7,78 @@
   "rows": 6,
   "iconSize": 46,
   "moves": 30,
-  "animalTypes": [0, 1, 2],
-  "animalNames": ["Tiger", "Deer", "Goat"],
+  "animalTypes": [
+    0,
+    1,
+    2
+  ],
+  "animalNames": [
+    "Tiger",
+    "Deer",
+    "Goat"
+  ],
   "objective": "hunt",
   "huntAnimal": 1,
   "huntAnimalName": "Deer",
   "huntCount": 15,
-  "goalText": "Hunt 15 Deer before moves run out",
-  "foodChain": { "0": [1, 2] },
+  "goalText": "Hunt 15 Deer with Tiger attacks — deer matches do not count",
+  "foodChain": {
+    "0": [
+      1,
+      2
+    ]
+  },
   "blockers": [],
   "rulesVersion": "1.0",
-  "note": "Rules per KING_OF_JUNGLE_DESIGN_RULES.md — Zone I Starter Plains. Grid always 6x6, Zone I animals only, no blockers at Level 1."
+  "note": "Rules per KING_OF_JUNGLE_DESIGN_RULES.md — Zone I Starter Plains. Grid always 6x6, Zone I animals only, no blockers at Level 1. Hunt progress only counts Deer removed by Tiger food-chain attacks so Level 1 cannot auto-complete from Deer matches or cascades.",
+  "openingBoard": [
+    [
+      0,
+      1,
+      2,
+      0,
+      2,
+      1
+    ],
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      2
+    ],
+    [
+      2,
+      0,
+      1,
+      2,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      2,
+      0,
+      2,
+      1
+    ],
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      2
+    ],
+    [
+      2,
+      0,
+      1,
+      2,
+      1,
+      0
+    ]
+  ]
 }
