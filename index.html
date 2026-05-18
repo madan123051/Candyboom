@@ -1,474 +1,465 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candy Boom</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        #gameContainer {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
-        }
-        
-        h1 {
-            text-align: center;
-            color: #ff6b9d;
-            font-size: 48px;
-            margin-bottom: 10px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
-        }
-        
-        #gameInfo {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
-            border-radius: 15px;
-        }
-        
-        .info-item {
-            text-align: center;
-        }
-        
-        .info-label {
-            font-size: 14px;
-            color: #636e72;
-            font-weight: bold;
-        }
-        
-        .info-value {
-            font-size: 28px;
-            color: #2d3436;
-            font-weight: bold;
-        }
-        
-        #board {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .candy {
-            aspect-ratio: 1;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .candy:hover {
-            transform: scale(1.1);
-        }
-        
-        .candy.selected {
-            transform: scale(1.2);
-            box-shadow: 0 0 20px rgba(255,215,0,0.8);
-            border: 3px solid gold;
-        }
-        
-        .candy-0 { background: linear-gradient(135deg, #ff6b9d, #c44569); }
-        .candy-1 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .candy-2 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-        .candy-3 { background: linear-gradient(135deg, #fa709a, #fee140); }
-        .candy-4 { background: linear-gradient(135deg, #a8edea, #fed6e3); }
-        .candy-5 { background: linear-gradient(135deg, #fda085, #f6d365); }
-        
-        #message {
-            text-align: center;
-            font-size: 20px;
-            color: #2d3436;
-            min-height: 30px;
-            font-weight: bold;
-        }
-        
-        .combo {
-            animation: pulse 0.5s;
-            color: #ff6b9d;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-        
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: scale(0);
-            }
-        }
-        
-        .removing {
-            animation: fadeOut 0.3s forwards;
-        }
-        
-        #restartBtn {
-            width: 100%;
-            padding: 15px;
-            font-size: 20px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        
-        #restartBtn:hover {
-            transform: scale(1.05);
-        }
-        
-        .particles {
-            position: fixed;
-            pointer-events: none;
-            font-size: 20px;
-            animation: float 1s forwards;
-        }
-        
-        @keyframes float {
-            to {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candy Boom</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Comic Sans MS', cursive;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 10px;
+}
+#gameContainer {
+  background: white; border-radius: 20px; padding: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4); width: 100%; max-width: 520px;
+}
+h1 { text-align:center; color:#ff6b9d; font-size:36px; text-shadow:2px 2px 4px rgba(0,0,0,0.2); }
+#gameInfo {
+  display:flex; justify-content:space-around; margin:10px 0;
+  padding:10px; background:linear-gradient(135deg,#ffeaa7,#fdcb6e); border-radius:15px;
+}
+.info-item { text-align:center; }
+.info-label { font-size:11px; color:#636e72; font-weight:bold; }
+.info-value { font-size:22px; color:#2d3436; font-weight:bold; }
+#progressBar {
+  width:100%; height:14px; background:#eee; border-radius:10px;
+  margin:8px 0; overflow:hidden;
+}
+#progressFill {
+  height:100%; background:linear-gradient(90deg,#43e97b,#38f9d7);
+  border-radius:10px; transition:width 0.4s;
+}
+#progressLabel { text-align:center; font-size:13px; color:#636e72; margin-bottom:6px; }
+#board {
+  display:grid; grid-template-columns:repeat(8,1fr);
+  gap:4px; background:#f8f9fa; padding:8px; border-radius:15px; margin-bottom:10px;
+}
+.candy {
+  aspect-ratio:1; border-radius:8px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; transition:all 0.15s;
+  box-shadow:0 3px 6px rgba(0,0,0,0.1);
+}
+.candy:hover { transform:scale(1.1); }
+.candy.selected { transform:scale(1.2); box-shadow:0 0 18px gold; border:3px solid gold; }
+.candy-0 { background:linear-gradient(135deg,#ff6b9d,#c44569); }
+.candy-1 { background:linear-gradient(135deg,#4facfe,#00f2fe); }
+.candy-2 { background:linear-gradient(135deg,#43e97b,#38f9d7); }
+.candy-3 { background:linear-gradient(135deg,#fa709a,#fee140); }
+.candy-4 { background:linear-gradient(135deg,#a8edea,#fed6e3); }
+.candy-5 { background:linear-gradient(135deg,#fda085,#f6d365); }
+@keyframes fadeOut { to { opacity:0; transform:scale(0); } }
+.removing { animation:fadeOut 0.3s forwards; }
+#message {
+  text-align:center; font-size:18px; color:#2d3436;
+  min-height:28px; font-weight:bold; margin-bottom:8px;
+}
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+.combo { animation:pulse 0.5s; color:#ff6b9d; }
+#restartBtn {
+  width:100%; padding:12px; font-size:17px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white; border:none; border-radius:12px;
+  cursor:pointer; font-weight:bold; transition:transform 0.2s;
+}
+#restartBtn:hover { transform:scale(1.04); }
+
+/* OVERLAY SCREENS */
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.7); z-index:100;
+  justify-content:center; align-items:center;
+}
+.overlay.active { display:flex; }
+.overlay-box {
+  background:white; border-radius:24px; padding:40px 30px;
+  text-align:center; max-width:340px; width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  animation:popIn 0.4s ease;
+}
+@keyframes popIn {
+  from{transform:scale(0.5);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.overlay-box h2 { font-size:36px; margin-bottom:10px; }
+.overlay-box p { font-size:18px; color:#636e72; margin:6px 0; }
+.overlay-box .big { font-size:28px; color:#2d3436; font-weight:bold; margin:10px 0; }
+.overlay-btn {
+  margin-top:20px; padding:14px 30px; font-size:20px;
+  background:linear-gradient(135deg,#43e97b,#38f9d7);
+  color:white; border:none; border-radius:14px;
+  cursor:pointer; font-weight:bold; transition:transform 0.2s;
+  width:100%;
+}
+.overlay-btn:hover { transform:scale(1.05); }
+.overlay-btn.red {
+  background:linear-gradient(135deg,#ff6b9d,#c44569);
+  margin-top:10px;
+}
+.particles {
+  position:fixed; pointer-events:none; font-size:18px;
+  animation:floatUp 1s forwards;
+}
+@keyframes floatUp { to { transform:translateY(-120px); opacity:0; } }
+</style>
 </head>
 <body>
-    <div id="gameContainer">
-        <h1>🍭 Candy Boom 🍬</h1>
-        
-        <div id="gameInfo">
-            <div class="info-item">
-                <div class="info-label">SCORE</div>
-                <div class="info-value" id="score">0</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">MOVES</div>
-                <div class="info-value" id="moves">30</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">BEST</div>
-                <div class="info-value" id="bestScore">0</div>
-            </div>
-        </div>
-        
-        <div id="board"></div>
-        
-        <div id="message">Match 3 or more candies!</div>
-        
-        <button id="restartBtn" onclick="restartGame()">🔄 New Game</button>
-    </div>
+<div id="gameContainer">
+  <h1>🍭 Candy Boom 🍬</h1>
 
-    <script>
-        const BOARD_SIZE = 8;
-        const CANDY_TYPES = 6;
-        const candyEmojis = ['🍭', '🍬', '🍫', '🍩', '🧁', '🍪'];
-        
-        let board = [];
-        let score = 0;
-        let moves = 30;
-        let bestScore = localStorage.getItem('candyBoomBest') || 0;
-        let selectedCandy = null;
-        let isProcessing = false;
-        
-        function initGame() {
-            board = [];
-            score = 0;
-            moves = 30;
-            selectedCandy = null;
-            isProcessing = false;
-            
-            document.getElementById('score').textContent = score;
-            document.getElementById('moves').textContent = moves;
-            document.getElementById('bestScore').textContent = bestScore;
-            document.getElementById('message').textContent = 'Match 3 or more candies!';
-            
-            createBoard();
-            renderBoard();
-            
-            while (findMatches().length > 0) {
-                createBoard();
-            }
-            renderBoard();
-        }
-        
-        function createBoard() {
-            board = [];
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                board[row] = [];
-                for (let col = 0; col < BOARD_SIZE; col++) {
-                    board[row][col] = Math.floor(Math.random() * CANDY_TYPES);
-                }
-            }
-        }
-        
-        function renderBoard() {
-            const boardElement = document.getElementById('board');
-            boardElement.innerHTML = '';
-            
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                for (let col = 0; col < BOARD_SIZE; col++) {
-                    const candy = document.createElement('div');
-                    candy.className = `candy candy-${board[row][col]}`;
-                    candy.textContent = candyEmojis[board[row][col]];
-                    candy.dataset.row = row;
-                    candy.dataset.col = col;
-                    candy.addEventListener('click', () => handleCandyClick(row, col));
-                    boardElement.appendChild(candy);
-                }
-            }
-        }
-        
-        function handleCandyClick(row, col) {
-            if (isProcessing || moves <= 0) return;
-            
-            const clickedCandy = { row, col };
-            
-            if (!selectedCandy) {
-                selectedCandy = clickedCandy;
-                highlightCandy(row, col);
-            } else {
-                if (selectedCandy.row === row && selectedCandy.col === col) {
-                    selectedCandy = null;
-                    removeHighlight();
-                } else if (isAdjacent(selectedCandy, clickedCandy)) {
-                    swapCandies(selectedCandy, clickedCandy);
-                } else {
-                    removeHighlight();
-                    selectedCandy = clickedCandy;
-                    highlightCandy(row, col);
-                }
-            }
-        }
-        
-        function isAdjacent(candy1, candy2) {
-            const rowDiff = Math.abs(candy1.row - candy2.row);
-            const colDiff = Math.abs(candy1.col - candy2.col);
-            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-        }
-        
-        function swapCandies(candy1, candy2) {
-            isProcessing = true;
-            removeHighlight();
-            
-            const temp = board[candy1.row][candy1.col];
-            board[candy1.row][candy1.col] = board[candy2.row][candy2.col];
-            board[candy2.row][candy2.col] = temp;
-            
-            renderBoard();
-            
-            const matches = findMatches();
-            
-            if (matches.length > 0) {
-                moves--;
-                document.getElementById('moves').textContent = moves;
-                setTimeout(() => processMatches(), 300);
-            } else {
-                setTimeout(() => {
-                    const temp = board[candy1.row][candy1.col];
-                    board[candy1.row][candy1.col] = board[candy2.row][candy2.col];
-                    board[candy2.row][candy2.col] = temp;
-                    renderBoard();
-                    isProcessing = false;
-                }, 300);
-            }
-            
-            selectedCandy = null;
-        }
-        
-        function findMatches() {
-            const matches = [];
-            
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                for (let col = 0; col < BOARD_SIZE - 2; col++) {
-                    const candy = board[row][col];
-                    if (candy === board[row][col + 1] && candy === board[row][col + 2]) {
-                        const match = [{ row, col }];
-                        let checkCol = col + 1;
-                        while (checkCol < BOARD_SIZE && board[row][checkCol] === candy) {
-                            match.push({ row, col: checkCol });
-                            checkCol++;
-                        }
-                        matches.push(match);
-                        col = checkCol - 1;
-                    }
-                }
-            }
-            
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                for (let row = 0; row < BOARD_SIZE - 2; row++) {
-                    const candy = board[row][col];
-                    if (candy === board[row + 1][col] && candy === board[row + 2][col]) {
-                        const match = [{ row, col }];
-                        let checkRow = row + 1;
-                        while (checkRow < BOARD_SIZE && board[checkRow][col] === candy) {
-                            match.push({ row: checkRow, col });
-                            checkRow++;
-                        }
-                        matches.push(match);
-                        row = checkRow - 1;
-                    }
-                }
-            }
-            
-            return matches;
-        }
-        
-        function processMatches() {
-            const matches = findMatches();
-            
-            if (matches.length === 0) {
-                isProcessing = false;
-                if (moves <= 0) {
-                    endGame();
-                }
-                return;
-            }
-            
-            let matchCount = 0;
-            matches.forEach(match => {
-                matchCount += match.length;
-                match.forEach(candy => {
-                    const element = document.querySelector(`[data-row="${candy.row}"][data-col="${candy.col}"]`);
-                    if (element) {
-                        element.classList.add('removing');
-                        createParticles(element);
-                    }
-                });
-            });
-            
-            const points = matchCount * 10 * matches.length;
-            score += points;
-            document.getElementById('score').textContent = score;
-            
-            if (matches.length > 1) {
-                showMessage(`🎉 COMBO x${matches.length}! +${points}`, true);
-            } else {
-                showMessage(`+${points} points!`);
-            }
-            
-            setTimeout(() => {
-                removeMatches(matches);
-                dropCandies();
-                setTimeout(() => {
-                    fillBoard();
-                    renderBoard();
-                    setTimeout(() => processMatches(), 300);
-                }, 300);
-            }, 300);
-        }
-        
-        function removeMatches(matches) {
-            matches.forEach(match => {
-                match.forEach(candy => {
-                    board[candy.row][candy.col] = -1;
-                });
-            });
-        }
-        
-        function dropCandies() {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                let emptyRow = BOARD_SIZE - 1;
-                for (let row = BOARD_SIZE - 1; row >= 0; row--) {
-                    if (board[row][col] !== -1) {
-                        if (row !== emptyRow) {
-                            board[emptyRow][col] = board[row][col];
-                            board[row][col] = -1;
-                        }
-                        emptyRow--;
-                    }
-                }
-            }
-        }
-        
-        function fillBoard() {
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                for (let col = 0; col < BOARD_SIZE; col++) {
-                    if (board[row][col] === -1) {
-                        board[row][col] = Math.floor(Math.random() * CANDY_TYPES);
-                    }
-                }
-            }
-        }
-        
-        function highlightCandy(row, col) {
-            const element = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            if (element) element.classList.add('selected');
-        }
-        
-        function removeHighlight() {
-            document.querySelectorAll('.candy').forEach(el => el.classList.remove('selected'));
-        }
-        
-        function showMessage(text, isCombo = false) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            if (isCombo) {
-                messageEl.classList.add('combo');
-                setTimeout(() => messageEl.classList.remove('combo'), 500);
-            }
-        }
-        
-        function createParticles(element) {
-            const rect = element.getBoundingClientRect();
-            for (let i = 0; i < 3; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particles';
-                particle.textContent = '✨';
-                particle.style.left = rect.left + rect.width / 2 + 'px';
-                particle.style.top = rect.top + rect.height / 2 + 'px';
-                particle.style.transform = `translateX(${(Math.random() - 0.5) * 50}px)`;
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 1000);
-            }
-        }
-        
-        function endGame() {
-            if (score > bestScore) {
-                bestScore = score;
-                localStorage.setItem('candyBoomBest', bestScore);
-                document.getElementById('bestScore').textContent = bestScore;
-                showMessage(`🏆 NEW BEST SCORE: ${score}!`, true);
-            } else {
-                showMessage(`Game Over! Final Score: ${score}`);
-            }
-        }
-        
-        function restartGame() {
-            initGame();
-        }
-        
-        initGame();
-    </script>
+  <div id="gameInfo">
+    <div class="info-item">
+      <div class="info-label">LEVEL</div>
+      <div class="info-value" id="levelDisplay">1</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">SCORE</div>
+      <div class="info-value" id="score">0</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">MOVES</div>
+      <div class="info-value" id="moves">30</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">BEST</div>
+      <div class="info-value" id="bestScore">0</div>
+    </div>
+  </div>
+
+  <div id="progressLabel">🎯 Target: <span id="targetDisplay">500</span></div>
+  <div id="progressBar"><div id="progressFill" style="width:0%"></div></div>
+
+  <div id="board"></div>
+  <div id="message">Match 3 or more candies!</div>
+  <button id="restartBtn" onclick="restartGame()">🔄 Restart Game</button>
+</div>
+
+<!-- Level Complete Overlay -->
+<div class="overlay" id="levelCompleteOverlay">
+  <div class="overlay-box">
+    <h2>🎉 Level Complete!</h2>
+    <p>Level <span id="completedLevel">1</span> cleared!</p>
+    <div class="big">Score: <span id="levelScore">0</span></div>
+    <p>Bonus Moves Left: <span id="bonusMoves">0</span> × 50 = <span id="bonusPoints">0</span> pts</p>
+    <button class="overlay-btn" onclick="nextLevel()">▶️ Next Level</button>
+  </div>
+</div>
+
+<!-- Game Over Overlay -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="overlay-box">
+    <h2>😢 Game Over!</h2>
+    <p>Level <span id="failedLevel">1</span> failed</p>
+    <div class="big">Score: <span id="finalScore">0</span></div>
+    <p>Target was: <span id="failedTarget">0</span></p>
+    <button class="overlay-btn" onclick="retryLevel()">🔄 Retry Level</button>
+    <button class="overlay-btn red" onclick="restartGame()">🏠 Main Menu</button>
+  </div>
+</div>
+
+<script>
+const BOARD_SIZE = 8;
+const CANDY_TYPES = 6;
+const EMOJIS = ['🍭','🍬','🍫','🍩','🧁','🍪'];
+
+// Level config: { target score, moves }
+const LEVELS = [
+  { target: 500,  moves: 30 },
+  { target: 1000, moves: 28 },
+  { target: 1800, moves: 26 },
+  { target: 2800, moves: 24 },
+  { target: 4000, moves: 22 },
+  { target: 5500, moves: 20 },
+  { target: 7500, moves: 20 },
+  { target: 10000,moves: 18 },
+  { target: 13000,moves: 18 },
+  { target: 17000,moves: 16 },
+];
+
+let board = [];
+let score = 0;
+let moves = 0;
+let level = 1;
+let bestScore = 0;
+let selectedCandy = null;
+let isProcessing = false;
+
+function getLevelConfig(lvl) {
+  const idx = Math.min(lvl - 1, LEVELS.length - 1);
+  const cfg = LEVELS[idx];
+  // After level 10, keep scaling
+  if (lvl > LEVELS.length) {
+    return { target: cfg.target + (lvl - LEVELS.length) * 5000, moves: 16 };
+  }
+  return cfg;
+}
+
+function initLevel() {
+  const cfg = getLevelConfig(level);
+  score = 0;
+  moves = cfg.moves;
+  selectedCandy = null;
+  isProcessing = false;
+
+  document.getElementById('levelDisplay').textContent = level;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('moves').textContent = moves;
+  document.getElementById('bestScore').textContent = bestScore;
+  document.getElementById('targetDisplay').textContent = cfg.target;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('message').textContent = `Level ${level} - Match candies! 🍬`;
+
+  createBoard();
+  while (findMatches().length > 0) createBoard();
+  renderBoard();
+}
+
+function createBoard() {
+  board = [];
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    board[r] = [];
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      board[r][c] = Math.floor(Math.random() * CANDY_TYPES);
+    }
+  }
+}
+
+function renderBoard() {
+  const el = document.getElementById('board');
+  el.innerHTML = '';
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const div = document.createElement('div');
+      div.className = `candy candy-${board[r][c]}`;
+      div.textContent = EMOJIS[board[r][c]];
+      div.dataset.row = r; div.dataset.col = c;
+      div.addEventListener('click', () => handleClick(r, c));
+      el.appendChild(div);
+    }
+  }
+}
+
+function handleClick(r, c) {
+  if (isProcessing || moves <= 0) return;
+  if (!selectedCandy) {
+    selectedCandy = {r, c};
+    getEl(r, c)?.classList.add('selected');
+  } else {
+    if (selectedCandy.r === r && selectedCandy.c === c) {
+      selectedCandy = null;
+      removeHighlight();
+    } else if (isAdj(selectedCandy, {r, c})) {
+      doSwap(selectedCandy, {r, c});
+    } else {
+      removeHighlight();
+      selectedCandy = {r, c};
+      getEl(r, c)?.classList.add('selected');
+    }
+  }
+}
+
+function isAdj(a, b) {
+  return (Math.abs(a.r-b.r) + Math.abs(a.c-b.c)) === 1;
+}
+
+function getEl(r, c) {
+  return document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+}
+
+function removeHighlight() {
+  document.querySelectorAll('.candy').forEach(e => e.classList.remove('selected'));
+}
+
+function doSwap(a, b) {
+  isProcessing = true;
+  removeHighlight();
+  swap(a.r, a.c, b.r, b.c);
+  renderBoard();
+
+  if (findMatches().length > 0) {
+    moves--;
+    document.getElementById('moves').textContent = moves;
+    setTimeout(() => processMatches(), 300);
+  } else {
+    setTimeout(() => {
+      swap(a.r, a.c, b.r, b.c);
+      renderBoard();
+      isProcessing = false;
+    }, 300);
+  }
+  selectedCandy = null;
+}
+
+function swap(r1,c1,r2,c2) {
+  let t = board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=t;
+}
+
+function findMatches() {
+  const matches = [];
+  // Horizontal
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE-2; c++) {
+      const v = board[r][c];
+      if (v === board[r][c+1] && v === board[r][c+2]) {
+        const m = [{r,c}]; let x = c+1;
+        while(x < BOARD_SIZE && board[r][x]===v) { m.push({r,c:x}); x++; }
+        matches.push(m); c = x-1;
+      }
+    }
+  }
+  // Vertical
+  for (let c = 0; c < BOARD_SIZE; c++) {
+    for (let r = 0; r < BOARD_SIZE-2; r++) {
+      const v = board[r][c];
+      if (v === board[r+1][c] && v === board[r+2][c]) {
+        const m = [{r,c}]; let y = r+1;
+        while(y < BOARD_SIZE && board[y][c]===v) { m.push({r:y,c}); y++; }
+        matches.push(m); r = y-1;
+      }
+    }
+  }
+  return matches;
+}
+
+function processMatches() {
+  const matches = findMatches();
+  if (matches.length === 0) {
+    isProcessing = false;
+    checkLevelStatus();
+    return;
+  }
+
+  let count = 0;
+  matches.forEach(m => {
+    count += m.length;
+    m.forEach(({r,c}) => {
+      const el = getEl(r,c);
+      if(el){ el.classList.add('removing'); spawnParticles(el); }
+    });
+  });
+
+  const pts = count * 10 * matches.length;
+  score += pts;
+  updateScore();
+
+  if (matches.length > 1) showMsg(`🎉 COMBO x${matches.length}! +${pts}`, true);
+  else showMsg(`+${pts} points! 🍬`);
+
+  setTimeout(() => {
+    matches.forEach(m => m.forEach(({r,c}) => { board[r][c] = -1; }));
+    dropDown();
+    setTimeout(() => {
+      fillEmpty();
+      renderBoard();
+      setTimeout(() => processMatches(), 300);
+    }, 300);
+  }, 300);
+}
+
+function dropDown() {
+  for (let c = 0; c < BOARD_SIZE; c++) {
+    let empty = BOARD_SIZE - 1;
+    for (let r = BOARD_SIZE-1; r >= 0; r--) {
+      if (board[r][c] !== -1) {
+        if (r !== empty) { board[empty][c]=board[r][c]; board[r][c]=-1; }
+        empty--;
+      }
+    }
+  }
+}
+
+function fillEmpty() {
+  for (let r = 0; r < BOARD_SIZE; r++)
+    for (let c = 0; c < BOARD_SIZE; c++)
+      if (board[r][c] === -1) board[r][c] = Math.floor(Math.random()*CANDY_TYPES);
+}
+
+function updateScore() {
+  const cfg = getLevelConfig(level);
+  document.getElementById('score').textContent = score;
+  const pct = Math.min((score / cfg.target) * 100, 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  if (score > bestScore) {
+    bestScore = score;
+    document.getElementById('bestScore').textContent = bestScore;
+  }
+}
+
+function checkLevelStatus() {
+  const cfg = getLevelConfig(level);
+  if (score >= cfg.target) {
+    // Level Complete!
+    setTimeout(() => showLevelComplete(), 400);
+  } else if (moves <= 0) {
+    // Game Over
+    setTimeout(() => showGameOver(), 400);
+  }
+}
+
+function showLevelComplete() {
+  const bonusMoves = moves;
+  const bonusPoints = bonusMoves * 50;
+  score += bonusPoints;
+  updateScore();
+
+  document.getElementById('completedLevel').textContent = level;
+  document.getElementById('levelScore').textContent = score;
+  document.getElementById('bonusMoves').textContent = bonusMoves;
+  document.getElementById('bonusPoints').textContent = bonusPoints;
+  document.getElementById('levelCompleteOverlay').classList.add('active');
+}
+
+function showGameOver() {
+  const cfg = getLevelConfig(level);
+  document.getElementById('failedLevel').textContent = level;
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('failedTarget').textContent = cfg.target;
+  document.getElementById('gameOverOverlay').classList.add('active');
+}
+
+function nextLevel() {
+  document.getElementById('levelCompleteOverlay').classList.remove('active');
+  level++;
+  initLevel();
+}
+
+function retryLevel() {
+  document.getElementById('gameOverOverlay').classList.remove('active');
+  initLevel();
+}
+
+function restartGame() {
+  document.getElementById('gameOverOverlay').classList.remove('active');
+  document.getElementById('levelCompleteOverlay').classList.remove('active');
+  level = 1;
+  initLevel();
+}
+
+function showMsg(txt, combo=false) {
+  const el = document.getElementById('message');
+  el.textContent = txt;
+  if(combo){ el.classList.add('combo'); setTimeout(()=>el.classList.remove('combo'),500); }
+}
+
+function spawnParticles(el) {
+  const rect = el.getBoundingClientRect();
+  for(let i=0;i<3;i++){
+    const p = document.createElement('div');
+    p.className = 'particles';
+    p.textContent = '✨';
+    p.style.left = rect.left + rect.width/2 + 'px';
+    p.style.top = rect.top + rect.height/2 + 'px';
+    p.style.transform = `translateX(${(Math.random()-0.5)*60}px)`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 1000);
+  }
+}
+
+// Start!
+initLevel();
+</script>
 </body>
 </html>
