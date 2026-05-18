@@ -829,6 +829,8 @@ let huntProgress=0;
 let lastSpawnedCells = new Set();
 let lastDroppedCells = new Set();
 let animationsEnabled = true;
+const MAX_AUTO_CASCADES = 2;
+const CASCADE_PAUSE_MS = 500;
 
 function getConfig(lvl) {
   const i = Math.min(lvl - 1, LEVELS.length - 1);
@@ -901,14 +903,17 @@ function createBoard(animalTypes, presetBoard=null) {
     board = presetBoard.map(row => row.slice());
     return;
   }
-  board = [];
-  for (let r = 0; r < ROWS; r++) {
-    board[r] = [];
-    for (let c = 0; c < COLS; c++) {
-      board[r][c] = pickSafeAnimal(animalTypes, r, c);
+  let attempts = 0;
+  while (attempts < 80) {
+    attempts++;
+    board = [];
+    for (let r = 0; r < ROWS; r++) {
+      board[r] = [];
+      for (let c = 0; c < COLS; c++) board[r][c] = pickSafeAnimal(animalTypes, r, c);
     }
     if (findMatches().length === 0 && hasAnyValidMove()) return;
   }
+  throw new Error('Unable to generate a valid no-match opening board.');
 }
 
 function pickSafeAnimal(animalTypes, r, c) {
@@ -1102,10 +1107,10 @@ function mergeIntersections(matches) {
 
 function cellKey({r, c}) { return `${r},${c}`; }
 
-function processMatches(playerTriggered=false) {
+function processMatches(playerTriggered=false, cascadeDepth=0) {
   const cfg = getConfig(level);
   const matches = findMatches();
-  if (!matches.length) { isProcessing = false; checkStatus(); return; }
+  if (!matches.length) { isProcessing = false; ensurePlayableBoard(); checkStatus(); return; }
 
   let totalCnt = 0;
   const firstType = matches[0].type;
@@ -1206,7 +1211,21 @@ function processMatches(playerTriggered=false) {
     setTimeout(() => {
       fill(cfg.animalTypes);
       renderBoard(undefined, true);
-      setTimeout(() => processMatches(false), 330);
+      const nextMatches = findMatches();
+      if (!nextMatches.length) {
+        isProcessing = false;
+        checkStatus();
+        return;
+      }
+      const nextDepth = playerTriggered ? 1 : cascadeDepth + 1;
+      if (nextDepth > MAX_AUTO_CASCADES) {
+        isProcessing = false;
+        showMsg('🌿 Cascade stabilized — your turn!');
+        ensurePlayableBoard();
+        checkStatus();
+        return;
+      }
+      setTimeout(() => processMatches(false, nextDepth), CASCADE_PAUSE_MS);
     }, 300);
   }, animationsEnabled ? 460 : 120);
 }
@@ -1249,10 +1268,58 @@ function drop() {
 function fill(animalTypes) {
   lastSpawnedCells.clear();
   const types = animalTypes || getConfig(level).animalTypes;
-  for (let r = 0; r < ROWS; r++)
-    for (let c = 0; c < COLS; c++)
-      if (board[r][c] === -1)
-        board[r][c] = pickSafeAnimal(types, r, c);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] === -1) board[r][c] = pickSpawnAnimal(types, r, c);
+    }
+  }
+}
+
+function pickSpawnAnimal(animalTypes, r, c) {
+  const weights = getSpawnWeights(animalTypes);
+  const tried = new Set();
+  while (tried.size < animalTypes.length) {
+    const animal = weightedPick(animalTypes, weights, tried);
+    tried.add(animal);
+    const makesHorizontal = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
+    const makesVertical = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
+    const makesBox = r >= 1 && c >= 1 && board[r - 1][c] === animal && board[r][c - 1] === animal && board[r - 1][c - 1] === animal;
+    if (!makesHorizontal && !makesVertical && !makesBox) return animal;
+  }
+  return pickSafeAnimal(animalTypes, r, c);
+}
+
+function getSpawnWeights(animalTypes) {
+  const counts = new Map(animalTypes.map(t => [t, 0]));
+  let filled = 0;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const v = board[r][c];
+      if (v >= 0 && counts.has(v)) {
+        counts.set(v, counts.get(v) + 1);
+        filled++;
+      }
+    }
+  }
+  const avg = filled > 0 ? filled / animalTypes.length : 0;
+  const weights = new Map();
+  for (const type of animalTypes) {
+    const diff = counts.get(type) - avg;
+    const penalty = diff > 0 ? Math.min(diff * 0.22, 0.72) : 0;
+    weights.set(type, Math.max(0.12, 1 - penalty));
+  }
+  return weights;
+}
+
+function weightedPick(types, weights, blacklist) {
+  const pool = types.filter(t => !blacklist.has(t));
+  const total = pool.reduce((sum, t) => sum + (weights.get(t) || 1), 0);
+  let roll = Math.random() * total;
+  for (const type of pool) {
+    roll -= (weights.get(type) || 1);
+    if (roll <= 0) return type;
+  }
+  return pool[pool.length - 1];
 }
 
 function updateScore() {
