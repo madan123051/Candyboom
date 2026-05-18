@@ -380,6 +380,11 @@ h1 {
     <h1>KING OF JUNGLE</h1>
     <div class="subtitle">🌿 Nepal Wild Kingdom 🌿</div>
   </div>
+  <div id="profileBar" style="text-align:center;color:#8adf80;font-size:12px;margin:4px 0 8px;">Guest mode</div>
+  <div style="display:flex;gap:8px;margin-bottom:8px;">
+    <input id="shareLink" readonly style="flex:1;padding:8px;border-radius:10px;border:1px solid #2a6a2a;background:#0a1f0a;color:#8adf80;" placeholder="Invite link">
+    <button id="shareBtn" class="overlay-btn" style="margin:0;padding:8px 12px;width:auto;">Share</button>
+  </div>
 
   <!-- Zone identifier (updates per level) -->
   <div id="zoneBar">Zone I — Starter Plains 🌾</div>
@@ -440,7 +445,58 @@ h1 {
   </div>
 </div>
 
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js';
+
+const firebaseConfig = { apiKey:'REPLACE_ME', authDomain:'REPLACE_ME', projectId:'REPLACE_ME', appId:'REPLACE_ME' };
+let ready = false;
+let saveLevelResultFn, fetchDashboardFn, genReferralFn;
+
+try {
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const functions = getFunctions(app);
+  saveLevelResultFn = httpsCallable(functions, 'saveLevelResult');
+  fetchDashboardFn = httpsCallable(functions, 'fetchDashboardData');
+  genReferralFn = httpsCallable(functions, 'generateReferralCode');
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    ready = true;
+    document.getElementById('profileBar').textContent = `Player: ${user.isAnonymous ? 'Guest' : (user.displayName || user.email || user.uid.slice(0,8))}`;
+    const dash = await fetchDashboardFn();
+    if (dash?.data?.user?.currentLevel) window.setServerCurrentLevel(dash.data.user.currentLevel);
+    const ref = await genReferralFn();
+    document.getElementById('shareLink').value = `${location.origin}/index.html?ref=${encodeURIComponent(ref.data.code)}`;
+  });
+
+  window.saveProgressToCloud = async (payload) => {
+    if (!ready) return;
+    await saveLevelResultFn(payload);
+  };
+} catch (e) {
+  console.warn('Firebase not configured yet', e);
+}
+
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const link = document.getElementById('shareLink').value;
+  if (!link) return;
+  if (navigator.share) {
+    try { await navigator.share({ title:'King of Jungle', text:'Join me in King of Jungle!', url: link }); } catch {}
+  } else {
+    await navigator.clipboard.writeText(link);
+    alert('Invite link copied');
+  }
+});
+</script>
+
 <script>
+window.saveProgressToCloud = async ()=>{};
+window.setServerCurrentLevel = (lvl)=>{};
+
 // =================================================================
 // KING OF JUNGLE — Pro animated match-3 engine
 // Level 1 follows KING_OF_JUNGLE_DESIGN_RULES.md strictly:
@@ -720,6 +776,7 @@ const LEVELS = [
 ];
 
 let board=[], score=0, movesLeft=0, level=1, bestScore=0;
+window.setServerCurrentLevel = (lvl) => { if (Number.isInteger(lvl) && lvl > level) { level = lvl; initLevel(); } };
 let ROWS=6, COLS=6;
 let isProcessing=false;
 let touchStartX=0, touchStartY=0, touchStartRow=-1, touchStartCol=-1;
@@ -1190,6 +1247,7 @@ function showLevelComplete() {
   document.getElementById('bonusPts').textContent = bonus;
   jungleAudio.play('win');
   showComboBanner('👑 Victory of the Jungle!');
+  window.saveProgressToCloud({ level, score, stars: movesLeft > 6 ? 3 : movesLeft > 2 ? 2 : 1 }).catch(()=>{});
   document.getElementById('lvlOverlay').classList.add('active');
 }
 function showGameOver() {

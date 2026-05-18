@@ -393,6 +393,13 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
   margin-bottom:14px;
 }
 .cta-box p { color:#4a8a4a; margin-bottom:30px; line-height:1.7; }
+
+.auth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;}
+.auth-overlay.active{display:flex;}
+.auth-card{width:min(92vw,380px);background:#07210d;border:1px solid #2d8a2d;border-radius:18px;padding:22px;text-align:center;}
+.auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+.invite-box{display:none;margin-top:16px;}
+.invite-input{width:100%;padding:10px;border-radius:8px;border:1px solid #2d8a2d;background:#031206;color:#9de39c;}
 </style>
 </head>
 <body>
@@ -440,7 +447,7 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
       as the ultimate King of the Jungle.
     </p>
     <div class="btn-group">
-      <a href="game.html" class="btn-play">▶ Play Now 🐯</a>
+      <button class="btn-play" onclick="playNow()">▶ Play Now 🐯</button>
       <a href="#howto" class="btn-how">📖 How to Play</a>
     </div>
 
@@ -454,7 +461,9 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
     </div>
 
     <div class="scroll-arrow">⬇</div>
-  </section>
+  <div id="authStatus" style="margin:14px 0;"></div>
+<div id="inviteBox" class="invite-box"><input id="inviteLink" class="invite-input" readonly><button class="btn-how" style="margin-top:8px;" onclick="copyInvite()">📨 Copy Invite Link</button></div>
+</section>
 
   <!-- FEATURES -->
   <section id="features">
@@ -590,7 +599,7 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
     <div class="reveal cta-box">
       <h2>Ready to Rule? 👑</h2>
       <p>The jungle awaits your command. Match the animals, master the levels, and claim your throne!</p>
-      <a href="game.html" class="btn-play" style="text-decoration:none;">▶ Start Playing 🐯</a>
+      <button class="btn-play" onclick="playNow()">▶ Start Playing 🐯</button>
     </div>
   </section>
 
@@ -686,5 +695,103 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   });
 });
 </script>
+
+<div id="authModal" class="auth-overlay" onclick="if(event.target===this)closeAuthModal()">
+  <div class="auth-card">
+    <h3 style="color:#f0c040;">Login to Enter Jungle</h3>
+    <p style="color:#6dbf67;margin-top:8px;">Choose your play mode</p>
+    <div class="auth-actions">
+      <button class="btn-play" onclick="loginGoogle()">Continue with Google</button>
+      <button class="btn-how" onclick="loginFacebook()">Continue with Facebook</button>
+      <button class="btn-how" onclick="loginGuest()">Play as Guest</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, signInAnonymously, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js';
+
+const firebaseConfig = {
+  apiKey: 'REPLACE_ME',
+  authDomain: 'REPLACE_ME',
+  projectId: 'REPLACE_ME',
+  appId: 'REPLACE_ME'
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const functions = getFunctions(app);
+const initProfile = httpsCallable(functions, 'createOrInitUserProfile');
+const genReferral = httpsCallable(functions, 'generateReferralCode');
+
+const authModal = document.getElementById('authModal');
+const authStatus = document.getElementById('authStatus');
+const inviteBox = document.getElementById('inviteBox');
+
+function openAuthModal(){ authModal.classList.add('active'); }
+function closeAuthModal(){ authModal.classList.remove('active'); }
+
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+
+async function loginWith(providerName){
+  try {
+    const provider = providerName === 'google' ? new GoogleAuthProvider() : new FacebookAuthProvider();
+    await signInWithPopup(auth, provider);
+    closeAuthModal();
+  } catch (e) {
+    alert(`Login failed: ${e.message}`);
+  }
+}
+
+window.loginGoogle = () => loginWith('google');
+window.loginFacebook = () => loginWith('facebook');
+window.loginGuest = async () => {
+  try {
+    await signInAnonymously(auth);
+    closeAuthModal();
+  } catch (e) {
+    alert(`Guest login failed: ${e.message}`);
+  }
+};
+window.logoutUser = async () => signOut(auth);
+
+window.copyInvite = async () => {
+  const text = document.getElementById('inviteLink').value;
+  await navigator.clipboard.writeText(text);
+  alert('Invite link copied!');
+};
+
+window.playNow = () => {
+  const user = auth.currentUser;
+  if (!user) return openAuthModal();
+  location.href = `game.html?uid=${encodeURIComponent(user.uid)}`;
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    authStatus.innerHTML = '<button class="btn-play" onclick="openAuthModal()">🔐 Login to Play</button>';
+    inviteBox.style.display = 'none';
+    return;
+  }
+
+  await initProfile();
+  authStatus.innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;">
+      <span style="color:#6dbf67;">Logged in as ${user.isAnonymous ? 'Guest' : (user.displayName || user.email || 'Player')}</span>
+      <button class="btn-how" onclick="logoutUser()">Logout</button>
+      <button class="btn-play" onclick="playNow()">▶ Continue</button>
+    </div>`;
+
+  try {
+    const { data } = await genReferral();
+    const link = `${location.origin}${location.pathname.replace('index.html','')}index.html?ref=${encodeURIComponent(data.code)}`;
+    document.getElementById('inviteLink').value = link;
+    inviteBox.style.display = 'block';
+  } catch {}
+});
+</script>
+
 </body>
 </html>
