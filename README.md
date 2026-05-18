@@ -74,3 +74,61 @@ You can also run the build manually:
 ```bash
 bash ./scripts/build-hosting.sh
 ```
+
+## Android Firebase setup (Gradle + google-services)
+
+If your Android app package is `Game.wildsaura.com` and uses Firebase Analytics, configure it as follows.
+
+1. Save the Firebase Android config as `app/google-services.json`:
+
+```json
+{
+  "project_info": {
+    "project_number": "993583513273",
+    "project_id": "king-of-jungle-77f06",
+    "storage_bucket": "king-of-jungle-77f06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993583513273:android:c160d4bd3bd03dd63ba568",
+        "android_client_info": {
+          "package_name": "Game.wildsaura.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3oDgYNVRVp_uRfOChMCLOTawTfZIJFRc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+```
+
+2. In your root `build.gradle(.kts)` plugins block:
+
+```kts
+id("com.google.gms.google-services") version "4.4.4" apply false
+```
+
+3. In your app module `build.gradle(.kts)` plugins block:
+
+```kts
+id("com.android.application")
+id("com.google.gms.google-services")
+```
+
+4. Add Firebase BoM and Analytics dependency in your app module:
+
+```kts
+implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
+implementation("com.google.firebase:firebase-analytics")
+```
