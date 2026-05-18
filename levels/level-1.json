@@ -34,9 +34,31 @@
   "tutorialHint": "Match Tigers beside Deer. Deer-only matches scatter, but they do not count as hunts.",
   "difficultyNote": "Level 1 keeps the required 30 moves and 6x6 Zone I board, but only Tiger food-chain attacks count toward the Deer objective so the level cannot auto-clear from random Deer matches.",
   "animationRequirements": [
+    "Level start jungle-gate opening with Rule the Jungle title",
     "Animated swap and invalid-swap shake",
     "Tiger pounce trails when predator matches hunt adjacent Deer or Goat",
-    "Prey-hit dissolve, jungle particles, cascade drop-in, and new-spawn animations",
-    "Special match effects for 5-in-row, cross, and 2x2 blast patterns"
-  ]
+    "Fierce Tiger glow, claw-slash screen flash, and board shake for 5-in-row color sweep",
+    "Line-rush/cross-strike and expanding blast visual feedback for special matches",
+    "Prey-hit dissolve, floating score, jungle particles, cascade drop-in, and new-spawn animations",
+    "Victory crown and defeated Tiger state overlays"
+  ],
+  "audioDesign": {
+    "copyrightSafe": "All Level 1 BGM and SFX are generated in code with Web Audio oscillators/noise; no external copyrighted audio files are required.",
+    "ambientBgm": [
+      "soft flute-like sine notes",
+      "tabla-style drum pulses",
+      "procedural cricket, bird, and leaf noise"
+    ],
+    "comboIntensity": "large matches temporarily increase procedural drum density and low-end impact",
+    "spatialization": "SFX pan left/right based on the triggering board column",
+    "sfx": [
+      "Tiger roar with bass drop for 5-in-row Fierce Tiger",
+      "swoosh and claw slash for color-bomb trigger",
+      "thud/line rush for cross strikes",
+      "low rumble and boom for 2x2 blast",
+      "crunch/pop for successful hunts and tile clears",
+      "melancholic flute tones for failure",
+      "victory arpeggio and drum hit for success"
+    ]
+  }
 }

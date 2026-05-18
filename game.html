@@ -216,6 +216,65 @@ h1 {
 @keyframes floatUp { to { transform:translateY(-100px); opacity:0; } }
 
 
+#audioBtn {
+  width:100%; margin-top:8px; padding:9px; font-size:13px;
+  background:linear-gradient(135deg, rgba(90,58,16,.8), rgba(160,104,28,.75));
+  color:#ffe39a; border:1px solid #aa7a28; border-radius:12px;
+  cursor:pointer; font-weight:bold; letter-spacing:.5px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 4px 12px rgba(0,0,0,.28);
+}
+#audioBtn.sound-on { background:linear-gradient(135deg,#184f1f,#2d8a2d); color:#f0c040; border-color:#6dbf67; }
+
+body.board-shake #gameContainer { animation:boardShake .46s ease; }
+@keyframes boardShake { 0%,100%{transform:translate(0,0)} 18%{transform:translate(-5px,3px)} 36%{transform:translate(6px,-3px)} 54%{transform:translate(-4px,-2px)} 72%{transform:translate(3px,4px)} }
+.level-gate {
+  position:fixed; inset:0; z-index:260; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle, rgba(13,59,30,.22), rgba(0,0,0,.84));
+  animation:gateFade 1.8s ease forwards;
+}
+.level-gate::before, .level-gate::after {
+  content:''; position:absolute; top:0; bottom:0; width:50%;
+  background:linear-gradient(90deg, #071608, #123918 55%, #071608);
+  box-shadow:inset 0 0 70px rgba(0,0,0,.75);
+  animation:gateOpen 1.25s ease forwards;
+}
+.level-gate::before { left:0; transform-origin:left; }
+.level-gate::after { right:0; transform-origin:right; animation-name:gateOpenRight; }
+.level-gate-text {
+  position:relative; z-index:2; color:#f0c040; font-family:'Cinzel Decorative',serif;
+  font-size:clamp(20px, 7vw, 36px); text-align:center; text-shadow:0 0 24px #f0c040, 0 4px 8px #000;
+  animation:gateText 1.45s ease forwards;
+}
+.claw-slash {
+  position:fixed; inset:0; z-index:220; pointer-events:none;
+  background:
+    linear-gradient(118deg, transparent 38%, rgba(255,236,130,.95) 40%, rgba(255,88,26,.75) 42%, transparent 45%),
+    linear-gradient(123deg, transparent 46%, rgba(255,236,130,.85) 48%, rgba(255,88,26,.65) 50%, transparent 53%),
+    linear-gradient(128deg, transparent 54%, rgba(255,236,130,.75) 56%, rgba(255,88,26,.55) 58%, transparent 61%);
+  animation:slashFlash .55s ease forwards;
+}
+.victory-crown, .fail-tiger {
+  position:fixed; left:50%; top:42%; transform:translate(-50%,-50%); z-index:320; pointer-events:none;
+  font-size:76px; filter:drop-shadow(0 0 24px #f0c040); animation:victoryPop 1.25s ease forwards;
+}
+.fail-tiger { filter:drop-shadow(0 0 18px #4b7a4b); animation:failDrop 1.25s ease forwards; }
+.floating-score {
+  position:fixed; z-index:230; pointer-events:none; color:#f0c040; font-weight:900;
+  font-size:14px; text-shadow:0 0 8px #000; animation:scoreFloat .85s ease forwards;
+}
+.candy.fierce-tiger { animation:fierceTiger 0.75s ease; box-shadow:0 0 30px #f0c040, 0 0 18px #f04a22 inset !important; }
+@keyframes gateOpen { to{transform:translateX(-78%) rotateY(22deg)} }
+@keyframes gateOpenRight { to{transform:translateX(78%) rotateY(-22deg)} }
+@keyframes gateFade { 0%,75%{opacity:1} 100%{opacity:0;visibility:hidden} }
+@keyframes gateText { 0%{opacity:0;transform:scale(.82)} 35%,75%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.08)} }
+@keyframes slashFlash { 0%{opacity:0;transform:translateX(-15%) scale(.94)} 28%{opacity:1} 100%{opacity:0;transform:translateX(12%) scale(1.04)} }
+@keyframes victoryPop { 0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-14deg)} 35%{opacity:1;transform:translate(-50%,-50%) scale(1.25) rotate(8deg)} 100%{opacity:0;transform:translate(-50%,-78%) scale(1)} }
+@keyframes failDrop { 0%{opacity:0;transform:translate(-50%,-70%) scale(.8)} 30%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-35%) scale(.9)} }
+@keyframes scoreFloat { to{transform:translateY(-46px) scale(1.15); opacity:0} }
+@keyframes fierceTiger { 0%{transform:scale(1)} 35%{transform:scale(1.35);filter:brightness(1.6)} 70%{transform:scale(1.12) rotate(-6deg)} 100%{transform:scale(1)} }
+
+
 /* Pro jungle match-3 animation layer */
 #board { position:relative; perspective:900px; }
 .candy {
@@ -321,6 +380,7 @@ h1 {
   <div id="message">🌿 Match Tigers to hunt the Deer!</div>
   <div id="hint">👆 Tiger matches hunt nearby Deer &amp; Goat — Swipe to move</div>
   <button id="restartBtn">🔄 Restart Jungle</button>
+  <button id="audioBtn" aria-pressed="false">🔇 Enable Jungle Sound</button>
 </div>
 
 <!-- Level Complete overlay -->
@@ -360,6 +420,99 @@ const FOOD_CHAIN = {
 };
 const ZONE_ICONS = { 'I':'🌾', 'II':'🌴', 'III':'💧', 'IV':'⛰️', 'V':'🌺' };
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+
+// =================================================================
+// PROCEDURAL AUDIO — copyright-safe, hardcoded Web Audio synthesis.
+// No external music/SFX files are used. Audio starts only after a
+// player gesture, satisfying browser autoplay rules.
+// =================================================================
+const AUDIO = {
+  ctx:null, master:null, musicGain:null, sfxGain:null, ambientTimer:null, intensityUntil:0, enabled:false,
+  ensure() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return false;
+      this.ctx = new AudioCtx();
+      this.master = this.ctx.createGain(); this.master.gain.value = 0.34; this.master.connect(this.ctx.destination);
+      this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.24; this.musicGain.connect(this.master);
+      this.sfxGain = this.ctx.createGain(); this.sfxGain.gain.value = 0.66; this.sfxGain.connect(this.master);
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    this.enabled = true;
+    if (this.master) this.master.gain.setTargetAtTime(0.34, this.ctx.currentTime, 0.08);
+    return true;
+  },
+  start() {
+    if (!this.ensure()) return;
+    const btn = document.getElementById('audioBtn');
+    if (btn) { btn.textContent = '🔊 Jungle Sound On'; btn.classList.add('sound-on'); btn.setAttribute('aria-pressed', 'true'); }
+    if (!this.ambientTimer) {
+      this.playLevelStart();
+      this.ambientTimer = setInterval(() => this.playAmbientBar(), 1450);
+      this.playAmbientBar();
+    }
+  },
+  stop() {
+    if (this.ambientTimer) clearInterval(this.ambientTimer);
+    this.ambientTimer = null; this.enabled = false;
+    if (this.master) this.master.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.08);
+    const btn = document.getElementById('audioBtn');
+    if (btn) { btn.textContent = '🔇 Enable Jungle Sound'; btn.classList.remove('sound-on'); btn.setAttribute('aria-pressed', 'false'); }
+  },
+  toggle() { if (this.enabled) this.stop(); else this.start(); },
+  panNode(pan=0) {
+    if (!this.ctx) return null;
+    if (this.ctx.createStereoPanner) { const p = this.ctx.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); return p; }
+    return this.ctx.createGain();
+  },
+  tone(freq, dur, type='sine', gain=0.18, dest=this.sfxGain, when=0, pan=0) {
+    if (!this.enabled || !this.ctx) return;
+    const t = this.ctx.currentTime + when;
+    const osc = this.ctx.createOscillator(); const g = this.ctx.createGain(); const p = this.panNode(pan);
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.025); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g); g.connect(p); p.connect(dest); osc.start(t); osc.stop(t + dur + 0.04);
+  },
+  noise(dur, gain=0.12, dest=this.sfxGain, when=0, pan=0, filterFreq=900, type='bandpass') {
+    if (!this.enabled || !this.ctx) return;
+    const t = this.ctx.currentTime + when;
+    const len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+    const buffer = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i=0; i<len; i++) data[i] = Math.random() * 2 - 1;
+    const src = this.ctx.createBufferSource(); const filter = this.ctx.createBiquadFilter(); const g = this.ctx.createGain(); const p = this.panNode(pan);
+    src.buffer = buffer; filter.type = type; filter.frequency.value = filterFreq; filter.Q.value = 3.5;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.018); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(filter); filter.connect(g); g.connect(p); p.connect(dest); src.start(t); src.stop(t + dur + 0.03);
+  },
+  playAmbientBar() {
+    if (!this.enabled || !this.ctx) return;
+    const intense = performance.now() < this.intensityUntil;
+    const base = [392, 440, 523, 587, 660][Math.floor(Math.random()*5)];
+    this.tone(base, 0.72, 'sine', intense ? 0.08 : 0.055, this.musicGain, 0, -0.25);
+    this.tone(base * 1.5, 0.42, 'triangle', intense ? 0.045 : 0.025, this.musicGain, 0.18, 0.2);
+    this.noise(0.9, 0.018, this.musicGain, 0.05, 0.55, 5200, 'highpass'); // crickets/leaves
+    this.noise(0.55, 0.014, this.musicGain, 0.45, -0.5, 2600, 'bandpass'); // birds
+    this.playTabla(0.08, intense ? 0.09 : 0.045, -0.18);
+    if (intense) { this.playTabla(0.42, 0.075, 0.18); this.playTabla(0.78, 0.065, -0.08); }
+  },
+  playTabla(when=0, gain=0.08, pan=0) { this.tone(92, 0.18, 'sine', gain, this.musicGain, when, pan); this.noise(0.08, gain*0.55, this.musicGain, when, pan, 170, 'lowpass'); },
+  bumpIntensity() { this.intensityUntil = performance.now() + 5200; },
+  playLevelStart() { this.playTabla(0, .16, -0.2); this.playTabla(.18, .14, 0.15); this.playTabla(.36, .18, 0); this.tone(196, .9, 'sawtooth', .09, this.sfxGain, .05, 0); },
+  playSwap(pan=0) { this.tone(660, .08, 'triangle', .055, this.sfxGain, 0, pan); this.tone(880, .1, 'triangle', .04, this.sfxGain, .06, pan); },
+  playInvalid(pan=0) { this.tone(170, .16, 'sawtooth', .07, this.sfxGain, 0, pan); this.tone(120, .22, 'square', .035, this.sfxGain, .08, pan); },
+  playPop(pan=0) { this.noise(.08, .07, this.sfxGain, 0, pan, 1250, 'bandpass'); this.tone(720, .09, 'triangle', .04, this.sfxGain, 0, pan); },
+  playCrunch(pan=0) { this.noise(.16, .11, this.sfxGain, 0, pan, 720, 'bandpass'); this.tone(96, .14, 'sawtooth', .08, this.sfxGain, 0, pan); },
+  playTigerRoar(pan=0) { this.bumpIntensity(); this.tone(74, .7, 'sawtooth', .18, this.sfxGain, 0, pan); this.tone(112, .55, 'square', .08, this.sfxGain, .05, pan); this.noise(.62, .16, this.sfxGain, .02, pan, 430, 'bandpass'); },
+  playSwoosh(pan=0) { this.noise(.32, .09, this.sfxGain, 0, pan, 2100, 'bandpass'); this.tone(520, .18, 'triangle', .035, this.sfxGain, .04, pan); },
+  playLine(type=0, pan=0) { this.bumpIntensity(); if (type === 3) this.playEagleShriek(pan); else { this.noise(.34, .11, this.sfxGain, 0, pan, 280, 'lowpass'); this.tone(82, .24, 'sine', .12, this.sfxGain, 0, pan); } },
+  playEagleShriek(pan=0) { this.tone(1250, .24, 'sawtooth', .08, this.sfxGain, 0, pan); this.noise(.3, .08, this.sfxGain, .02, pan, 3600, 'bandpass'); },
+  playBoom(pan=0) { this.bumpIntensity(); this.tone(58, .62, 'sine', .24, this.sfxGain, 0, pan); this.noise(.48, .2, this.sfxGain, .04, pan, 210, 'lowpass'); },
+  playWin() { this.bumpIntensity(); [523,659,784,1046].forEach((f,i)=>this.tone(f,.42,'triangle',.1,this.sfxGain,i*.12,0)); this.playTabla(.12,.16,0); },
+  playFail() { [392,330,294,247].forEach((f,i)=>this.tone(f,.58,'sine',.07,this.sfxGain,i*.22,-.15)); this.noise(.8,.035,this.sfxGain,.2,0,900,'lowpass'); },
+  playHeavyBlocker(kind='elephant', pan=0) { if (kind === 'rhino') { this.noise(.36,.16,this.sfxGain,0,pan,180,'lowpass'); this.tone(140,.2,'square',.13,this.sfxGain,.08,pan); } else { this.tone(180,.42,'sawtooth',.13,this.sfxGain,0,pan); this.tone(64,.28,'sine',.18,this.sfxGain,.18,pan); } this.tone(360,.16,'square',.08,this.sfxGain,.34,pan); }
+};
 
 const LEVELS = [
   {
@@ -418,6 +571,7 @@ function initLevel() {
   document.getElementById('zoneBar').textContent = `Zone ${cfg.zone} — ${cfg.zoneName || ''} ${ZONE_ICONS[cfg.zone] || ''}`;
   document.getElementById('message').textContent = `🌿 Level ${level} — ${cfg.goalText}`;
   document.getElementById('hint').textContent = cfg.tutorialHint || '👆 Swipe adjacent animals to create jungle strikes';
+  showLevelGate(`Level ${level} — Rule the Jungle!`);
 
   const objLabel = document.getElementById('objectiveLabel');
   const objText  = document.getElementById('objectiveText');
@@ -539,7 +693,9 @@ function swapCells(r1, c1, r2, c2) { const t = board[r1][c1]; board[r1][c1] = bo
 
 async function doSwap(r1, c1, r2, c2) {
   if (isProcessing) return;
+  AUDIO.start();
   isProcessing = true; clearSelected(); clearHints();
+  AUDIO.playSwap(cellPan(c1));
   swapCells(r1, c1, r2, c2);
   const anim = new Map([[`${r1},${c1}`, ['swapping']], [`${r2},${c2}`, ['swapping']]]);
   renderBoard(undefined, anim);
@@ -552,6 +708,7 @@ async function doSwap(r1, c1, r2, c2) {
     swapCells(r1, c1, r2, c2);
     const invalid = new Map([[`${r1},${c1}`, ['invalid']], [`${r2},${c2}`, ['invalid']]]);
     renderBoard(undefined, invalid);
+    AUDIO.playInvalid(cellPan(c1));
     showMsg('🍃 No jungle pattern — try a sharper swipe!');
     await delay(360);
     renderBoard();
@@ -639,6 +796,7 @@ async function processMatches() {
   while (findMatches().length && safety++ < 20) {
     const matches = findMatches();
     const {special, center, type, all} = classifyShape(matches);
+    playMatchSfx(special, type, center);
     const cellsToRemove = new Set(all.map(({r,c}) => `${r},${c}`));
     const huntedCells = new Set();
     const predatorCells = all.filter(({r,c}) => FOOD_CHAIN[board[r][c]]);
@@ -657,6 +815,7 @@ async function processMatches() {
     const points = (cellsToRemove.size * 12) + (huntedCells.size * 38) + (special !== 'basic' ? 100 : 0);
     score += points;
     updateScore();
+    huntedCells.forEach(key => { const [r,c] = key.split(',').map(Number); showFloatingScore(r, c, '+100'); });
     announceTurn(matches.length, special, type, huntedCells.size, points);
 
     cellsToRemove.forEach(key => { const [r,c] = key.split(',').map(Number); board[r][c] = -1; });
@@ -714,10 +873,14 @@ async function animateStrike({cellsToRemove, huntedCells, predatorCells, special
   const anim = new Map();
   cellsToRemove.forEach(key => anim.set(key, ['removing']));
   huntedCells.forEach(key => anim.set(key, ['prey-hit']));
-  predatorCells.forEach(({r,c}) => anim.set(`${r},${c}`, ['predator-strike']));
+  predatorCells.forEach(({r,c}) => anim.set(`${r},${c}`, [special === 'color' ? 'fierce-tiger' : 'predator-strike']));
   specialCells.forEach(key => anim.set(key, [special === 'blast' ? 'special-bomb' : 'special-line']));
   renderBoard(undefined, anim);
-  if (special !== 'basic') showComboBanner(special === 'color' ? '🐯 Fierce Tiger Sweep!' : special === 'cross' ? '⚔️ Jungle Cross Strike!' : '💥 Expanding Blast!');
+  if (special !== 'basic') {
+    if (special === 'color') showClawSlash();
+    document.body.classList.add('board-shake'); setTimeout(() => document.body.classList.remove('board-shake'), 480);
+    showComboBanner(special === 'color' ? '🐯 Fierce Tiger Sweep!' : special === 'cross' ? '⚔️ Jungle Cross Strike!' : '💥 Expanding Blast!');
+  }
   await delay(520);
   cellsToRemove.forEach(key => { const [r,c] = key.split(',').map(Number); const el = getEl(r,c); if (el) spawnParticles(el, huntedCells.has(key)); });
   await delay(120);
@@ -773,6 +936,8 @@ function checkStatus() {
   else if (movesLeft <= 0) setTimeout(showGameOver, 420);
 }
 function showLevelComplete() {
+  AUDIO.playWin();
+  showVictoryCrown();
   const bonus = movesLeft * 50;
   score += bonus; updateScore();
   document.getElementById('completedLevel').textContent = level;
@@ -782,6 +947,8 @@ function showLevelComplete() {
   document.getElementById('lvlOverlay').classList.add('active');
 }
 function showGameOver() {
+  AUDIO.playFail();
+  showFailTiger();
   const cfg = getConfig(level);
   document.getElementById('failedLevel').textContent = level;
   document.getElementById('finalScore').textContent = score;
@@ -794,6 +961,56 @@ function nextLevel() { document.getElementById('lvlOverlay').classList.remove('a
 function retryLevel() { document.getElementById('overOverlay').classList.remove('active'); initLevel(); }
 function restartGame() { document.getElementById('lvlOverlay').classList.remove('active'); document.getElementById('overOverlay').classList.remove('active'); level = 1; initLevel(); }
 function showMsg(txt, combo=false) { const el = document.getElementById('message'); el.textContent = txt; if (combo) { el.classList.add('combo'); setTimeout(() => el.classList.remove('combo'), 500); } }
+
+
+function cellPan(c) { return COLS <= 1 ? 0 : (c / (COLS - 1)) * 2 - 1; }
+function playMatchSfx(special, type, center) {
+  const pan = cellPan(center?.c || 0);
+  if (special === 'color') AUDIO.playTigerRoar(pan);
+  else if (special === 'cross') AUDIO.playLine(type, pan);
+  else if (special === 'blast') AUDIO.playBoom(pan);
+  else if (FOOD_CHAIN[type]) AUDIO.playCrunch(pan);
+  else AUDIO.playPop(pan);
+}
+function showLevelGate(text) {
+  const gate = document.createElement('div');
+  gate.className = 'level-gate';
+  gate.innerHTML = `<div class="level-gate-text">${text}</div>`;
+  document.body.appendChild(gate);
+  setTimeout(() => gate.remove(), 1850);
+}
+function showClawSlash() {
+  const slash = document.createElement('div');
+  slash.className = 'claw-slash';
+  document.body.appendChild(slash);
+  AUDIO.playSwoosh(0);
+  setTimeout(() => slash.remove(), 620);
+}
+function showVictoryCrown() {
+  const crown = document.createElement('div');
+  crown.className = 'victory-crown';
+  crown.textContent = '👑';
+  document.body.appendChild(crown);
+  setTimeout(() => crown.remove(), 1300);
+}
+function showFailTiger() {
+  const tiger = document.createElement('div');
+  tiger.className = 'fail-tiger';
+  tiger.textContent = '🐯💤';
+  document.body.appendChild(tiger);
+  setTimeout(() => tiger.remove(), 1300);
+}
+function showFloatingScore(r, c, text) {
+  const el = getEl(r,c); if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const scoreEl = document.createElement('div');
+  scoreEl.className = 'floating-score';
+  scoreEl.textContent = text;
+  scoreEl.style.left = rect.left + rect.width * .45 + 'px';
+  scoreEl.style.top = rect.top + rect.height * .2 + 'px';
+  document.body.appendChild(scoreEl);
+  setTimeout(() => scoreEl.remove(), 900);
+}
 
 function fxLayer() {
   let layer = document.querySelector('.fx-layer');
@@ -869,6 +1086,7 @@ function markPossibleMoveHint() {
 function clearHints() { document.querySelectorAll('.hint-pulse').forEach(el => el.classList.remove('hint-pulse')); }
 
 document.getElementById('restartBtn').addEventListener('click', restartGame);
+document.getElementById('audioBtn').addEventListener('click', () => AUDIO.toggle());
 initLevel();
 </script>
 </body>
