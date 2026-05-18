@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.candyboom.game" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Candyboom</name>
+    <description>Match 3 Puzzle Game with Firebase Backend</description>
+    <author email="support@candyboom.com" href="https://candyboom.com">Candyboom Team</author>
+    
+    <content src="index.html" />
+    
+    <!-- Required permissions -->
+    <platform name="android">
+        <allow-intent href="http://*/*" />
+        <allow-intent href="https://*/*" />
+        <allow-intent href="tel:*" />
+        <allow-intent href="sms:*" />
+        <allow-intent href="mailto:*" />
+        <allow-intent href="geo:*" />
+        
+        <!-- Icon and splash screen -->
+        <icon src="res/android/icon.png" density="ldpi" />
+        <icon src="res/android/icon-mdpi.png" density="mdpi" />
+        <icon src="res/android/icon-hdpi.png" density="hdpi" />
+        <icon src="res/android/icon-xhdpi.png" density="xhdpi" />
+        <icon src="res/android/icon-xxhdpi.png" density="xxhdpi" />
+        <icon src="res/android/icon-xxxhdpi.png" density="xxxhdpi" />
+        
+        <splash src="res/android/splash-land-ldpi.png" density="land-ldpi" />
+        <splash src="res/android/splash-land-mdpi.png" density="land-mdpi" />
+        <splash src="res/android/splash-land-hdpi.png" density="land-hdpi" />
+        <splash src="res/android/splash-land-xhdpi.png" density="land-xhdpi" />
+        <splash src="res/android/splash-port-ldpi.png" density="port-ldpi" />
+        <splash src="res/android/splash-port-mdpi.png" density="port-mdpi" />
+        <splash src="res/android/splash-port-hdpi.png" density="port-hdpi" />
+        <splash src="res/android/splash-port-xhdpi.png" density="port-xhdpi" />
+        
+        <!-- Permissions -->
+        <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    </platform>
+    
+    <!-- Preferences -->
+    <preference name="Orientation" value="portrait" />
+    <preference name="FullScreen" value="true" />
+    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="SplashScreenDelay" value="3000" />
+    
+    <!-- Plugins -->
+    <plugin name="cordova-plugin-whitelist" spec="1" />
+    <plugin name="cordova-plugin-dialogs" spec="2" />
+    <plugin name="cordova-plugin-device" spec="2" />
+</widget>

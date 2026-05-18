@@ -1,0 +1,29 @@
+{
+  "name": "candyboom",
+  "version": "1.0.0",
+  "description": "Match 3 Puzzle Game with Firebase Backend",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server",
+    "build": "echo 'Build complete'",
+    "deploy:firebase": "firebase deploy",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:firestore": "firebase deploy --only firestore:rules",
+    "serve": "firebase serve"
+  },
+  "keywords": [
+    "game",
+    "match3",
+    "puzzle",
+    "firebase"
+  ],
+  "author": "Candyboom Team",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^10.7.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.0.0",
+    "live-server": "^1.2.2"
+  }
+}

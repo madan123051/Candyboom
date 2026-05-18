@@ -1,907 +1,703 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>King of Jungle - Home</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candyboom - Match 3 Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-html, body {
-  width:100%; min-height:100dvh;
-  overflow-x:hidden;
-  font-family:'Lato', sans-serif;
-  background:#030f05;
-  color:white;
-}
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
 
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
 
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
 
-:root {
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
 
-@supports not (height: 100dvh) {
-  html, body, #wrapper, #hero { min-height: 100vh; }
-}
-/* ── ANIMATED BG ── */
-#bgCanvas {
-  position:fixed; inset:0; z-index:0;
-  pointer-events:none;
-}
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
 
-/* ── FLOATING LEAVES ── */
-.leaf {
-  position:fixed; font-size:24px; z-index:1;
-  pointer-events:none; opacity:0;
-  animation: leafFall linear infinite;
-}
-@keyframes leafFall {
-  0%   { transform:translateY(-60px) rotate(0deg); opacity:0; }
-  10%  { opacity:0.6; }
-  90%  { opacity:0.4; }
-  100% { transform:translateY(110vh) rotate(360deg); opacity:0; }
-}
+        .auth-section {
+            padding: 30px 20px;
+            text-align: center;
+        }
 
-/* ── FIREFLIES ── */
-.firefly {
-  position:fixed; width:4px; height:4px;
-  border-radius:50%; background:#c8ff00;
-  box-shadow:0 0 8px 3px #c8ff0088;
-  z-index:1; pointer-events:none;
-  animation: flyAround ease-in-out infinite;
-}
-@keyframes flyAround {
-  0%,100% { transform:translate(0,0); opacity:0; }
-  25%     { transform:translate(30px,-40px); opacity:1; }
-  50%     { transform:translate(-20px,-70px); opacity:0.8; }
-  75%     { transform:translate(40px,-30px); opacity:0.6; }
-}
+        .auth-section.hidden {
+            display: none;
+        }
 
-/* ── WRAPPER ── */
-#wrapper {
-  position:relative; z-index:10;
-  min-height:100dvh;
-  display:flex; flex-direction:column; align-items:center;
-}
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
 
-/* ── NAVBAR ── */
-nav {
-  width:100%; padding:calc(12px + var(--safe-top)) calc(18px + var(--safe-right)) 12px calc(18px + var(--safe-left));
-  display:flex; justify-content:space-between; align-items:center;
-  background:linear-gradient(180deg,rgba(0,0,0,0.7) 0%,transparent 100%);
-  position:fixed; top:0; left:0; z-index:100;
-  backdrop-filter:blur(4px);
-  border-bottom:1px solid rgba(45,138,45,0.2);
-}
-.nav-logo {
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040; font-size:14px;
-  text-shadow:0 0 10px #f0c04088;
-  letter-spacing:1px;
-}
-.nav-links { display:flex; gap:20px; }
-.nav-links a {
-  color:#6dbf67; font-size:13px; text-decoration:none;
-  letter-spacing:1px; text-transform:uppercase;
-  transition:color 0.3s;
-}
-.nav-links a:hover { color:#f0c040; }
+        .btn-google {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
 
-/* ── HERO ── */
-#hero {
-  min-height:100dvh;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  text-align:center; padding:100px 20px 60px;
-  position:relative;
-}
+        .btn-google:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
 
-/* Jungle ground gradient at bottom */
-#hero::after {
-  content:'';
-  position:absolute; bottom:0; left:0; right:0;
-  height:200px;
-  background:linear-gradient(to top, #030f05, transparent);
-  pointer-events:none;
-}
+        .btn-guest {
+            background: #f0f0f0;
+            color: #333;
+        }
 
-.hero-badge {
-  background:rgba(45,138,45,0.2);
-  border:1px solid #2d8a2d;
-  border-radius:30px;
-  padding:6px 18px;
-  font-size:12px;
-  color:#6dbf67;
-  letter-spacing:3px;
-  text-transform:uppercase;
-  margin-bottom:24px;
-  animation: fadeDown 0.8s ease both;
-  backdrop-filter:blur(4px);
-}
+        .btn-guest:hover {
+            background: #e0e0e0;
+        }
 
-.hero-crown {
-  font-size:70px;
-  animation: crownFloat 3s ease-in-out infinite, fadeDown 0.8s ease 0.2s both;
-  display:block;
-  filter:drop-shadow(0 0 20px #f0c04088);
-}
+        .btn-logout {
+            background: #ff6b6b;
+            color: white;
+        }
 
-h1.hero-title {
-  font-family:'Cinzel Decorative', serif;
-  font-size:clamp(36px, 8vw, 72px);
-  line-height:1.1;
-  color:#f0c040;
-  text-shadow:0 0 40px #f0c04066, 0 4px 8px rgba(0,0,0,0.8);
-  margin:10px 0 6px;
-  animation: fadeDown 0.8s ease 0.3s both;
-}
+        .btn-logout:hover {
+            background: #ff5252;
+        }
 
-.hero-sub {
-  font-size:clamp(13px, 3vw, 18px);
-  color:#6dbf67;
-  letter-spacing:4px;
-  text-transform:uppercase;
-  margin-bottom:30px;
-  animation: fadeDown 0.8s ease 0.4s both;
-}
+        .game-section {
+            padding: 30px 20px;
+        }
 
-.hero-desc {
-  max-width:480px;
-  font-size:15px;
-  color:#4a8a4a;
-  line-height:1.8;
-  margin-bottom:40px;
-  animation: fadeDown 0.8s ease 0.5s both;
-}
+        .game-section.hidden {
+            display: none;
+        }
 
-/* CTA Buttons */
-.btn-group {
-  display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
-  animation: fadeDown 0.8s ease 0.6s both;
-}
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
 
-.btn-play {
-  padding:16px 40px;
-  background:linear-gradient(135deg, #1a5c1a, #2d8a2d, #3daa3d);
-  color:#f0c040;
-  border:2px solid #3daa3d;
-  border-radius:50px;
-  font-size:18px;
-  font-family:'Cinzel Decorative',serif;
-  font-weight:700;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex; align-items:center; gap:10px;
-  box-shadow:0 0 30px rgba(45,138,45,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-  transition:all 0.3s;
-  position:relative; overflow:hidden;
-}
-.btn-play::before {
-  content:'';
-  position:absolute; inset:0;
-  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.1));
-  transform:translateX(-100%);
-  transition:transform 0.4s;
-}
-.btn-play:hover::before { transform:translateX(100%); }
-.btn-play:hover {
-  transform:translateY(-3px) scale(1.04);
-  box-shadow:0 0 50px rgba(45,138,45,0.7), 0 8px 20px rgba(0,0,0,0.4);
-}
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
 
-.btn-how {
-  padding:16px 32px;
-  background:transparent;
-  color:#6dbf67;
-  border:2px solid #2d6a2d;
-  border-radius:50px;
-  font-size:16px;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex; align-items:center; gap:8px;
-  transition:all 0.3s;
-}
-.btn-how:hover {
-  background:rgba(45,138,45,0.15);
-  border-color:#6dbf67;
-  transform:translateY(-2px);
-}
+        .user-score {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
 
-/* Animals row */
-.animals-row {
-  display:flex; gap:12px; justify-content:center;
-  flex-wrap:wrap; margin-top:50px;
-  animation: fadeDown 0.8s ease 0.7s both;
-}
-.animal-chip {
-  background:rgba(10,40,10,0.8);
-  border:1px solid #1a4a1a;
-  border-radius:40px;
-  padding:8px 16px;
-  display:flex; align-items:center; gap:7px;
-  font-size:13px; color:#6dbf67;
-  backdrop-filter:blur(4px);
-  transition:all 0.3s;
-  cursor:default;
-}
-.animal-chip:hover {
-  border-color:#6dbf67;
-  background:rgba(20,60,20,0.9);
-  transform:translateY(-3px) scale(1.05);
-  color:#f0c040;
-}
-.animal-chip span { font-size:20px; }
+        .level-select {
+            margin-top: 20px;
+        }
 
-/* Scroll arrow */
-.scroll-arrow {
-  margin-top:40px;
-  animation:bounce 2s infinite, fadeDown 1s ease 1s both;
-  font-size:24px; color:#2d6a2d;
-}
-@keyframes bounce {
-  0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)}
-}
+        .level-select label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
 
-/* ── FEATURES SECTION ── */
-#features {
-  width:100%; padding:80px 20px;
-  max-width:1000px; margin:0 auto;
-}
-.section-title {
-  text-align:center;
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040;
-  font-size:clamp(22px,5vw,36px);
-  text-shadow:0 0 20px #f0c04066;
-  margin-bottom:10px;
-}
-.section-sub {
-  text-align:center; color:#3a6a3a;
-  font-size:14px; letter-spacing:2px;
-  text-transform:uppercase; margin-bottom:50px;
-}
-.features-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
-  gap:20px;
-}
-.feature-card {
-  background:linear-gradient(135deg, rgba(10,30,10,0.9), rgba(5,15,5,0.95));
-  border:1px solid #1a4a1a;
-  border-radius:20px;
-  padding:28px 22px;
-  text-align:center;
-  transition:all 0.4s;
-  cursor:default;
-  position:relative; overflow:hidden;
-}
-.feature-card::before {
-  content:'';
-  position:absolute; top:0; left:0; right:0; height:2px;
-  background:linear-gradient(90deg, transparent, #2d8a2d, transparent);
-  transform:scaleX(0); transition:transform 0.4s;
-}
-.feature-card:hover::before { transform:scaleX(1); }
-.feature-card:hover {
-  border-color:#2d8a2d;
-  transform:translateY(-6px);
-  box-shadow:0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(45,138,45,0.15);
-}
-.feature-icon { font-size:40px; margin-bottom:14px; display:block; }
-.feature-title { color:#f0c040; font-size:16px; font-weight:700; margin-bottom:8px; }
-.feature-desc { color:#3a6a3a; font-size:13px; line-height:1.7; }
+        .level-select select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
 
-/* ── ANIMALS SECTION ── */
-#animals {
-  width:100%; padding:80px 20px;
-  max-width:1000px; margin:0 auto;
-}
-.animals-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
-  gap:16px;
-}
-.animal-card {
-  background:linear-gradient(180deg, rgba(10,30,10,0.9), rgba(5,15,5,0.95));
-  border:1px solid #1a4a1a;
-  border-radius:16px;
-  padding:24px 14px;
-  text-align:center;
-  transition:all 0.3s;
-}
-.animal-card:hover {
-  border-color:#2d8a2d;
-  transform:scale(1.06);
-  box-shadow:0 0 20px rgba(45,138,45,0.2);
-}
-.animal-card .icon { font-size:44px; margin-bottom:10px; display:block; }
-.animal-card .name { color:#f0c040; font-size:14px; font-weight:700; }
-.animal-card .bio { color:#3a6a3a; font-size:11px; margin-top:4px; line-height:1.5; }
+        .game-board {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
 
-/* ── HOW TO PLAY ── */
-#howto {
-  width:100%; padding:80px 20px;
-  max-width:700px; margin:0 auto;
-}
-.steps { display:flex; flex-direction:column; gap:20px; }
-.step {
-  display:flex; gap:18px; align-items:flex-start;
-  background:rgba(10,30,10,0.6);
-  border:1px solid #1a4a1a;
-  border-radius:16px; padding:22px;
-  transition:all 0.3s;
-}
-.step:hover { border-color:#2d8a2d; background:rgba(15,40,15,0.8); }
-.step-num {
-  font-family:'Cinzel Decorative',serif;
-  font-size:28px; color:#f0c040;
-  text-shadow:0 0 10px #f0c04066;
-  min-width:36px;
-}
-.step-content h3 { color:#6dbf67; font-size:15px; margin-bottom:6px; }
-.step-content p { color:#3a6a3a; font-size:13px; line-height:1.7; }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
 
-/* ── FOOTER ── */
-footer {
-  width:100%; padding:40px 20px calc(40px + var(--safe-bottom));
-  text-align:center;
-  border-top:1px solid #0a2a0a;
-  background:rgba(0,0,0,0.4);
-}
-.footer-logo {
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040; font-size:18px;
-  text-shadow:0 0 10px #f0c04066;
-  margin-bottom:10px;
-}
-footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
-.footer-animals { font-size:24px; letter-spacing:6px; margin:14px 0; }
+        .candy {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            user-select: none;
+        }
 
-/* ── DIVIDER ── */
-.divider {
-  width:100%; text-align:center;
-  color:#0a2a0a; font-size:22px;
-  letter-spacing:8px; margin:10px 0;
-}
+        .candy:hover {
+            transform: scale(1.05);
+        }
 
-/* ── ANIMATIONS ── */
-@keyframes crownFloat {
-  0%,100% { transform:translateY(0) rotate(-3deg); }
-  50%      { transform:translateY(-14px) rotate(3deg); }
-}
-@keyframes fadeDown {
-  from { opacity:0; transform:translateY(-20px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+        .candy.selected {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
 
-/* Scroll reveal */
-.reveal {
-  opacity:0; transform:translateY(30px);
-  transition:opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal.visible { opacity:1; transform:translateY(0); }
+        .candy-red { background: linear-gradient(135deg, #ff6b6b, #ff5252); }
+        .candy-blue { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .candy-green { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+        .candy-yellow { background: linear-gradient(135deg, #ffd89b, #19547b); }
+        .candy-purple { background: linear-gradient(135deg, #a8edea, #fed6e3); }
 
-/* ── CTA BOTTOM ── */
-#cta {
-  width:100%; padding:80px 20px;
-  text-align:center;
-}
-.cta-box {
-  max-width:560px; margin:0 auto;
-  background:linear-gradient(135deg, rgba(10,40,10,0.9), rgba(5,20,5,0.95));
-  border:1px solid #2d8a2d;
-  border-radius:24px; padding:50px 30px;
-  box-shadow:0 0 60px rgba(45,138,45,0.15);
-}
-.cta-box h2 {
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040; font-size:clamp(22px,5vw,34px);
-  text-shadow:0 0 20px #f0c04066;
-  margin-bottom:14px;
-}
-.cta-box p { color:#4a8a4a; margin-bottom:30px; line-height:1.7; }
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-.auth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;}
-.auth-overlay.active{display:flex;}
-.auth-card{width:min(92vw,380px);background:#07210d;border:1px solid #2d8a2d;border-radius:18px;padding:22px;text-align:center;}
-.auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
-.invite-box{display:none;margin-top:16px;}
-.invite-input{width:100%;padding:10px;border-radius:8px;border:1px solid #2d8a2d;background:#031206;color:#9de39c;}
-#homeAudioBtn{position:fixed;right:16px;bottom:18px;z-index:220;border:1px solid #2d8a2d;border-radius:26px;background:linear-gradient(135deg,#0f3c17,#1e6a2f);color:#8adf80;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35);}
-#homeAudioBtn.muted{color:#6f836f;border-color:#486248;background:linear-gradient(135deg,#283229,#334236);}
+        .stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
 
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
 
-@media (max-width: 768px) {
-  nav {
-    gap: 10px;
-    align-items: flex-start;
-    flex-direction: column;
-  }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
 
-  .nav-links {
-    width: 100%;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
 
-  #hero {
-    justify-content: flex-start;
-    padding-top: calc(130px + var(--safe-top));
-    padding-bottom: calc(36px + var(--safe-bottom));
-  }
+        .booster {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
 
-  .btn-group {
-    width: 100%;
-    max-width: 360px;
-    flex-direction: column;
-  }
+        .booster:hover {
+            background: #f0f0ff;
+            transform: translateY(-2px);
+        }
 
-  .btn-play, .btn-how {
-    width: 100%;
-    justify-content: center;
-  }
-}
+        .booster-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
 
-</style>
+        .booster-name {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🍬 Candyboom</h1>
+            <p>Match 3 Puzzle Game</p>
+        </div>
 
-<canvas id="bgCanvas"></canvas>
+        <!-- Authentication Section -->
+        <div id="authSection" class="auth-section">
+            <h2 style="margin-bottom: 20px; color: #667eea;">Login to Play</h2>
+            
+            <button class="btn btn-google" onclick="loginWithGoogle()">
+                <span>🔐</span> Sign in with Google
+            </button>
 
-<!-- Leaves -->
-<div class="leaf" style="left:5%;animation-duration:12s;animation-delay:0s;font-size:20px;">🍃</div>
-<div class="leaf" style="left:15%;animation-duration:15s;animation-delay:2s;">🌿</div>
-<div class="leaf" style="left:30%;animation-duration:10s;animation-delay:4s;font-size:16px;">🍃</div>
-<div class="leaf" style="left:50%;animation-duration:14s;animation-delay:1s;">🌱</div>
-<div class="leaf" style="left:65%;animation-duration:11s;animation-delay:6s;font-size:18px;">🌿</div>
-<div class="leaf" style="left:80%;animation-duration:13s;animation-delay:3s;">🍃</div>
-<div class="leaf" style="left:90%;animation-duration:16s;animation-delay:5s;font-size:22px;">🌿</div>
+            <div style="margin: 20px 0; text-align: center; color: #999;">
+                OR
+            </div>
 
-<!-- Fireflies -->
-<div class="firefly" style="left:10%;top:20%;animation-duration:4s;animation-delay:0s;"></div>
-<div class="firefly" style="left:25%;top:50%;animation-duration:5s;animation-delay:1s;"></div>
-<div class="firefly" style="left:60%;top:30%;animation-duration:3.5s;animation-delay:2s;"></div>
-<div class="firefly" style="left:75%;top:60%;animation-duration:6s;animation-delay:0.5s;"></div>
-<div class="firefly" style="left:45%;top:75%;animation-duration:4.5s;animation-delay:1.5s;"></div>
-<div class="firefly" style="left:85%;top:40%;animation-duration:5.5s;animation-delay:3s;"></div>
+            <button class="btn btn-guest" onclick="loginAsGuest()">
+                👤 Play as Guest
+            </button>
 
-<div id="wrapper">
+            <div id="authError" class="error hidden"></div>
+        </div>
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">👑 King of Jungle</div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#howto">How to Play</a>
-      <a href="game.html">▶ Play</a>
+        <!-- Game Section -->
+        <div id="gameSection" class="game-section hidden">
+            <div class="user-info">
+                <div class="user-name" id="userName">Player</div>
+                <div class="user-score">Total Score: <span id="totalScore">0</span></div>
+                <div class="user-score">Stars: ⭐ <span id="totalStars">0</span></div>
+                <button class="btn btn-logout" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="level-select">
+                <label for="levelSelect">Select Level:</label>
+                <select id="levelSelect" onchange="selectLevel()">
+                    <option value="">Choose a level...</option>
+                </select>
+            </div>
+
+            <div class="game-board">
+                <div class="game-stats">
+                    <div class="stat">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="currentScore">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Moves Left</div>
+                        <div class="stat-value" id="movesLeft">20</div>
+                    </div>
+                </div>
+
+                <div class="game-grid" id="gameGrid"></div>
+
+                <div class="game-controls">
+                    <div class="booster" onclick="useBooster('hammer')">
+                        <div class="booster-icon">🔨</div>
+                        <div class="booster-name">Hammer</div>
+                    </div>
+                    <div class="booster" onclick="useBooster('lightning')">
+                        <div class="booster-icon">⚡</div>
+                        <div class="booster-name">Lightning</div>
+                    </div>
+                    <div class="booster" onclick="useBooster('bomb')">
+                        <div class="booster-icon">💣</div>
+                        <div class="booster-name">Bomb</div>
+                    </div>
+                    <div class="booster" onclick="useBooster('shuffle')">
+                        <div class="booster-icon">🔀</div>
+                        <div class="booster-name">Shuffle</div>
+                    </div>
+                </div>
+
+                <button class="btn-play" onclick="startGame()">🎮 Start Game</button>
+            </div>
+
+            <div id="gameMessage"></div>
+        </div>
+
+        <div id="loadingSection" class="loading hidden">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea;">Loading...</p>
+        </div>
     </div>
-  </nav>
 
-  <!-- HERO -->
-  <section id="hero">
-    <div class="hero-badge">🌿 Nepal Wild Kingdom 🌿</div>
-    <span class="hero-crown">👑</span>
-    <h1 class="hero-title">KING OF<br>JUNGLE</h1>
-    <p class="hero-sub">Match · Conquer · Rule</p>
-    <p class="hero-desc">
-      Enter the wild heart of Nepal's jungle. Match powerful animals,
-      chain combos and rise through 10 legendary levels to claim your throne
-      as the ultimate King of the Jungle.
-    </p>
-    <div class="btn-group">
-      <button class="btn-play" onclick="playNow()">▶ Play Now 🐯</button>
-      <a href="#howto" class="btn-how">📖 How to Play</a>
-    </div>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+        import { httpsCallable, getFunctions } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-functions.js';
 
-    <div class="animals-row">
-      <div class="animal-chip"><span>🐯</span> Tiger</div>
-      <div class="animal-chip"><span>🦏</span> Rhino</div>
-      <div class="animal-chip"><span>🐘</span> Elephant</div>
-      <div class="animal-chip"><span>🦚</span> Peacock</div>
-      <div class="animal-chip"><span>🐒</span> Monkey</div>
-      <div class="animal-chip"><span>🦅</span> Eagle</div>
-    </div>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOCAbauIOAnUOSLWlwe9Z5PvQq8xyzQGQ",
+            authDomain: "king-of-jungle-77f06.firebaseapp.com",
+            projectId: "king-of-jungle-77f06",
+            storageBucket: "king-of-jungle-77f06.appspot.com",
+            messagingSenderId: "993583513273",
+            appId: "1:993583513273:web:d4f7e8c9a1b2c3d4e5f6"
+        };
 
-    <div class="scroll-arrow">⬇</div>
-  <div id="authStatus" style="margin:14px 0;"></div>
-<div id="inviteBox" class="invite-box"><input id="inviteLink" class="invite-input" readonly><button class="btn-how" style="margin-top:8px;" onclick="copyInvite()">📨 Copy Invite Link</button></div>
-</section>
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const functions = getFunctions(app);
 
-  <!-- FEATURES -->
-  <section id="features">
-    <div class="reveal">
-      <p class="section-title">Game Features</p>
-      <p class="section-sub">🌿 What makes it legendary 🌿</p>
-      <div class="features-grid">
-        <div class="feature-card">
-          <span class="feature-icon">🏆</span>
-          <div class="feature-title">10 Epic Levels</div>
-          <div class="feature-desc">Each level harder than the last. Survive the jungle and prove your worth.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">👆</span>
-          <div class="feature-title">Swipe Controls</div>
-          <div class="feature-desc">Swipe up, down, left, right — fluid and natural on mobile & desktop.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🔥</span>
-          <div class="feature-title">Combo System</div>
-          <div class="feature-desc">Chain multiple matches for explosive combos and massive bonus points.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">⭐</span>
-          <div class="feature-title">Best Score</div>
-          <div class="feature-desc">Your highest score is saved. Beat your record and dominate the jungle.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🌿</span>
-          <div class="feature-title">Nepal Jungle Theme</div>
-          <div class="feature-desc">Deep greens, earthy tones and wild animals inspired by Nepal's Chitwan.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🎁</span>
-          <div class="feature-title">Bonus Moves</div>
-          <div class="feature-desc">Complete levels with spare moves for extra bonus points. Be efficient!</div>
-        </div>
-      </div>
-    </div>
-  </section>
+        // Set Google OAuth Client ID
+        auth.settings.appVerificationDisabledForTesting = false;
 
-  <div class="divider">🌿 · 🐯 · 🦏 · 🐘 · 🌿</div>
+        // Global Game State
+        let currentUser = null;
+        let currentLevel = 1;
+        let currentScore = 0;
+        let movesLeft = 20;
+        let selectedCandies = [];
+        let gameActive = false;
 
-  <!-- ANIMALS -->
-  <section id="animals">
-    <div class="reveal">
-      <p class="section-title">Nepal's Wild Warriors</p>
-      <p class="section-sub">🌿 Match them to win 🌿</p>
-      <div class="animals-grid">
-        <div class="animal-card">
-          <span class="icon">🐯</span>
-          <div class="name">Bengal Tiger</div>
-          <div class="bio">Chitwan's apex predator. Rare & powerful.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🦏</span>
-          <div class="name">One-Horn Rhino</div>
-          <div class="bio">Nepal's pride. Protected in Chitwan.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🐘</span>
-          <div class="name">Asian Elephant</div>
-          <div class="bio">Gentle giant of the Terai forests.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🦚</span>
-          <div class="name">Peacock</div>
-          <div class="bio">National bird of Nepal's neighbour. Dazzling colours.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🐒</span>
-          <div class="name">Langur Monkey</div>
-          <div class="bio">Swings freely through Nepal's jungle canopy.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🦅</span>
-          <div class="name">Himalayan Eagle</div>
-          <div class="bio">Master of Nepal's skies. Soars the Himalayas.</div>
-        </div>
-      </div>
-    </div>
-  </section>
+        // Candy colors
+        const candyColors = ['candy-red', 'candy-blue', 'candy-green', 'candy-yellow', 'candy-purple'];
 
-  <div class="divider">🌿 · 🦅 · 🐒 · 🦚 · 🌿</div>
+        // Login with Google
+        window.loginWithGoogle = async function() {
+            try {
+                showLoading(true);
+                const provider = new GoogleAuthProvider();
+                provider.setCustomParameters({
+                    'client_id': '993583513273-0d1o49evnp5obo5ks2re9i3n0mggc15h.apps.googleusercontent.com'
+                });
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+                
+                // Create user profile if first login
+                await createUserProfile(result.user);
+                
+                showLoading(false);
+                showMessage('success', `Welcome, ${result.user.displayName}!`);
+            } catch (error) {
+                showLoading(false);
+                console.error('Google login error:', error);
+                showMessage('error', `Login failed: ${error.message}`);
+            }
+        };
 
-  <!-- HOW TO PLAY -->
-  <section id="howto">
-    <div class="reveal">
-      <p class="section-title">How to Play</p>
-      <p class="section-sub">🌿 Master the jungle 🌿</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <h3>👆 Tap or Swipe an Animal</h3>
-            <p>Touch any animal tile and swipe in any direction — up, down, left or right — to move it.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <h3>🐯 Match 3 or More</h3>
-            <p>Line up 3 or more of the same animal in a row or column to eliminate them and score points.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <h3>🔥 Chain Combos</h3>
-            <p>When matches create new matches automatically, you get a combo multiplier for massive points!</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <h3>🏆 Reach the Target</h3>
-            <p>Each level has a score target. Reach it before your moves run out to advance to the next level.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">5</div>
-          <div class="step-content">
-            <h3>👑 Become the King</h3>
-            <p>Complete all 10 levels and claim your throne as the ultimate King of the Jungle!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        // Login as Guest
+        window.loginAsGuest = async function() {
+            try {
+                showLoading(true);
+                const result = await signInAnonymously(auth);
+                currentUser = result.user;
+                
+                // Create user profile if first login
+                await createUserProfile(result.user);
+                
+                showLoading(false);
+                showMessage('success', 'Welcome, Guest!');
+            } catch (error) {
+                showLoading(false);
+                console.error('Guest login error:', error);
+                showMessage('error', `Login failed: ${error.message}`);
+            }
+        };
 
-  <!-- CTA BOTTOM -->
-  <section id="cta">
-    <div class="reveal cta-box">
-      <h2>Ready to Rule? 👑</h2>
-      <p>The jungle awaits your command. Match the animals, master the levels, and claim your throne!</p>
-      <button class="btn-play" onclick="playNow()">▶ Start Playing 🐯</button>
-    </div>
-  </section>
+        // Create or update user profile
+        async function createUserProfile(user) {
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">👑 King of Jungle</div>
-    <div class="footer-animals">🐯 🦏 🐘 🦚 🐒 🦅</div>
-    <p>Inspired by the wild beauty of Nepal's jungle 🌿</p>
-    <p style="margin-top:6px;">Chitwan · Bardiya · Himalaya</p>
-    <p style="margin-top:14px; color:#0d2a0d;">Made with ❤️ for Nepal's wildlife</p>
-  </footer>
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        email: user.email || 'guest@candyboom.game',
+                        displayName: user.displayName || 'Guest Player',
+                        profilePicture: user.photoURL || '',
+                        currentLevel: 1,
+                        totalScore: 0,
+                        totalStars: 0,
+                        createdAt: new Date(),
+                        boosters: {
+                            hammer: 5,
+                            lightning: 5,
+                            bomb: 3,
+                            shuffle: 3
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error creating user profile:', error);
+            }
+        }
 
-</div>
+        // Load user data
+        async function loadUserData() {
+            if (!currentUser) return;
 
-<script>
-// ── CANVAS BACKGROUND (animated jungle mist) ──
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
-let W, H, particles = [];
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userSnap = await getDoc(userRef);
 
-function resize(){
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    document.getElementById('userName').textContent = userData.displayName || 'Player';
+                    document.getElementById('totalScore').textContent = userData.totalScore || 0;
+                    document.getElementById('totalStars').textContent = userData.totalStars || 0;
 
-// Mist particles
-for(let i=0;i<60;i++){
-  particles.push({
-    x: Math.random()*2000,
-    y: Math.random()*1000,
-    r: Math.random()*120+40,
-    dx: (Math.random()-0.5)*0.2,
-    dy: (Math.random()-0.5)*0.1,
-    a: Math.random()*0.04+0.01
-  });
-}
+                    // Load levels
+                    loadLevelSelect();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
 
-function drawBG(){
-  ctx.clearRect(0,0,W,H);
-  // Deep jungle gradient
-  const bg = ctx.createRadialGradient(W/2,H*0.3,0, W/2,H*0.3, W*0.8);
-  bg.addColorStop(0,'#0a2a0a');
-  bg.addColorStop(1,'#010801');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+        // Load level select dropdown
+        function loadLevelSelect() {
+            const select = document.getElementById('levelSelect');
+            select.innerHTML = '<option value="">Choose a level...</option>';
+            
+            for (let i = 1; i <= 50; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Level ${i}`;
+                select.appendChild(option);
+            }
+        }
 
-  // Mist blobs
-  particles.forEach(p=>{
-    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-    g.addColorStop(0,`rgba(20,80,20,${p.a})`);
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x<-p.r) p.x=W+p.r;
-    if(p.x>W+p.r) p.x=-p.r;
-    if(p.y<-p.r) p.y=H+p.r;
-    if(p.y>H+p.r) p.y=-p.r;
-  });
-  requestAnimationFrame(drawBG);
-}
-drawBG();
+        // Select level
+        window.selectLevel = function() {
+            const level = document.getElementById('levelSelect').value;
+            if (level) {
+                currentLevel = parseInt(level);
+                currentScore = 0;
+                movesLeft = 20 + (currentLevel - 1) * 2;
+                updateGameDisplay();
+            }
+        };
 
-// ── SCROLL REVEAL ──
-const reveals = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.classList.add('visible');
-      // Stagger children
-      e.target.querySelectorAll('.feature-card, .animal-card, .step').forEach((el,i)=>{
-        el.style.transitionDelay = (i*0.1)+'s';
-        el.style.opacity='0';
-        el.style.transform='translateY(20px)';
-        setTimeout(()=>{
-          el.style.opacity='1';
-          el.style.transform='translateY(0)';
-          el.style.transition='opacity 0.5s ease, transform 0.5s ease, border 0.3s, box-shadow 0.3s';
-        }, i*100+200);
-      });
-    }
-  });
-},{threshold:0.1});
-reveals.forEach(r=>observer.observe(r));
+        // Start game
+        window.startGame = function() {
+            if (!currentLevel) {
+                showMessage('error', 'Please select a level first');
+                return;
+            }
 
-// ── SMOOTH SCROLL ──
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    e.preventDefault();
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t) t.scrollIntoView({behavior:'smooth'});
-  });
-});
-</script>
+            gameActive = true;
+            initializeGameBoard();
+            showMessage('success', `Level ${currentLevel} started! Good luck! 🍬`);
+        };
 
-<div id="authModal" class="auth-overlay" onclick="if(event.target===this)closeAuthModal()">
-  <div class="auth-card">
-    <h3 style="color:#f0c040;">Login to Enter Jungle</h3>
-    <p style="color:#6dbf67;margin-top:8px;">Choose your play mode</p>
-    <div class="auth-actions">
-      <button class="btn-play" onclick="loginGoogle()">Continue with Google</button>
-      <button class="btn-how" onclick="loginFacebook()">Continue with Facebook</button>
-      <button class="btn-how" onclick="loginGuest()">Play as Guest</button>
-    </div>
-  </div>
-</div>
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, signInAnonymously, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js';
+        // Initialize game board
+        function initializeGameBoard() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
 
-const firebaseConfig = {
-  apiKey: 'REPLACE_ME',
-  authDomain: 'REPLACE_ME',
-  projectId: 'REPLACE_ME',
-  appId: 'REPLACE_ME'
-};
+            for (let i = 0; i < 25; i++) {
+                const candy = document.createElement('div');
+                candy.className = `candy ${candyColors[Math.floor(Math.random() * candyColors.length)]}`;
+                candy.dataset.index = i;
+                candy.textContent = '🍭';
+                candy.onclick = () => selectCandy(i);
+                grid.appendChild(candy);
+            }
+        }
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const functions = getFunctions(app);
-const initProfile = httpsCallable(functions, 'createOrInitUserProfile');
-const genReferral = httpsCallable(functions, 'generateReferralCode');
+        // Select candy
+        function selectCandy(index) {
+            if (!gameActive) return;
 
-const authModal = document.getElementById('authModal');
-const authStatus = document.getElementById('authStatus');
-const inviteBox = document.getElementById('inviteBox');
-const AUDIO_PREF_KEY = 'koj_audio_enabled';
+            const candy = document.querySelector(`[data-index="${index}"]`);
+            candy.classList.toggle('selected');
 
-class HomeJungleAudio {
-  constructor() { this.ctx = null; this.master = null; this.bus = null; this.loop = null; this.enabled = localStorage.getItem(AUDIO_PREF_KEY) === '1'; }
-  build() {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx || this.ctx) return;
-    this.ctx = new Ctx();
-    this.master = this.ctx.createGain(); this.master.gain.value = 0.0001; this.master.connect(this.ctx.destination);
-    this.bus = this.ctx.createGain(); this.bus.gain.value = 0.22; this.bus.connect(this.master);
-  }
-  unlock() {
-    this.build();
-    if (!this.ctx) return;
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-    if (this.enabled) this.start();
-  }
-  tone(freq, duration = 0.4, volume = 0.03) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, now);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(volume, now + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-    osc.connect(gain); gain.connect(this.bus); osc.start(now); osc.stop(now + duration + 0.04);
-  }
-  start() {
-    if (!this.ctx || !this.enabled) return;
-    this.master.gain.setTargetAtTime(0.35, this.ctx.currentTime, 0.2);
-    if (this.loop) return;
-    const notes = [261.63, 329.63, 392, 349.23];
-    let i = 0;
-    this.loop = setInterval(() => {
-      if (!this.enabled || !this.ctx) return;
-      this.tone(notes[i++ % notes.length], 0.45, 0.03);
-    }, 900);
-  }
-  stop() { if (this.ctx) this.master.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.08); }
-  toggle() {
-    this.enabled = !this.enabled;
-    localStorage.setItem(AUDIO_PREF_KEY, this.enabled ? '1' : '0');
-    this.unlock();
-    if (this.enabled) this.start(); else this.stop();
-    this.updateUi();
-  }
-  updateUi() {
-    const btn = document.getElementById('homeAudioBtn');
-    if (!btn) return;
-    btn.textContent = this.enabled ? '🔊 Home Audio On' : '🔇 Home Audio Off';
-    btn.classList.toggle('muted', !this.enabled);
-  }
-}
-const homeAudio = new HomeJungleAudio();
+            if (selectedCandies.includes(index)) {
+                selectedCandies = selectedCandies.filter(i => i !== index);
+            } else {
+                selectedCandies.push(index);
+            }
 
-function openAuthModal(){ authModal.classList.add('active'); }
-function closeAuthModal(){ authModal.classList.remove('active'); }
+            if (selectedCandies.length >= 3) {
+                makeMove();
+            }
+        }
 
-window.openAuthModal = openAuthModal;
-window.closeAuthModal = closeAuthModal;
+        // Make a move
+        function makeMove() {
+            if (selectedCandies.length < 3) return;
 
-async function loginWith(providerName){
-  try {
-    const provider = providerName === 'google' ? new GoogleAuthProvider() : new FacebookAuthProvider();
-    await signInWithPopup(auth, provider);
-    closeAuthModal();
-  } catch (e) {
-    alert(`Login failed: ${e.message}`);
-  }
-}
+            const pointsPerCandy = 10;
+            currentScore += selectedCandies.length * pointsPerCandy;
+            movesLeft--;
+            selectedCandies = [];
 
-window.loginGoogle = () => loginWith('google');
-window.loginFacebook = () => loginWith('facebook');
-window.loginGuest = async () => {
-  try {
-    await signInAnonymously(auth);
-    closeAuthModal();
-  } catch (e) {
-    alert(`Guest login failed: ${e.message}`);
-  }
-};
-window.logoutUser = async () => signOut(auth);
+            updateGameDisplay();
 
-window.copyInvite = async () => {
-  const text = document.getElementById('inviteLink').value;
-  await navigator.clipboard.writeText(text);
-  alert('Invite link copied!');
-};
+            // Reinitialize board
+            setTimeout(() => {
+                initializeGameBoard();
+            }, 300);
 
-window.playNow = () => {
-  const user = auth.currentUser;
-  if (!user) return openAuthModal();
-  location.href = `game.html?uid=${encodeURIComponent(user.uid)}`;
-};
+            if (movesLeft <= 0) {
+                endGame();
+            }
+        }
 
-document.addEventListener('pointerdown', () => homeAudio.unlock(), { once:true });
-document.addEventListener('keydown', () => homeAudio.unlock(), { once:true });
+        // End game
+        async function endGame() {
+            gameActive = false;
+            const stars = currentScore >= 100 ? 3 : currentScore >= 50 ? 2 : 1;
+            
+            try {
+                const saveLevelResult = httpsCallable(functions, 'saveLevelResult');
+                await saveLevelResult({
+                    levelId: currentLevel.toString(),
+                    score: currentScore,
+                    stars: stars,
+                    moves: 20 + (currentLevel - 1) * 2 - movesLeft,
+                    time: new Date().getTime()
+                });
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    authStatus.innerHTML = '<button class="btn-play" onclick="openAuthModal()">🔐 Login to Play</button>';
-    inviteBox.style.display = 'none';
-    return;
-  }
+                showMessage('success', `Level completed! Score: ${currentScore}, Stars: ${'⭐'.repeat(stars)}`);
+                await loadUserData();
+            } catch (error) {
+                console.error('Error saving level result:', error);
+                showMessage('error', 'Error saving your score');
+            }
+        }
 
-  await initProfile();
-  authStatus.innerHTML = `
-    <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;">
-      <span style="color:#6dbf67;">Logged in as ${user.isAnonymous ? 'Guest' : (user.displayName || user.email || 'Player')}</span>
-      <button class="btn-how" onclick="logoutUser()">Logout</button>
-      <button class="btn-play" onclick="playNow()">▶ Continue</button>
-    </div>`;
+        // Use booster
+        window.useBooster = function(boosterType) {
+            if (!gameActive) {
+                showMessage('error', 'Start a game first!');
+                return;
+            }
 
-  try {
-    const { data } = await genReferral();
-    const link = `${location.origin}${location.pathname.replace('index.html','')}index.html?ref=${encodeURIComponent(data.code)}`;
-    document.getElementById('inviteLink').value = link;
-    inviteBox.style.display = 'block';
-  } catch {}
-});
+            // Booster logic would go here
+            showMessage('success', `${boosterType.toUpperCase()} booster used!`);
+        };
 
-document.body.insertAdjacentHTML('beforeend', '<button id="homeAudioBtn" class="muted" type="button">🔇 Home Audio Off</button>');
-document.getElementById('homeAudioBtn').addEventListener('click', () => homeAudio.toggle());
-homeAudio.updateUi();
-if (homeAudio.enabled) homeAudio.unlock();
-</script>
+        // Update game display
+        function updateGameDisplay() {
+            document.getElementById('currentScore').textContent = currentScore;
+            document.getElementById('movesLeft').textContent = Math.max(0, movesLeft);
+        }
 
+        // Logout
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                showMessage('success', 'Logged out successfully');
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        };
+
+        // Show message
+        function showMessage(type, message) {
+            const messageDiv = document.getElementById('gameMessage');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Show loading
+        function showLoading(show) {
+            document.getElementById('loadingSection').classList.toggle('hidden', !show);
+        }
+
+        // Toggle sections
+        function toggleSections(showAuth) {
+            document.getElementById('authSection').classList.toggle('hidden', !showAuth);
+            document.getElementById('gameSection').classList.toggle('hidden', showAuth);
+        }
+
+        // Monitor auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                toggleSections(false);
+                loadUserData();
+            } else {
+                currentUser = null;
+                toggleSections(true);
+            }
+        });
+    </script>
 </body>
 </html>
