@@ -123,20 +123,53 @@ h1 {
   display:flex; align-items:center; justify-content:center;
   line-height:1;
   overflow:hidden;
-  transition:transform 0.15s, box-shadow 0.15s;
+  transition:transform 0.15s, box-shadow 0.15s, filter 0.15s;
   cursor:pointer;
   -webkit-user-select:none; user-select:none;
   min-width:0; min-height:0;
   width:100%; height:100%;
+  position:relative;
+  isolation:isolate;
+  border:1px solid rgba(255,255,255,0.08);
+  text-shadow:0 2px 3px rgba(0,0,0,0.45);
 }
+.candy::before {
+  content:'';
+  position:absolute; inset:5px 6px auto 6px; height:30%;
+  border-radius:50%;
+  background:linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0));
+  pointer-events:none; z-index:-1;
+}
+.candy.spawned { animation:tileSpawn 0.36s cubic-bezier(.2,1.4,.5,1) both; }
+.candy.swapping { animation:swapPop 0.28s ease both; z-index:20; }
+.candy.invalid { animation:invalidShake 0.34s ease both; }
+.candy.predator-strike { animation:predatorStrike 0.46s ease both; filter:brightness(1.45); z-index:25; }
+.candy.prey-hit { animation:preyHit 0.46s ease both; box-shadow:0 0 22px #ffdc73, inset 0 0 18px rgba(255,255,255,0.22); }
+.candy.special-sweep { animation:specialSweep 0.7s ease both; }
+@keyframes tileSpawn { from{opacity:0; transform:translateY(-28px) scale(.55) rotate(-10deg)} to{opacity:1; transform:translateY(0) scale(1) rotate(0)} }
+@keyframes swapPop { 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(1)} }
+@keyframes invalidShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 50%{transform:translateX(7px)} 75%{transform:translateX(-4px)} }
+@keyframes predatorStrike { 0%{transform:scale(1)} 35%{transform:scale(1.25) rotate(-8deg)} 70%{transform:scale(1.08) rotate(8deg)} 100%{transform:scale(1)} }
+@keyframes preyHit { 0%{transform:scale(1)} 45%{transform:scale(.72) rotate(10deg)} 100%{transform:scale(0) rotate(22deg); opacity:0} }
+@keyframes specialSweep { 0%{transform:scale(1); filter:brightness(1)} 40%{transform:scale(1.28); filter:brightness(1.8)} 100%{transform:scale(1); filter:brightness(1)} }
 .candy.selected {
   transform:scale(1.12);
   box-shadow:0 0 18px #f0c040, 0 0 6px #fff;
   border:2px solid #f0c040;
   z-index:10; position:relative;
 }
-@keyframes fadeOut { to { opacity:0; transform:scale(0) rotate(20deg); } }
+@keyframes fadeOut { to { opacity:0; transform:scale(0) rotate(20deg); filter:brightness(1.7); } }
 .removing { animation:fadeOut 0.35s forwards; }
+.attack-line {
+  position:fixed; height:4px; border-radius:20px; pointer-events:none; z-index:180;
+  transform-origin:left center;
+  background:linear-gradient(90deg, rgba(240,192,64,0), #f0c040, rgba(255,90,30,0));
+  box-shadow:0 0 14px #f0c040;
+  animation:attackLine 0.42s ease forwards;
+}
+@keyframes attackLine { from{opacity:0; transform:scaleX(.2)} 35%{opacity:1} to{opacity:0; transform:scaleX(1)} }
+.screen-shake { animation:screenShake 0.28s ease; }
+@keyframes screenShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 50%{transform:translateX(3px)} 75%{transform:translateX(-2px)} }
 
 /* Animal tile colors */
 .candy-0 { background: linear-gradient(135deg, #6a2000, #aa4010); box-shadow:0 3px 8px rgba(0,0,0,0.5); } /* Tiger - deep orange */
@@ -363,8 +396,8 @@ h1 {
   </div>
 
   <div id="board"></div>
-  <div id="message">🌿 Match Tigers to hunt the Deer!</div>
-  <div id="hint">👆 Tiger matches hunt nearby Deer &amp; Goat — Swipe to move</div>
+  <div id="message">🐯 Build Tiger matches to hunt Deer — direct Deer matches only scatter!</div>
+  <div id="hint">👆 Swipe like Candy Crush: Tigers hunt adjacent Deer/Goat, 5 Tigers trigger a full deer sweep</div>
   <button id="restartBtn">🔄 Restart Jungle</button>
   <button id="audioBtn" class="muted" type="button">🔊 Enable Jungle Audio</button>
 </div>
@@ -630,19 +663,35 @@ class JungleAudioEngine {
 
 const jungleAudio = new JungleAudioEngine();
 
+// A hand-tuned Level 1 opener: no automatic matches on load, but several
+// meaningful Tiger setups exist so the player must swipe and plan hunts.
+const LEVEL_ONE_START_BOARD = [
+  [0,1,2,0,1,2],
+  [2,0,1,2,0,1],
+  [1,2,0,1,2,0],
+  [0,2,1,0,1,2],
+  [1,0,2,1,0,2],
+  [2,1,0,2,1,0],
+];
+
+// =================================================================
+// LEVEL CONFIGS — following KING_OF_JUNGLE_DESIGN_RULES.md
+// Level 1: FULLY RULES-COMPLIANT (Zone I — Starter Plains)
+// Levels 2-10: will be updated zone-by-zone as game expands
+// =================================================================
 const LEVELS = [
   {
     level:1, zone:'I', zoneName:'Starter Plains', biome:'Open Grasslands',
-    cols:6, rows:6, iconSize:46,
-    moves:30,
-    animalTypes:[0,1,2],
-    objective:'hunt',
-    huntAnimal:1,
-    huntAnimalName:'Deer',
-    huntCount:15,
-    goalText:'Hunt 15 Deer with Tiger strikes before moves run out',
+    cols:6, rows:6,            // ✅ Rule: Grid always 6×6
+    iconSize:46,
+    moves:30,                  // ✅ Rule: Zone I start moves = 30
+    animalTypes:[0,1,2],       // ✅ Rule: Zone I = Tiger, Deer, Goat only
+    objective:'hunt',          // ✅ Rule: Hunt objective for Levels 1-50
+    huntAnimal:1,              // ✅ Hunt Deer (index 1)
+    huntCount:15,              // ✅ Rule example: Hunt 15 Deer
+    goalText:'Hunt 15 Deer with Tiger attacks before moves run out',
     target:0,
-    tutorialHint:'🐯 Match Tigers beside Deer. Deer-only matches scatter, but they do not count as hunts.',
+    openingBoard: LEVEL_ONE_START_BOARD,
   },
   { level:2,  zone:'I',  zoneName:'Starter Plains',  cols:6, rows:6, iconSize:46, moves:28, animalTypes:[0,1,2],       objective:'score', target:1000,  goalText:'Reach score 1,000'  },
   { level:3,  zone:'I',  zoneName:'Starter Plains',  cols:6, rows:6, iconSize:44, moves:26, animalTypes:[0,1,2],       objective:'score', target:1800,  goalText:'Reach score 1,800'  },
@@ -706,32 +755,38 @@ function initLevel() {
   const boardEl = document.getElementById('board');
   boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
 
-  createBoard(cfg.animalTypes);
-  renderBoard(cfg.iconSize);
-  markPossibleMoveHint();
-  showLevelIntro(`Level ${level} — Rule the Jungle!`);
-  jungleAudio.play('levelStart');
+  createBoard(cfg.animalTypes, cfg.openingBoard);
+  while (findMatches().length > 0) createBoard(cfg.animalTypes);
+  renderBoard(cfg.iconSize, true);
 }
 
-function createBoard(animalTypes) {
-  const maxAttempts = 500;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    board = Array.from({length:ROWS}, () => Array(COLS).fill(0));
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const safeTypes = animalTypes.filter(type =>
-          !(c >= 2 && board[r][c-1] === type && board[r][c-2] === type) &&
-          !(r >= 2 && board[r-1][c] === type && board[r-2][c] === type)
-        );
-        const pool = safeTypes.length ? safeTypes : animalTypes;
-        board[r][c] = pool[Math.floor(Math.random() * pool.length)];
-      }
+function createBoard(animalTypes, presetBoard=null) {
+  if (presetBoard) {
+    board = presetBoard.map(row => row.slice());
+    return;
+  }
+  board = [];
+  for (let r = 0; r < ROWS; r++) {
+    board[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      board[r][c] = pickSafeAnimal(animalTypes, r, c);
     }
     if (findMatches().length === 0 && hasAnyValidMove()) return;
   }
 }
 
-function renderBoard(iconSizeOverride, animationMap = new Map()) {
+function pickSafeAnimal(animalTypes, r, c) {
+  const choices = animalTypes.slice().sort(() => Math.random() - 0.5);
+  for (const animal of choices) {
+    const makesHorizontal = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
+    const makesVertical = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
+    const makesBox = r >= 1 && c >= 1 && board[r - 1][c] === animal && board[r][c - 1] === animal && board[r - 1][c - 1] === animal;
+    if (!makesHorizontal && !makesVertical && !makesBox) return animal;
+  }
+  return choices[0];
+}
+
+function renderBoard(iconSizeOverride, markSpawned=false) {
   const cfg = getConfig(level);
   const iSize = iconSizeOverride || cfg.iconSize;
   const el = document.getElementById('board');
@@ -741,11 +796,7 @@ function renderBoard(iconSizeOverride, animationMap = new Map()) {
     for (let c = 0; c < COLS; c++) {
       const animalIdx = board[r][c];
       const d = document.createElement('div');
-      const key = `${r},${c}`;
-      d.className = `candy candy-${Math.min(animalIdx, 5)}`;
-      if (lastDroppedCells.has(key)) d.classList.add('drop-in');
-      if (lastSpawnedCells.has(key)) d.classList.add('new-spawn');
-      if (animationMap.has(key)) d.classList.add(...animationMap.get(key));
+      d.className = `candy candy-${Math.min(animalIdx, 5)}${markSpawned ? ' spawned' : ''}`;
       d.textContent = ALL_ANIMALS[animalIdx] || '🐯';
       d.title = ANIMAL_NAMES[animalIdx] || 'Animal';
       d.style.fontSize = iSize + 'px';
@@ -805,35 +856,45 @@ function handleSwipe(dx, dy, threshold) {
   if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) doSwap(touchStartRow, touchStartCol, nr, nc);
   clearSelected();
 }
-function setSelected(r, c) { clearSelected(); selectedRow = r; selectedCol = c; getEl(r, c)?.classList.add('selected'); }
-function clearSelected() { if (selectedRow >= 0) getEl(selectedRow, selectedCol)?.classList.remove('selected'); selectedRow = -1; selectedCol = -1; }
-function getEl(r, c) { return document.querySelector(`[data-r="${r}"][data-c="${c}"]`); }
-function swapCells(r1, c1, r2, c2) { const t = board[r1][c1]; board[r1][c1] = board[r2][c2]; board[r2][c2] = t; }
 
-async function doSwap(r1, c1, r2, c2) {
-  if (isProcessing) return;
-  isProcessing = true; clearSelected(); clearHints();
-  jungleAudio.unlock();
-  jungleAudio.play('swap', jungleAudio.panFromCell((c1 + c2) / 2));
-  swapCells(r1, c1, r2, c2);
-  const anim = new Map([[`${r1},${c1}`, ['swapping']], [`${r2},${c2}`, ['swapping']]]);
-  renderBoard(undefined, anim);
-  await delay(260);
+function setSelected(r, c) {
+  clearSelected(); selectedRow = r; selectedCol = c;
+  getEl(r, c)?.classList.add('selected');
+}
+function clearSelected() {
+  if (selectedRow >= 0) getEl(selectedRow, selectedCol)?.classList.remove('selected');
+  selectedRow = -1; selectedCol = -1;
+}
+function getEl(r, c) {
+  return document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+}
+
+function doSwap(r1, c1, r2, c2) {
+  isProcessing = true; clearSelected();
+  swapCells(r1, c1, r2, c2); renderBoard();
+  markCells([[r1,c1],[r2,c2]], 'swapping');
   if (findMatches().length > 0) {
     movesLeft--;
     document.getElementById('moves').textContent = movesLeft;
-    await processMatches();
+    setTimeout(() => processMatches(true), 280);
   } else {
-    swapCells(r1, c1, r2, c2);
-    const invalid = new Map([[`${r1},${c1}`, ['invalid']], [`${r2},${c2}`, ['invalid']]]);
-    renderBoard(undefined, invalid);
-    jungleAudio.play('invalid', jungleAudio.panFromCell((c1 + c2) / 2));
-    showMsg('🍃 No jungle pattern — try a sharper swipe!');
-    await delay(360);
-    renderBoard();
-    isProcessing = false;
-    markPossibleMoveHint();
+    showMsg('🌿 No hunt path there — try another swipe.');
+    setTimeout(() => {
+      markCells([[r1,c1],[r2,c2]], 'invalid');
+      swapCells(r1, c1, r2, c2); renderBoard();
+      document.getElementById('gameContainer').classList.add('screen-shake');
+      setTimeout(() => document.getElementById('gameContainer').classList.remove('screen-shake'), 300);
+      isProcessing = false;
+    }, 260);
   }
+}
+
+function markCells(cells, className) {
+  cells.forEach(([r, c]) => getEl(r, c)?.classList.add(className));
+}
+
+function swapCells(r1, c1, r2, c2) {
+  const t = board[r1][c1]; board[r1][c1] = board[r2][c2]; board[r2][c2] = t;
 }
 
 function findMatches() {
@@ -845,7 +906,8 @@ function findMatches() {
       if (v === board[r][c+1] && v === board[r][c+2]) {
         const cells = [{r,c}]; let x = c+1;
         while (x < COLS && board[r][x] === v) { cells.push({r, c:x}); x++; }
-        matches.push({type:v, cells, orientation:'h'}); c = x - 1;
+        matches.push({ type:v, shape: cells.length >= 5 ? 'five' : 'line', cells });
+        c = x - 1;
       }
     }
   }
@@ -856,7 +918,8 @@ function findMatches() {
       if (v === board[r+1][c] && v === board[r+2][c]) {
         const cells = [{r,c}]; let y = r+1;
         while (y < ROWS && board[y][c] === v) { cells.push({r:y, c}); y++; }
-        matches.push({type:v, cells, orientation:'v'}); r = y - 1;
+        matches.push({ type:v, shape: cells.length >= 5 ? 'five' : 'line', cells });
+        r = y - 1;
       }
     }
   }
@@ -864,34 +927,101 @@ function findMatches() {
     for (let c = 0; c < COLS - 1; c++) {
       const v = board[r][c];
       if (v < 0) continue;
-      if (board[r+1][c] === v && board[r][c+1] === v && board[r+1][c+1] === v) {
-        matches.push({type:v, cells:[{r,c},{r:r+1,c},{r,c:c+1},{r:r+1,c:c+1}], orientation:'box'});
+      if (board[r][c+1] === v && board[r+1][c] === v && board[r+1][c+1] === v) {
+        matches.push({ type:v, shape:'box', cells:[{r,c},{r,c:c+1},{r:r+1,c},{r:r+1,c:c+1}] });
       }
     }
   }
-  return matches;
+  return mergeIntersections(matches);
 }
 
-function classifyShape(matches) {
-  const all = uniqueCells(matches.flatMap(m => m.cells));
-  const type = matches[0]?.type;
-  let special = 'basic';
-  let center = all[Math.floor(all.length / 2)] || {r:0,c:0};
-  if (matches.some(m => m.cells.length >= 5)) special = 'color';
-  else if (matches.some(m => m.orientation === 'box')) special = 'blast';
-  else {
-    const byCell = new Map();
-    matches.forEach(m => m.cells.forEach(cell => {
-      const key = `${cell.r},${cell.c}`;
-      if (!byCell.has(key)) byCell.set(key, []);
-      byCell.get(key).push(m.orientation);
-    }));
-    for (const [key, dirs] of byCell) {
-      if (dirs.includes('h') && dirs.includes('v')) {
-        const [r,c] = key.split(',').map(Number);
-        center = {r,c};
-        special = all.length >= 5 ? 'cross' : 'basic';
-        break;
+function mergeIntersections(matches) {
+  const used = new Array(matches.length).fill(false);
+  const merged = [];
+  for (let i = 0; i < matches.length; i++) {
+    if (used[i]) continue;
+    let group = [matches[i]];
+    used[i] = true;
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const groupKeys = new Set(group.flatMap(m => m.cells.map(cellKey)));
+      for (let j = 0; j < matches.length; j++) {
+        if (used[j] || matches[j].type !== matches[i].type) continue;
+        if (matches[j].cells.some(cell => groupKeys.has(cellKey(cell)))) {
+          group.push(matches[j]); used[j] = true; changed = true;
+        }
+      }
+    }
+    const byKey = new Map();
+    group.flatMap(m => m.cells).forEach(cell => byKey.set(cellKey(cell), cell));
+    const shape = group.some(m => m.shape === 'box') ? 'box'
+      : byKey.size >= 5 ? 'five'
+      : group.length > 1 ? 'cross'
+      : group[0].shape;
+    merged.push({ type:matches[i].type, shape, cells:[...byKey.values()] });
+  }
+  return merged;
+}
+
+function cellKey({r, c}) { return `${r},${c}`; }
+
+function processMatches(playerTriggered=false) {
+  const cfg = getConfig(level);
+  const matches = findMatches();
+  if (!matches.length) { isProcessing = false; checkStatus(); return; }
+
+  let totalCnt = 0;
+  const firstType = matches[0].type;
+  const cellsToRemove = new Set();
+  const huntedCells = new Set();
+  const predatorCells = [];
+  const attackLinks = [];
+  let specialLabel = '';
+
+  matches.forEach(match => {
+    totalCnt += match.cells.length;
+    match.cells.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`));
+
+    const matchType = match.type;
+    if (FOOD_CHAIN[matchType]) {
+      predatorCells.push(...match.cells.map(({r,c}) => [r,c]));
+      const preyTypes = FOOD_CHAIN[matchType];
+      match.cells.forEach(({r, c}) => {
+        [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr, nc]) => {
+          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && preyTypes.includes(board[nr][nc])) {
+            cellsToRemove.add(`${nr},${nc}`);
+            huntedCells.add(`${nr},${nc}`);
+            attackLinks.push([[r,c], [nr,nc]]);
+          }
+        });
+      });
+
+      if (match.shape === 'five') {
+        specialLabel = '🐯 Fierce Tiger sweep!';
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (board[r][c] === cfg.huntAnimal) {
+              cellsToRemove.add(`${r},${c}`);
+              huntedCells.add(`${r},${c}`);
+              attackLinks.push([[match.cells[0].r, match.cells[0].c], [r,c]]);
+            }
+          }
+        }
+      } else if (match.shape === 'box') {
+        specialLabel = '💣 Expanding jungle blast!';
+        const center = match.cells[0];
+        for (let r = Math.max(0, center.r - 2); r <= Math.min(ROWS - 1, center.r + 2); r++) {
+          for (let c = Math.max(0, center.c - 2); c <= Math.min(COLS - 1, center.c + 2); c++) {
+            if (preyTypes.includes(board[r][c])) {
+              cellsToRemove.add(`${r},${c}`);
+              huntedCells.add(`${r},${c}`);
+              attackLinks.push([[center.r, center.c], [r,c]]);
+            }
+          }
+        }
+      } else if (match.shape === 'cross') {
+        specialLabel = '⚔️ Cross-clear strike!';
       }
     }
     if (special === 'basic' && hasBoxMatch(type)) special = 'blast';
@@ -909,30 +1039,10 @@ function uniqueCells(cells) {
   return cells.filter(({r,c}) => { const key = `${r},${c}`; if (seen.has(key)) return false; seen.add(key); return true; });
 }
 
-async function processMatches() {
-  const cfg = getConfig(level);
-  let safety = 0;
-  while (findMatches().length && safety++ < 20) {
-    const matches = findMatches();
-    const {special, center, type, all} = classifyShape(matches);
-    const strikePan = jungleAudio.panFromCell(center.c);
-    const cellsToRemove = new Set(all.map(({r,c}) => `${r},${c}`));
-    const huntedCells = new Set();
-    const predatorCells = all.filter(({r,c}) => FOOD_CHAIN[board[r][c]]);
-    const specialCells = new Set();
-
-    predatorCells.forEach(({r,c}) => addAdjacentPrey(r, c, board[r][c], cellsToRemove, huntedCells));
-    if (FOOD_CHAIN[type]) applySpecialStrike(special, center, type, cellsToRemove, huntedCells, specialCells);
-
-    await animateStrike({cellsToRemove, huntedCells, predatorCells, specialCells, special, center});
-    if (special !== 'basic') jungleAudio.play(special, strikePan);
-    else if (huntedCells.size > 0) jungleAudio.play('hunt', strikePan);
-    else jungleAudio.play('pop', strikePan);
-
+  if (cfg.objective === 'hunt') {
     huntedCells.forEach(key => {
-      const [r,c] = key.split(',').map(Number);
-      if (cfg.objective === 'hunt' && board[r][c] === cfg.huntAnimal) huntProgress++;
-      showScoreFloat(r, c, '+100');
+      const [r, c] = key.split(',').map(Number);
+      if (board[r][c] === cfg.huntAnimal) huntProgress++;
     });
 
     const points = (cellsToRemove.size * 12) + (huntedCells.size * 38) + (special !== 'basic' ? 100 : 0);
@@ -955,56 +1065,69 @@ async function processMatches() {
   markPossibleMoveHint();
 }
 
-function addAdjacentPrey(r, c, predatorType, cellsToRemove, huntedCells) {
-  [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr,nc]) => {
-    if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) return;
-    if (FOOD_CHAIN[predatorType].includes(board[nr][nc])) {
-      const key = `${nr},${nc}`;
-      cellsToRemove.add(key);
-      huntedCells.add(key);
-      drawAttackTrail(r, c, nr, nc);
+  predatorCells.forEach(([r, c]) => getEl(r, c)?.classList.add('predator-strike'));
+  attackLinks.slice(0, 18).forEach(([from, to]) => drawAttackLine(from, to));
+  cellsToRemove.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    const el = getEl(r, c);
+    if (el) {
+      if (huntedCells.has(key)) el.classList.add('prey-hit');
+      else el.classList.add(matchIsSpecial(matches, r, c) ? 'special-sweep' : 'removing');
+      spawnParticles(el, huntedCells.has(key));
     }
   });
-}
-function applySpecialStrike(special, center, predatorType, cellsToRemove, huntedCells, specialCells) {
-  const prey = FOOD_CHAIN[predatorType] || [];
-  const addIfPrey = (r,c) => {
-    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
-    if (prey.includes(board[r][c])) {
-      const key = `${r},${c}`;
-      cellsToRemove.add(key); huntedCells.add(key); specialCells.add(key);
-      drawAttackTrail(center.r, center.c, r, c);
-    }
+
+  const pts = totalCnt * 10 * matches.length + huntedCells.size * 25;
+  score += pts;
+  updateScore();
+
+  const msgs = {
+    0: '🐯 Tiger Hunts! Only real prey counts toward the objective!',
+    1: '🦌 Deer scattered — match Tigers to actually hunt them!',
+    2: '🐐 Goats flee in panic!',
+    3: '🦅 Eagle strikes from sky!',
+    4: '🐍 Snake slithers away!',
+    5: '🐒 Monkey swings to safety!',
   };
-  if (special === 'color') {
-    const targetPrey = getConfig(level).huntAnimal;
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (board[r][c] === targetPrey) addIfPrey(r,c);
-    drawBlastRing(center.r, center.c);
-  } else if (special === 'cross') {
-    for (let c = 0; c < COLS; c++) addIfPrey(center.r,c);
-    for (let r = 0; r < ROWS; r++) addIfPrey(r,center.c);
-    drawBlastRing(center.r, center.c);
-  } else if (special === 'blast') {
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-      if (Math.abs(r - center.r) + Math.abs(c - center.c) <= 6) addIfPrey(r,c);
-    }
-    drawBlastRing(center.r, center.c);
-  }
+  if (specialLabel) showMsg(`${specialLabel} +${pts}`, true);
+  else if (matches.length > 1) showMsg(`🔥 COMBO x${matches.length}! +${pts}`, true);
+  else showMsg(msgs[firstType] || `✨ Match! +${pts}`);
+
+  setTimeout(() => {
+    cellsToRemove.forEach(key => {
+      const [r, c] = key.split(',').map(Number);
+      board[r][c] = -1;
+    });
+    drop();
+    setTimeout(() => {
+      fill(cfg.animalTypes);
+      renderBoard(undefined, true);
+      setTimeout(() => processMatches(false), 330);
+    }, 300);
+  }, 460);
 }
-async function animateStrike({cellsToRemove, huntedCells, predatorCells, specialCells, special, center}) {
-  const anim = new Map();
-  cellsToRemove.forEach(key => anim.set(key, ['removing']));
-  huntedCells.forEach(key => anim.set(key, ['prey-hit']));
-  predatorCells.forEach(({r,c}) => anim.set(`${r},${c}`, ['predator-strike']));
-  specialCells.forEach(key => anim.set(key, [special === 'blast' ? 'special-bomb' : 'special-line']));
-  renderBoard(undefined, anim);
-  if (special !== 'basic') {
-    showComboBanner(special === 'color' ? '🐯 Fierce Tiger Sweep!' : special === 'cross' ? '⚔️ Jungle Cross Strike!' : '💥 Expanding Blast!');
-    shakeBoard();
-  }
-  await delay(520);
-  cellsToRemove.forEach(key => { const [r,c] = key.split(',').map(Number); const el = getEl(r,c); if (el) spawnParticles(el, huntedCells.has(key)); });
-  await delay(120);
+
+function matchIsSpecial(matches, r, c) {
+  return matches.some(m => m.shape !== 'line' && m.cells.some(cell => cell.r === r && cell.c === c));
+}
+
+function drawAttackLine(from, to) {
+  const a = getEl(from[0], from[1]);
+  const b = getEl(to[0], to[1]);
+  if (!a || !b) return;
+  const ar = a.getBoundingClientRect();
+  const br = b.getBoundingClientRect();
+  const x1 = ar.left + ar.width / 2, y1 = ar.top + ar.height / 2;
+  const x2 = br.left + br.width / 2, y2 = br.top + br.height / 2;
+  const dx = x2 - x1, dy = y2 - y1;
+  const line = document.createElement('div');
+  line.className = 'attack-line';
+  line.style.left = `${x1}px`;
+  line.style.top = `${y1}px`;
+  line.style.width = `${Math.hypot(dx, dy)}px`;
+  line.style.rotate = `${Math.atan2(dy, dx)}rad`;
+  document.body.appendChild(line);
+  setTimeout(() => line.remove(), 460);
 }
 
 function drop() {
@@ -1022,12 +1145,10 @@ function drop() {
 function fill(animalTypes) {
   lastSpawnedCells.clear();
   const types = animalTypes || getConfig(level).animalTypes;
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    if (board[r][c] === -1) {
-      board[r][c] = types[Math.floor(Math.random() * types.length)];
-      lastSpawnedCells.add(`${r},${c}`);
-    }
-  }
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c] === -1)
+        board[r][c] = pickSafeAnimal(types, r, c);
 }
 
 function updateScore() {
@@ -1113,10 +1234,11 @@ function showComboBanner(text) {
   const b = document.createElement('div'); b.className = 'combo-banner'; b.textContent = text;
   document.body.appendChild(b); setTimeout(() => b.remove(), 920);
 }
+
 function spawnParticles(el, hunted=false) {
   const rect = el.getBoundingClientRect();
-  const icons = hunted ? ['💥','🐾','✨','🍃'] : ['🌿','🍃','✨','🌱'];
-  for (let i = 0; i < (hunted ? 6 : 3); i++) {
+  const icons = hunted ? ['🐾','💥','🌿','✨'] : ['🌿','🍃','✨','🌱'];
+  for (let i = 0; i < (hunted ? 5 : 3); i++) {
     const p = document.createElement('div');
     p.className = 'particles';
     p.textContent = icons[Math.floor(Math.random() * icons.length)];
