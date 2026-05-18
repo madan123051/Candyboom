@@ -7,7 +7,14 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": ".",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "public": "dist",
+    "predeploy": [
+      "bash ./scripts/build-hosting.sh"
+    ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
 }

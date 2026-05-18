@@ -55,3 +55,22 @@ Apply it with:
 ```bash
 psql "$DATABASE_URL" -f schema.sql
 ```
+
+
+## Firebase Hosting build setup
+
+Hosting now deploys a generated `dist/` directory instead of the repository root.
+
+- Build script: `scripts/build-hosting.sh`
+- Copied into `dist/`: `index.html`, `game.html`, and `levels/`
+- Deploy command (from repo root):
+
+```bash
+firebase deploy --only hosting
+```
+
+You can also run the build manually:
+
+```bash
+bash ./scripts/build-hosting.sh
+```
