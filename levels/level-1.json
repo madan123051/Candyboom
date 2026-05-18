@@ -7,15 +7,84 @@
   "rows": 6,
   "iconSize": 46,
   "moves": 30,
-  "animalTypes": [0, 1, 2],
-  "animalNames": ["Tiger", "Deer", "Goat"],
+  "animalTypes": [
+    0,
+    1,
+    2
+  ],
+  "animalNames": [
+    "Tiger",
+    "Deer",
+    "Goat"
+  ],
   "objective": "hunt",
   "huntAnimal": 1,
   "huntAnimalName": "Deer",
   "huntCount": 15,
-  "goalText": "Hunt 15 Deer before moves run out",
-  "foodChain": { "0": [1, 2] },
+  "goalText": "Hunt 15 Deer with Tiger attacks before moves run out",
+  "foodChain": {
+    "0": [
+      1,
+      2
+    ]
+  },
   "blockers": [],
   "rulesVersion": "1.0",
-  "note": "Rules per KING_OF_JUNGLE_DESIGN_RULES.md — Zone I Starter Plains. Grid always 6x6, Zone I animals only, no blockers at Level 1."
+  "note": "Rules per KING_OF_JUNGLE_DESIGN_RULES.md \u2014 Zone I Starter Plains. Grid always 6x6, Zone I animals only, no blockers at Level 1, no automatic starting matches.",
+  "openingBoard": [
+    [
+      0,
+      1,
+      2,
+      0,
+      1,
+      2
+    ],
+    [
+      2,
+      0,
+      1,
+      2,
+      0,
+      1
+    ],
+    [
+      1,
+      2,
+      0,
+      1,
+      2,
+      0
+    ],
+    [
+      0,
+      2,
+      1,
+      0,
+      1,
+      2
+    ],
+    [
+      1,
+      0,
+      2,
+      1,
+      0,
+      2
+    ],
+    [
+      2,
+      1,
+      0,
+      2,
+      1,
+      0
+    ]
+  ],
+  "objectiveRule": "Only Deer removed by Tiger food-chain attacks count as hunted; direct Deer matches scatter but do not advance the hunt counter.",
+  "animationRequirements": [
+    "Candy-style swap pop and invalid-swipe shake",
+    "Tiger predator strike and prey-hit animations",
+    "Attack-line trails, particle bursts, cascade refill spawn animation"
+  ]
 }

@@ -123,20 +123,53 @@ h1 {
   display:flex; align-items:center; justify-content:center;
   line-height:1;
   overflow:hidden;
-  transition:transform 0.15s, box-shadow 0.15s;
+  transition:transform 0.15s, box-shadow 0.15s, filter 0.15s;
   cursor:pointer;
   -webkit-user-select:none; user-select:none;
   min-width:0; min-height:0;
   width:100%; height:100%;
+  position:relative;
+  isolation:isolate;
+  border:1px solid rgba(255,255,255,0.08);
+  text-shadow:0 2px 3px rgba(0,0,0,0.45);
 }
+.candy::before {
+  content:'';
+  position:absolute; inset:5px 6px auto 6px; height:30%;
+  border-radius:50%;
+  background:linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0));
+  pointer-events:none; z-index:-1;
+}
+.candy.spawned { animation:tileSpawn 0.36s cubic-bezier(.2,1.4,.5,1) both; }
+.candy.swapping { animation:swapPop 0.28s ease both; z-index:20; }
+.candy.invalid { animation:invalidShake 0.34s ease both; }
+.candy.predator-strike { animation:predatorStrike 0.46s ease both; filter:brightness(1.45); z-index:25; }
+.candy.prey-hit { animation:preyHit 0.46s ease both; box-shadow:0 0 22px #ffdc73, inset 0 0 18px rgba(255,255,255,0.22); }
+.candy.special-sweep { animation:specialSweep 0.7s ease both; }
+@keyframes tileSpawn { from{opacity:0; transform:translateY(-28px) scale(.55) rotate(-10deg)} to{opacity:1; transform:translateY(0) scale(1) rotate(0)} }
+@keyframes swapPop { 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(1)} }
+@keyframes invalidShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 50%{transform:translateX(7px)} 75%{transform:translateX(-4px)} }
+@keyframes predatorStrike { 0%{transform:scale(1)} 35%{transform:scale(1.25) rotate(-8deg)} 70%{transform:scale(1.08) rotate(8deg)} 100%{transform:scale(1)} }
+@keyframes preyHit { 0%{transform:scale(1)} 45%{transform:scale(.72) rotate(10deg)} 100%{transform:scale(0) rotate(22deg); opacity:0} }
+@keyframes specialSweep { 0%{transform:scale(1); filter:brightness(1)} 40%{transform:scale(1.28); filter:brightness(1.8)} 100%{transform:scale(1); filter:brightness(1)} }
 .candy.selected {
   transform:scale(1.12);
   box-shadow:0 0 18px #f0c040, 0 0 6px #fff;
   border:2px solid #f0c040;
   z-index:10; position:relative;
 }
-@keyframes fadeOut { to { opacity:0; transform:scale(0) rotate(20deg); } }
+@keyframes fadeOut { to { opacity:0; transform:scale(0) rotate(20deg); filter:brightness(1.7); } }
 .removing { animation:fadeOut 0.35s forwards; }
+.attack-line {
+  position:fixed; height:4px; border-radius:20px; pointer-events:none; z-index:180;
+  transform-origin:left center;
+  background:linear-gradient(90deg, rgba(240,192,64,0), #f0c040, rgba(255,90,30,0));
+  box-shadow:0 0 14px #f0c040;
+  animation:attackLine 0.42s ease forwards;
+}
+@keyframes attackLine { from{opacity:0; transform:scaleX(.2)} 35%{opacity:1} to{opacity:0; transform:scaleX(1)} }
+.screen-shake { animation:screenShake 0.28s ease; }
+@keyframes screenShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 50%{transform:translateX(3px)} 75%{transform:translateX(-2px)} }
 
 /* Animal tile colors */
 .candy-0 { background: linear-gradient(135deg, #6a2000, #aa4010); box-shadow:0 3px 8px rgba(0,0,0,0.5); } /* Tiger - deep orange */
@@ -254,8 +287,8 @@ h1 {
   </div>
 
   <div id="board"></div>
-  <div id="message">🌿 Match Tigers to hunt the Deer!</div>
-  <div id="hint">👆 Tiger matches hunt nearby Deer &amp; Goat — Swipe to move</div>
+  <div id="message">🐯 Build Tiger matches to hunt Deer — direct Deer matches only scatter!</div>
+  <div id="hint">👆 Swipe like Candy Crush: Tigers hunt adjacent Deer/Goat, 5 Tigers trigger a full deer sweep</div>
   <button id="restartBtn">🔄 Restart Jungle</button>
 </div>
 
@@ -306,6 +339,17 @@ const FOOD_CHAIN = {
 // Zone icons for the zone bar
 const ZONE_ICONS = { 'I':'🌾', 'II':'🌴', 'III':'💧', 'IV':'⛰️', 'V':'🌺' };
 
+// A hand-tuned Level 1 opener: no automatic matches on load, but several
+// meaningful Tiger setups exist so the player must swipe and plan hunts.
+const LEVEL_ONE_START_BOARD = [
+  [0,1,2,0,1,2],
+  [2,0,1,2,0,1],
+  [1,2,0,1,2,0],
+  [0,2,1,0,1,2],
+  [1,0,2,1,0,2],
+  [2,1,0,2,1,0],
+];
+
 // =================================================================
 // LEVEL CONFIGS — following KING_OF_JUNGLE_DESIGN_RULES.md
 // Level 1: FULLY RULES-COMPLIANT (Zone I — Starter Plains)
@@ -322,8 +366,9 @@ const LEVELS = [
     objective:'hunt',          // ✅ Rule: Hunt objective for Levels 1-50
     huntAnimal:1,              // ✅ Hunt Deer (index 1)
     huntCount:15,              // ✅ Rule example: Hunt 15 Deer
-    goalText:'Hunt 15 Deer before moves run out',
+    goalText:'Hunt 15 Deer with Tiger attacks before moves run out',
     target:0,
+    openingBoard: LEVEL_ONE_START_BOARD,
   },
   // Levels 2-10 (score mode — to be upgraded per zone rules)
   { level:2,  zone:'I',  zoneName:'Starter Plains',  cols:6, rows:6, iconSize:46, moves:28, animalTypes:[0,1,2,3],     objective:'score', target:1000,  goalText:'Reach score 1,000'  },
@@ -406,22 +451,37 @@ function initLevel() {
   const boardEl = document.getElementById('board');
   boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
 
-  createBoard(cfg.animalTypes);
+  createBoard(cfg.animalTypes, cfg.openingBoard);
   while (findMatches().length > 0) createBoard(cfg.animalTypes);
-  renderBoard(cfg.iconSize);
+  renderBoard(cfg.iconSize, true);
 }
 
-function createBoard(animalTypes) {
+function createBoard(animalTypes, presetBoard=null) {
+  if (presetBoard) {
+    board = presetBoard.map(row => row.slice());
+    return;
+  }
   board = [];
   for (let r = 0; r < ROWS; r++) {
     board[r] = [];
     for (let c = 0; c < COLS; c++) {
-      board[r][c] = animalTypes[Math.floor(Math.random() * animalTypes.length)];
+      board[r][c] = pickSafeAnimal(animalTypes, r, c);
     }
   }
 }
 
-function renderBoard(iconSizeOverride) {
+function pickSafeAnimal(animalTypes, r, c) {
+  const choices = animalTypes.slice().sort(() => Math.random() - 0.5);
+  for (const animal of choices) {
+    const makesHorizontal = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
+    const makesVertical = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
+    const makesBox = r >= 1 && c >= 1 && board[r - 1][c] === animal && board[r][c - 1] === animal && board[r - 1][c - 1] === animal;
+    if (!makesHorizontal && !makesVertical && !makesBox) return animal;
+  }
+  return choices[0];
+}
+
+function renderBoard(iconSizeOverride, markSpawned=false) {
   const cfg = getConfig(level);
   const iSize = iconSizeOverride || cfg.iconSize;
   const el = document.getElementById('board');
@@ -432,8 +492,9 @@ function renderBoard(iconSizeOverride) {
     for (let c = 0; c < COLS; c++) {
       const animalIdx = board[r][c];
       const d = document.createElement('div');
-      d.className = `candy candy-${Math.min(animalIdx, 5)}`;
+      d.className = `candy candy-${Math.min(animalIdx, 5)}${markSpawned ? ' spawned' : ''}`;
       d.textContent = ALL_ANIMALS[animalIdx] || '🐯';
+      d.title = ANIMAL_NAMES[animalIdx] || 'Animal';
       d.style.fontSize = iSize + 'px';
       d.dataset.r = r; d.dataset.c = c;
       d.addEventListener('touchstart', onTouchStart, {passive:false});
@@ -511,13 +572,25 @@ function getEl(r, c) {
 function doSwap(r1, c1, r2, c2) {
   isProcessing = true; clearSelected();
   swapCells(r1, c1, r2, c2); renderBoard();
+  markCells([[r1,c1],[r2,c2]], 'swapping');
   if (findMatches().length > 0) {
     movesLeft--;
     document.getElementById('moves').textContent = movesLeft;
-    setTimeout(() => processMatches(), 300);
+    setTimeout(() => processMatches(true), 280);
   } else {
-    setTimeout(() => { swapCells(r1, c1, r2, c2); renderBoard(); isProcessing = false; }, 300);
+    showMsg('🌿 No hunt path there — try another swipe.');
+    setTimeout(() => {
+      markCells([[r1,c1],[r2,c2]], 'invalid');
+      swapCells(r1, c1, r2, c2); renderBoard();
+      document.getElementById('gameContainer').classList.add('screen-shake');
+      setTimeout(() => document.getElementById('gameContainer').classList.remove('screen-shake'), 300);
+      isProcessing = false;
+    }, 260);
   }
+}
+
+function markCells(cells, className) {
+  cells.forEach(([r, c]) => getEl(r, c)?.classList.add(className));
 }
 
 function swapCells(r1, c1, r2, c2) {
@@ -525,94 +598,167 @@ function swapCells(r1, c1, r2, c2) {
 }
 
 function findMatches() {
-  const m = [];
+  const matches = [];
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS - 2; c++) {
       const v = board[r][c];
+      if (v < 0) continue;
       if (v === board[r][c+1] && v === board[r][c+2]) {
-        const a = [{r,c}]; let x = c+1;
-        while (x < COLS && board[r][x] === v) { a.push({r, c:x}); x++; }
-        m.push(a); c = x - 1;
+        const cells = [{r,c}]; let x = c+1;
+        while (x < COLS && board[r][x] === v) { cells.push({r, c:x}); x++; }
+        matches.push({ type:v, shape: cells.length >= 5 ? 'five' : 'line', cells });
+        c = x - 1;
       }
     }
   }
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r < ROWS - 2; r++) {
       const v = board[r][c];
+      if (v < 0) continue;
       if (v === board[r+1][c] && v === board[r+2][c]) {
-        const a = [{r,c}]; let y = r+1;
-        while (y < ROWS && board[y][c] === v) { a.push({r:y, c}); y++; }
-        m.push(a); r = y - 1;
+        const cells = [{r,c}]; let y = r+1;
+        while (y < ROWS && board[y][c] === v) { cells.push({r:y, c}); y++; }
+        matches.push({ type:v, shape: cells.length >= 5 ? 'five' : 'line', cells });
+        r = y - 1;
       }
     }
   }
-  return m;
+  for (let r = 0; r < ROWS - 1; r++) {
+    for (let c = 0; c < COLS - 1; c++) {
+      const v = board[r][c];
+      if (v < 0) continue;
+      if (board[r][c+1] === v && board[r+1][c] === v && board[r+1][c+1] === v) {
+        matches.push({ type:v, shape:'box', cells:[{r,c},{r,c:c+1},{r:r+1,c},{r:r+1,c:c+1}] });
+      }
+    }
+  }
+  return mergeIntersections(matches);
 }
 
-function processMatches() {
+function mergeIntersections(matches) {
+  const used = new Array(matches.length).fill(false);
+  const merged = [];
+  for (let i = 0; i < matches.length; i++) {
+    if (used[i]) continue;
+    let group = [matches[i]];
+    used[i] = true;
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const groupKeys = new Set(group.flatMap(m => m.cells.map(cellKey)));
+      for (let j = 0; j < matches.length; j++) {
+        if (used[j] || matches[j].type !== matches[i].type) continue;
+        if (matches[j].cells.some(cell => groupKeys.has(cellKey(cell)))) {
+          group.push(matches[j]); used[j] = true; changed = true;
+        }
+      }
+    }
+    const byKey = new Map();
+    group.flatMap(m => m.cells).forEach(cell => byKey.set(cellKey(cell), cell));
+    const shape = group.some(m => m.shape === 'box') ? 'box'
+      : byKey.size >= 5 ? 'five'
+      : group.length > 1 ? 'cross'
+      : group[0].shape;
+    merged.push({ type:matches[i].type, shape, cells:[...byKey.values()] });
+  }
+  return merged;
+}
+
+function cellKey({r, c}) { return `${r},${c}`; }
+
+function processMatches(playerTriggered=false) {
   const cfg = getConfig(level);
   const matches = findMatches();
   if (!matches.length) { isProcessing = false; checkStatus(); return; }
 
   let totalCnt = 0;
-  const firstType = board[matches[0][0].r][matches[0][0].c];
+  const firstType = matches[0].type;
   const cellsToRemove = new Set();
+  const huntedCells = new Set();
+  const predatorCells = [];
+  const attackLinks = [];
+  let specialLabel = '';
 
   matches.forEach(match => {
-    totalCnt += match.length;
-    match.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`));
+    totalCnt += match.cells.length;
+    match.cells.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`));
 
-    // ============================================================
-    // FOOD CHAIN LOGIC — per KING_OF_JUNGLE_DESIGN_RULES.md §3
-    // When a predator tile is matched, it ALSO destroys adjacent
-    // prey tiles (e.g. Tiger match → nearby Deer & Goat destroyed)
-    // ============================================================
-    const matchType = board[match[0].r][match[0].c];
+    const matchType = match.type;
     if (FOOD_CHAIN[matchType]) {
+      predatorCells.push(...match.cells.map(({r,c}) => [r,c]));
       const preyTypes = FOOD_CHAIN[matchType];
-      match.forEach(({r, c}) => {
+      match.cells.forEach(({r, c}) => {
         [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr, nc]) => {
-          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
-            if (preyTypes.includes(board[nr][nc])) {
-              cellsToRemove.add(`${nr},${nc}`);
-            }
+          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && preyTypes.includes(board[nr][nc])) {
+            cellsToRemove.add(`${nr},${nc}`);
+            huntedCells.add(`${nr},${nc}`);
+            attackLinks.push([[r,c], [nr,nc]]);
           }
         });
       });
+
+      if (match.shape === 'five') {
+        specialLabel = '🐯 Fierce Tiger sweep!';
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (board[r][c] === cfg.huntAnimal) {
+              cellsToRemove.add(`${r},${c}`);
+              huntedCells.add(`${r},${c}`);
+              attackLinks.push([[match.cells[0].r, match.cells[0].c], [r,c]]);
+            }
+          }
+        }
+      } else if (match.shape === 'box') {
+        specialLabel = '💣 Expanding jungle blast!';
+        const center = match.cells[0];
+        for (let r = Math.max(0, center.r - 2); r <= Math.min(ROWS - 1, center.r + 2); r++) {
+          for (let c = Math.max(0, center.c - 2); c <= Math.min(COLS - 1, center.c + 2); c++) {
+            if (preyTypes.includes(board[r][c])) {
+              cellsToRemove.add(`${r},${c}`);
+              huntedCells.add(`${r},${c}`);
+              attackLinks.push([[center.r, center.c], [r,c]]);
+            }
+          }
+        }
+      } else if (match.shape === 'cross') {
+        specialLabel = '⚔️ Cross-clear strike!';
+      }
     }
   });
 
-  // ============================================================
-  // HUNT OBJECTIVE TRACKING (Level 1 — Hunt 15 Deer)
-  // Count every huntAnimal tile destroyed this turn
-  // ============================================================
   if (cfg.objective === 'hunt') {
-    cellsToRemove.forEach(key => {
+    huntedCells.forEach(key => {
       const [r, c] = key.split(',').map(Number);
       if (board[r][c] === cfg.huntAnimal) huntProgress++;
     });
   }
 
-  // Animate removal
+  predatorCells.forEach(([r, c]) => getEl(r, c)?.classList.add('predator-strike'));
+  attackLinks.slice(0, 18).forEach(([from, to]) => drawAttackLine(from, to));
   cellsToRemove.forEach(key => {
     const [r, c] = key.split(',').map(Number);
     const el = getEl(r, c);
-    if (el) { el.classList.add('removing'); spawnParticles(el); }
+    if (el) {
+      if (huntedCells.has(key)) el.classList.add('prey-hit');
+      else el.classList.add(matchIsSpecial(matches, r, c) ? 'special-sweep' : 'removing');
+      spawnParticles(el, huntedCells.has(key));
+    }
   });
 
-  const pts = totalCnt * 10 * matches.length;
+  const pts = totalCnt * 10 * matches.length + huntedCells.size * 25;
   score += pts;
   updateScore();
 
   const msgs = {
-    0: '🐯 Tiger Hunts! Prey destroyed!',
-    1: '🦌 Deer herd scattered!',
+    0: '🐯 Tiger Hunts! Only real prey counts toward the objective!',
+    1: '🦌 Deer scattered — match Tigers to actually hunt them!',
     2: '🐐 Goats flee in panic!',
     3: '🦅 Eagle strikes from sky!',
     4: '🐍 Snake slithers away!',
     5: '🐒 Monkey swings to safety!',
   };
-  if (matches.length > 1) showMsg(`🔥 COMBO x${matches.length}! +${pts}`, true);
+  if (specialLabel) showMsg(`${specialLabel} +${pts}`, true);
+  else if (matches.length > 1) showMsg(`🔥 COMBO x${matches.length}! +${pts}`, true);
   else showMsg(msgs[firstType] || `✨ Match! +${pts}`);
 
   setTimeout(() => {
@@ -623,10 +769,33 @@ function processMatches() {
     drop();
     setTimeout(() => {
       fill(cfg.animalTypes);
-      renderBoard();
-      setTimeout(() => processMatches(), 300);
+      renderBoard(undefined, true);
+      setTimeout(() => processMatches(false), 330);
     }, 300);
-  }, 300);
+  }, 460);
+}
+
+function matchIsSpecial(matches, r, c) {
+  return matches.some(m => m.shape !== 'line' && m.cells.some(cell => cell.r === r && cell.c === c));
+}
+
+function drawAttackLine(from, to) {
+  const a = getEl(from[0], from[1]);
+  const b = getEl(to[0], to[1]);
+  if (!a || !b) return;
+  const ar = a.getBoundingClientRect();
+  const br = b.getBoundingClientRect();
+  const x1 = ar.left + ar.width / 2, y1 = ar.top + ar.height / 2;
+  const x2 = br.left + br.width / 2, y2 = br.top + br.height / 2;
+  const dx = x2 - x1, dy = y2 - y1;
+  const line = document.createElement('div');
+  line.className = 'attack-line';
+  line.style.left = `${x1}px`;
+  line.style.top = `${y1}px`;
+  line.style.width = `${Math.hypot(dx, dy)}px`;
+  line.style.rotate = `${Math.atan2(dy, dx)}rad`;
+  document.body.appendChild(line);
+  setTimeout(() => line.remove(), 460);
 }
 
 function drop() {
@@ -646,7 +815,7 @@ function fill(animalTypes) {
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       if (board[r][c] === -1)
-        board[r][c] = types[Math.floor(Math.random() * types.length)];
+        board[r][c] = pickSafeAnimal(types, r, c);
 }
 
 function updateScore() {
@@ -725,10 +894,10 @@ function showMsg(txt, combo=false) {
   if (combo) { el.classList.add('combo'); setTimeout(() => el.classList.remove('combo'), 500); }
 }
 
-function spawnParticles(el) {
+function spawnParticles(el, hunted=false) {
   const rect = el.getBoundingClientRect();
-  const icons = ['🌿','🍃','✨','🌱'];
-  for (let i = 0; i < 3; i++) {
+  const icons = hunted ? ['🐾','💥','🌿','✨'] : ['🌿','🍃','✨','🌱'];
+  for (let i = 0; i < (hunted ? 5 : 3); i++) {
     const p = document.createElement('div');
     p.className = 'particles';
     p.textContent = icons[Math.floor(Math.random() * icons.length)];
