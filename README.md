@@ -38,3 +38,20 @@ This repository now includes a working Firebase backend scaffold for user auth/p
   - `level`, `highScore`, `stars`, `updatedAt`
 - `/referrals/{code}`
   - `ownerUid`, `redeemedBy[]`, `createdAt`
+
+
+## SQL schema (for relational backend)
+
+If you want to run the same data model on SQL (for example Cloud SQL Postgres), this repo now includes `schema.sql` that maps the following entities:
+
+- `User` -> `users`
+- `Level` -> `levels`
+- `GameSession` -> `game_sessions`
+- `PowerUp` -> `power_ups`
+- `UserPowerUp` -> `user_power_ups` (composite primary key)
+
+Apply it with:
+
+```bash
+psql "$DATABASE_URL" -f schema.sql
+```
