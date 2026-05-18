@@ -356,6 +356,22 @@ h1 {
 @keyframes scoreFloat { to{transform:translateY(-44px) scale(1.12);opacity:0} }
 
 
+
+body.level1-no-anim *,
+body.level1-no-anim *::before,
+body.level1-no-anim *::after {
+  animation: none !important;
+  transition: none !important;
+}
+body.level1-no-anim .particles,
+body.level1-no-anim .attack-line,
+body.level1-no-anim .attack-trail,
+body.level1-no-anim .blast-ring,
+body.level1-no-anim .combo-banner,
+body.level1-no-anim .score-float,
+body.level1-no-anim .level-intro {
+  display:none !important;
+}
 </style>
 </head>
 <body>
@@ -736,6 +752,7 @@ function initLevel() {
   document.getElementById('zoneBar').textContent = `Zone ${cfg.zone} — ${cfg.zoneName || ''} ${ZONE_ICONS[cfg.zone] || ''}`;
   document.getElementById('message').textContent = `🌿 Level ${level} — ${cfg.goalText}`;
   document.getElementById('hint').textContent = cfg.tutorialHint || '👆 Swipe adjacent animals to create jungle strikes';
+  document.body.classList.toggle('level1-no-anim', level === 1);
 
   const objLabel = document.getElementById('objectiveLabel');
   const objText  = document.getElementById('objectiveText');
@@ -984,100 +1001,68 @@ function processMatches(playerTriggered=false) {
     match.cells.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`));
 
     const matchType = match.type;
-    if (FOOD_CHAIN[matchType]) {
-      predatorCells.push(...match.cells.map(({r,c}) => [r,c]));
-      const preyTypes = FOOD_CHAIN[matchType];
-      match.cells.forEach(({r, c}) => {
-        [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr, nc]) => {
-          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && preyTypes.includes(board[nr][nc])) {
-            cellsToRemove.add(`${nr},${nc}`);
-            huntedCells.add(`${nr},${nc}`);
-            attackLinks.push([[r,c], [nr,nc]]);
-          }
-        });
-      });
+    if (!FOOD_CHAIN[matchType]) return;
 
-      if (match.shape === 'five') {
-        specialLabel = '🐯 Fierce Tiger sweep!';
-        for (let r = 0; r < ROWS; r++) {
-          for (let c = 0; c < COLS; c++) {
-            if (board[r][c] === cfg.huntAnimal) {
-              cellsToRemove.add(`${r},${c}`);
-              huntedCells.add(`${r},${c}`);
-              attackLinks.push([[match.cells[0].r, match.cells[0].c], [r,c]]);
-            }
+    predatorCells.push(...match.cells.map(({r,c}) => [r,c]));
+    const preyTypes = FOOD_CHAIN[matchType];
+
+    match.cells.forEach(({r, c}) => {
+      [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr, nc]) => {
+        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && preyTypes.includes(board[nr][nc])) {
+          cellsToRemove.add(`${nr},${nc}`);
+          huntedCells.add(`${nr},${nc}`);
+          attackLinks.push([[r,c], [nr,nc]]);
+        }
+      });
+    });
+
+    if (match.shape === 'five') {
+      specialLabel = '🐯 Fierce Tiger sweep!';
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (board[r][c] === cfg.huntAnimal) {
+            cellsToRemove.add(`${r},${c}`);
+            huntedCells.add(`${r},${c}`);
+            attackLinks.push([[match.cells[0].r, match.cells[0].c], [r,c]]);
           }
         }
-      } else if (match.shape === 'box') {
-        specialLabel = '💣 Expanding jungle blast!';
-        const center = match.cells[0];
-        for (let r = Math.max(0, center.r - 2); r <= Math.min(ROWS - 1, center.r + 2); r++) {
-          for (let c = Math.max(0, center.c - 2); c <= Math.min(COLS - 1, center.c + 2); c++) {
-            if (preyTypes.includes(board[r][c])) {
-              cellsToRemove.add(`${r},${c}`);
-              huntedCells.add(`${r},${c}`);
-              attackLinks.push([[center.r, center.c], [r,c]]);
-            }
-          }
-        }
-      } else if (match.shape === 'cross') {
-        specialLabel = '⚔️ Cross-clear strike!';
       }
+    } else if (match.shape === 'box') {
+      specialLabel = '💣 Expanding jungle blast!';
+      const center = match.cells[0];
+      for (let r = Math.max(0, center.r - 2); r <= Math.min(ROWS - 1, center.r + 2); r++) {
+        for (let c = Math.max(0, center.c - 2); c <= Math.min(COLS - 1, center.c + 2); c++) {
+          if (preyTypes.includes(board[r][c])) {
+            cellsToRemove.add(`${r},${c}`);
+            huntedCells.add(`${r},${c}`);
+            attackLinks.push([[center.r, center.c], [r,c]]);
+          }
+        }
+      }
+    } else if (match.shape === 'cross') {
+      specialLabel = '⚔️ Cross-clear strike!';
     }
-    if (special === 'basic' && hasBoxMatch(type)) special = 'blast';
-  }
-  return { special, center, type, all };
-}
-function hasBoxMatch(type) {
-  for (let r = 0; r < ROWS - 1; r++) for (let c = 0; c < COLS - 1; c++) {
-    if (board[r][c] === type && board[r+1][c] === type && board[r][c+1] === type && board[r+1][c+1] === type) return true;
-  }
-  return false;
-}
-function uniqueCells(cells) {
-  const seen = new Set();
-  return cells.filter(({r,c}) => { const key = `${r},${c}`; if (seen.has(key)) return false; seen.add(key); return true; });
-}
+  });
 
   if (cfg.objective === 'hunt') {
     huntedCells.forEach(key => {
       const [r, c] = key.split(',').map(Number);
       if (board[r][c] === cfg.huntAnimal) huntProgress++;
     });
-
-    const points = (cellsToRemove.size * 12) + (huntedCells.size * 38) + (special !== 'basic' ? 100 : 0);
-    score += points;
-    updateScore();
-    announceTurn(matches.length, special, type, huntedCells.size, points);
-
-    cellsToRemove.forEach(key => { const [r,c] = key.split(',').map(Number); board[r][c] = -1; });
-    await delay(120);
-    drop();
-    renderBoard();
-    await delay(260);
-    fill(cfg.animalTypes);
-    renderBoard();
-    await delay(360);
   }
-  isProcessing = false;
-  checkStatus();
-  if (!findMatches().length) ensurePlayableBoard();
-  markPossibleMoveHint();
-}
 
   predatorCells.forEach(([r, c]) => getEl(r, c)?.classList.add('predator-strike'));
   attackLinks.slice(0, 18).forEach(([from, to]) => drawAttackLine(from, to));
   cellsToRemove.forEach(key => {
     const [r, c] = key.split(',').map(Number);
     const el = getEl(r, c);
-    if (el) {
-      if (huntedCells.has(key)) el.classList.add('prey-hit');
-      else el.classList.add(matchIsSpecial(matches, r, c) ? 'special-sweep' : 'removing');
-      spawnParticles(el, huntedCells.has(key));
-    }
+    if (!el) return;
+    if (huntedCells.has(key)) el.classList.add('prey-hit');
+    else el.classList.add(matchIsSpecial(matches, r, c) ? 'special-sweep' : 'removing');
+    spawnParticles(el, huntedCells.has(key));
   });
 
-  const pts = totalCnt * 10 * matches.length + huntedCells.size * 25;
+  const pts = (cellsToRemove.size * 12) + (huntedCells.size * 30) + (matches.length > 1 ? 40 : 0);
   score += pts;
   updateScore();
 
@@ -1089,6 +1074,7 @@ function uniqueCells(cells) {
     4: '🐍 Snake slithers away!',
     5: '🐒 Monkey swings to safety!',
   };
+
   if (specialLabel) showMsg(`${specialLabel} +${pts}`, true);
   else if (matches.length > 1) showMsg(`🔥 COMBO x${matches.length}! +${pts}`, true);
   else showMsg(msgs[firstType] || `✨ Match! +${pts}`);
@@ -1112,6 +1098,7 @@ function matchIsSpecial(matches, r, c) {
 }
 
 function drawAttackLine(from, to) {
+  if (document.body.classList.contains('level1-no-anim')) return;
   const a = getEl(from[0], from[1]);
   const b = getEl(to[0], to[1]);
   if (!a || !b) return;
@@ -1236,6 +1223,7 @@ function showComboBanner(text) {
 }
 
 function spawnParticles(el, hunted=false) {
+  if (document.body.classList.contains('level1-no-anim')) return;
   const rect = el.getBoundingClientRect();
   const icons = hunted ? ['🐾','💥','🌿','✨'] : ['🌿','🍃','✨','🌱'];
   for (let i = 0; i < (hunted ? 5 : 3); i++) {
