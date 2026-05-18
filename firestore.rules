@@ -1,42 +1,36 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Allow read/write for authenticated users in their own user document
-    match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
-      
-      // Allow reading public profile info
-      allow read: if true;
-      
-      // Levels subcollection - user can read/write their own
-      match /levels/{levelId} {
-        allow read, write: if request.auth.uid == userId;
-      }
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.currentLevel is int
+        && request.resource.data.currentLevel >= 1
+        && request.resource.data.totalScore is int
+        && request.resource.data.totalScore >= 0;
     }
-    
-    // Config can be read by everyone, written only by admin
-    match /config/{document=**} {
-      allow read: if true;
-      allow write: if request.auth.token.admin == true;
+
+    match /users/{uid}/levels/{levelId} {
+      allow read: if isOwner(uid);
+      allow write: if isOwner(uid)
+        && request.resource.data.level is int
+        && request.resource.data.level >= 1
+        && request.resource.data.stars is int
+        && request.resource.data.stars >= 0
+        && request.resource.data.stars <= 3
+        && request.resource.data.highScore is int
+        && request.resource.data.highScore >= 0;
     }
-    
-    // Referrals can be read by everyone
+
     match /referrals/{code} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    
-    // Error logs can be written by anyone
-    match /error_logs/{document=**} {
-      allow create: if true;
-      allow read: if request.auth.token.admin == true;
-    }
-    
-    // Leaderboard data is public read-only
-    match /leaderboard/{document=**} {
-      allow read: if true;
-      allow write: if request.auth.token.admin == true;
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if false;
     }
   }
 }
