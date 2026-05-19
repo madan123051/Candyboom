@@ -1,910 +1,940 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>King of Jungle - Home</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>🐾 Animal Boom – Match 3 Puzzle</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800&display=swap');
 
-html, body {
-  width:100%; min-height:100dvh;
-  overflow-x:hidden;
-  font-family:'Lato', sans-serif;
-  background:#030f05;
-  color:white;
-}
+  :root {
+    --bg:       #1a0a2e;
+    --panel:    #2d1b4e;
+    --accent:   #ff6bcb;
+    --gold:     #ffd700;
+    --green:    #50fa7b;
+    --blue:     #8be9fd;
+    --purple:   #bd93f9;
+    --red:      #ff5555;
+    --orange:   #ffb86c;
+  }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-
-:root {
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-
-@supports not (height: 100dvh) {
-  html, body, #wrapper, #hero { min-height: 100vh; }
-}
-/* ── ANIMATED BG ── */
-#bgCanvas {
-  position:fixed; inset:0; z-index:0;
-  pointer-events:none;
-}
-
-/* ── FLOATING LEAVES ── */
-.leaf {
-  position:fixed; font-size:24px; z-index:1;
-  pointer-events:none; opacity:0;
-  animation: leafFall linear infinite;
-}
-@keyframes leafFall {
-  0%   { transform:translateY(-60px) rotate(0deg); opacity:0; }
-  10%  { opacity:0.6; }
-  90%  { opacity:0.4; }
-  100% { transform:translateY(110vh) rotate(360deg); opacity:0; }
-}
-
-/* ── FIREFLIES ── */
-.firefly {
-  position:fixed; width:4px; height:4px;
-  border-radius:50%; background:#c8ff00;
-  box-shadow:0 0 8px 3px #c8ff0088;
-  z-index:1; pointer-events:none;
-  animation: flyAround ease-in-out infinite;
-}
-@keyframes flyAround {
-  0%,100% { transform:translate(0,0); opacity:0; }
-  25%     { transform:translate(30px,-40px); opacity:1; }
-  50%     { transform:translate(-20px,-70px); opacity:0.8; }
-  75%     { transform:translate(40px,-30px); opacity:0.6; }
-}
-
-/* ── WRAPPER ── */
-#wrapper {
-  position:relative; z-index:10;
-  min-height:100dvh;
-  display:flex; flex-direction:column; align-items:center;
-}
-
-/* ── NAVBAR ── */
-nav {
-  width:100%; padding:calc(12px + var(--safe-top)) calc(18px + var(--safe-right)) 12px calc(18px + var(--safe-left));
-  display:flex; justify-content:space-between; align-items:center;
-  background:linear-gradient(180deg,rgba(0,0,0,0.7) 0%,transparent 100%);
-  position:fixed; top:0; left:0; z-index:100;
-  backdrop-filter:blur(4px);
-  border-bottom:1px solid rgba(45,138,45,0.2);
-}
-.nav-logo {
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040; font-size:14px;
-  text-shadow:0 0 10px #f0c04088;
-  letter-spacing:1px;
-}
-.nav-links { display:flex; gap:20px; }
-.nav-links a {
-  color:#6dbf67; font-size:13px; text-decoration:none;
-  letter-spacing:1px; text-transform:uppercase;
-  transition:color 0.3s;
-}
-.nav-links a:hover { color:#f0c040; }
-
-/* ── HERO ── */
-#hero {
-  min-height:100dvh;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  text-align:center; padding:100px 20px 60px;
-  position:relative;
-}
-
-/* Jungle ground gradient at bottom */
-#hero::after {
-  content:'';
-  position:absolute; bottom:0; left:0; right:0;
-  height:200px;
-  background:linear-gradient(to top, #030f05, transparent);
-  pointer-events:none;
-}
-
-.hero-badge {
-  background:rgba(45,138,45,0.2);
-  border:1px solid #2d8a2d;
-  border-radius:30px;
-  padding:6px 18px;
-  font-size:12px;
-  color:#6dbf67;
-  letter-spacing:3px;
-  text-transform:uppercase;
-  margin-bottom:24px;
-  animation: fadeDown 0.8s ease both;
-  backdrop-filter:blur(4px);
-}
-
-.hero-crown {
-  font-size:70px;
-  animation: crownFloat 3s ease-in-out infinite, fadeDown 0.8s ease 0.2s both;
-  display:block;
-  filter:drop-shadow(0 0 20px #f0c04088);
-}
-
-h1.hero-title {
-  font-family:'Cinzel Decorative', serif;
-  font-size:clamp(36px, 8vw, 72px);
-  line-height:1.1;
-  color:#f0c040;
-  text-shadow:0 0 40px #f0c04066, 0 4px 8px rgba(0,0,0,0.8);
-  margin:10px 0 6px;
-  animation: fadeDown 0.8s ease 0.3s both;
-}
-
-.hero-sub {
-  font-size:clamp(13px, 3vw, 18px);
-  color:#6dbf67;
-  letter-spacing:4px;
-  text-transform:uppercase;
-  margin-bottom:30px;
-  animation: fadeDown 0.8s ease 0.4s both;
-}
-
-.hero-desc {
-  max-width:480px;
-  font-size:15px;
-  color:#4a8a4a;
-  line-height:1.8;
-  margin-bottom:40px;
-  animation: fadeDown 0.8s ease 0.5s both;
-}
-
-/* CTA Buttons */
-.btn-group {
-  display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
-  animation: fadeDown 0.8s ease 0.6s both;
-}
-
-.btn-play {
-  padding:16px 40px;
-  background:linear-gradient(135deg, #1a5c1a, #2d8a2d, #3daa3d);
-  color:#f0c040;
-  border:2px solid #3daa3d;
-  border-radius:50px;
-  font-size:18px;
-  font-family:'Cinzel Decorative',serif;
-  font-weight:700;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex; align-items:center; gap:10px;
-  box-shadow:0 0 30px rgba(45,138,45,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-  transition:all 0.3s;
-  position:relative; overflow:hidden;
-}
-.btn-play::before {
-  content:'';
-  position:absolute; inset:0;
-  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.1));
-  transform:translateX(-100%);
-  transition:transform 0.4s;
-}
-.btn-play:hover::before { transform:translateX(100%); }
-.btn-play:hover {
-  transform:translateY(-3px) scale(1.04);
-  box-shadow:0 0 50px rgba(45,138,45,0.7), 0 8px 20px rgba(0,0,0,0.4);
-}
-
-.btn-how {
-  padding:16px 32px;
-  background:transparent;
-  color:#6dbf67;
-  border:2px solid #2d6a2d;
-  border-radius:50px;
-  font-size:16px;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex; align-items:center; gap:8px;
-  transition:all 0.3s;
-}
-.btn-how:hover {
-  background:rgba(45,138,45,0.15);
-  border-color:#6dbf67;
-  transform:translateY(-2px);
-}
-
-/* Animals row */
-.animals-row {
-  display:flex; gap:12px; justify-content:center;
-  flex-wrap:wrap; margin-top:50px;
-  animation: fadeDown 0.8s ease 0.7s both;
-}
-.animal-chip {
-  background:rgba(10,40,10,0.8);
-  border:1px solid #1a4a1a;
-  border-radius:40px;
-  padding:8px 16px;
-  display:flex; align-items:center; gap:7px;
-  font-size:13px; color:#6dbf67;
-  backdrop-filter:blur(4px);
-  transition:all 0.3s;
-  cursor:default;
-}
-.animal-chip:hover {
-  border-color:#6dbf67;
-  background:rgba(20,60,20,0.9);
-  transform:translateY(-3px) scale(1.05);
-  color:#f0c040;
-}
-.animal-chip span { font-size:20px; }
-
-/* Scroll arrow */
-.scroll-arrow {
-  margin-top:40px;
-  animation:bounce 2s infinite, fadeDown 1s ease 1s both;
-  font-size:24px; color:#2d6a2d;
-}
-@keyframes bounce {
-  0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)}
-}
-
-/* ── FEATURES SECTION ── */
-#features {
-  width:100%; padding:80px 20px;
-  max-width:1000px; margin:0 auto;
-}
-.section-title {
-  text-align:center;
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040;
-  font-size:clamp(22px,5vw,36px);
-  text-shadow:0 0 20px #f0c04066;
-  margin-bottom:10px;
-}
-.section-sub {
-  text-align:center; color:#3a6a3a;
-  font-size:14px; letter-spacing:2px;
-  text-transform:uppercase; margin-bottom:50px;
-}
-.features-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
-  gap:20px;
-}
-.feature-card {
-  background:linear-gradient(135deg, rgba(10,30,10,0.9), rgba(5,15,5,0.95));
-  border:1px solid #1a4a1a;
-  border-radius:20px;
-  padding:28px 22px;
-  text-align:center;
-  transition:all 0.4s;
-  cursor:default;
-  position:relative; overflow:hidden;
-}
-.feature-card::before {
-  content:'';
-  position:absolute; top:0; left:0; right:0; height:2px;
-  background:linear-gradient(90deg, transparent, #2d8a2d, transparent);
-  transform:scaleX(0); transition:transform 0.4s;
-}
-.feature-card:hover::before { transform:scaleX(1); }
-.feature-card:hover {
-  border-color:#2d8a2d;
-  transform:translateY(-6px);
-  box-shadow:0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(45,138,45,0.15);
-}
-.feature-icon { font-size:40px; margin-bottom:14px; display:block; }
-.feature-title { color:#f0c040; font-size:16px; font-weight:700; margin-bottom:8px; }
-.feature-desc { color:#3a6a3a; font-size:13px; line-height:1.7; }
-
-/* ── ANIMALS SECTION ── */
-#animals {
-  width:100%; padding:80px 20px;
-  max-width:1000px; margin:0 auto;
-}
-.animals-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
-  gap:16px;
-}
-.animal-card {
-  background:linear-gradient(180deg, rgba(10,30,10,0.9), rgba(5,15,5,0.95));
-  border:1px solid #1a4a1a;
-  border-radius:16px;
-  padding:24px 14px;
-  text-align:center;
-  transition:all 0.3s;
-}
-.animal-card:hover {
-  border-color:#2d8a2d;
-  transform:scale(1.06);
-  box-shadow:0 0 20px rgba(45,138,45,0.2);
-}
-.animal-card .icon { font-size:44px; margin-bottom:10px; display:block; }
-.animal-card .name { color:#f0c040; font-size:14px; font-weight:700; }
-.animal-card .bio { color:#3a6a3a; font-size:11px; margin-top:4px; line-height:1.5; }
-
-/* ── HOW TO PLAY ── */
-#howto {
-  width:100%; padding:80px 20px;
-  max-width:700px; margin:0 auto;
-}
-.steps { display:flex; flex-direction:column; gap:20px; }
-.step {
-  display:flex; gap:18px; align-items:flex-start;
-  background:rgba(10,30,10,0.6);
-  border:1px solid #1a4a1a;
-  border-radius:16px; padding:22px;
-  transition:all 0.3s;
-}
-.step:hover { border-color:#2d8a2d; background:rgba(15,40,15,0.8); }
-.step-num {
-  font-family:'Cinzel Decorative',serif;
-  font-size:28px; color:#f0c040;
-  text-shadow:0 0 10px #f0c04066;
-  min-width:36px;
-}
-.step-content h3 { color:#6dbf67; font-size:15px; margin-bottom:6px; }
-.step-content p { color:#3a6a3a; font-size:13px; line-height:1.7; }
-
-/* ── FOOTER ── */
-footer {
-  width:100%; padding:40px 20px calc(40px + var(--safe-bottom));
-  text-align:center;
-  border-top:1px solid #0a2a0a;
-  background:rgba(0,0,0,0.4);
-}
-.footer-logo {
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040; font-size:18px;
-  text-shadow:0 0 10px #f0c04066;
-  margin-bottom:10px;
-}
-footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
-.footer-animals { font-size:24px; letter-spacing:6px; margin:14px 0; }
-
-/* ── DIVIDER ── */
-.divider {
-  width:100%; text-align:center;
-  color:#0a2a0a; font-size:22px;
-  letter-spacing:8px; margin:10px 0;
-}
-
-/* ── ANIMATIONS ── */
-@keyframes crownFloat {
-  0%,100% { transform:translateY(0) rotate(-3deg); }
-  50%      { transform:translateY(-14px) rotate(3deg); }
-}
-@keyframes fadeDown {
-  from { opacity:0; transform:translateY(-20px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-
-/* Scroll reveal */
-.reveal {
-  opacity:0; transform:translateY(30px);
-  transition:opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal.visible { opacity:1; transform:translateY(0); }
-
-/* ── CTA BOTTOM ── */
-#cta {
-  width:100%; padding:80px 20px;
-  text-align:center;
-}
-.cta-box {
-  max-width:560px; margin:0 auto;
-  background:linear-gradient(135deg, rgba(10,40,10,0.9), rgba(5,20,5,0.95));
-  border:1px solid #2d8a2d;
-  border-radius:24px; padding:50px 30px;
-  box-shadow:0 0 60px rgba(45,138,45,0.15);
-}
-.cta-box h2 {
-  font-family:'Cinzel Decorative',serif;
-  color:#f0c040; font-size:clamp(22px,5vw,34px);
-  text-shadow:0 0 20px #f0c04066;
-  margin-bottom:14px;
-}
-.cta-box p { color:#4a8a4a; margin-bottom:30px; line-height:1.7; }
-
-.auth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;}
-.auth-overlay.active{display:flex;}
-.auth-card{width:min(92vw,380px);background:#07210d;border:1px solid #2d8a2d;border-radius:18px;padding:22px;text-align:center;}
-.auth-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
-.invite-box{display:none;margin-top:16px;}
-.invite-input{width:100%;padding:10px;border-radius:8px;border:1px solid #2d8a2d;background:#031206;color:#9de39c;}
-#homeAudioBtn{position:fixed;right:16px;bottom:18px;z-index:220;border:1px solid #2d8a2d;border-radius:26px;background:linear-gradient(135deg,#0f3c17,#1e6a2f);color:#8adf80;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35);}
-#homeAudioBtn.muted{color:#6f836f;border-color:#486248;background:linear-gradient(135deg,#283229,#334236);}
-
-
-@media (max-width: 768px) {
-  nav {
-    gap: 10px;
-    align-items: flex-start;
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 20%, #3d1a6e33 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #1a3d6e33 0%, transparent 60%);
+    min-height: 100vh;
+    display: flex;
     flex-direction: column;
-  }
-
-  .nav-links {
-    width: 100%;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  #hero {
+    align-items: center;
     justify-content: flex-start;
-    padding-top: calc(130px + var(--safe-top));
-    padding-bottom: calc(36px + var(--safe-bottom));
+    font-family: 'Nunito', sans-serif;
+    overflow-x: hidden;
   }
 
-  .btn-group {
+  /* ─── TOP BAR ─────────────────────────────────── */
+  .topbar {
     width: 100%;
-    max-width: 360px;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 8px;
+  }
+  .topbar-logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--accent);
+    text-shadow: 0 0 12px #ff6bcb88;
+    letter-spacing: 1px;
+  }
+  .topbar-logo span { color: var(--gold); }
+
+  .lives {
+    display: flex;
+    gap: 4px;
+    font-size: 1.4rem;
+  }
+  .lives .heart { transition: transform 0.3s; }
+  .lives .heart.lost { opacity: 0.3; filter: grayscale(1); transform: scale(0.8); }
+
+  /* ─── LEVEL PROGRESS ─────────────────────────── */
+  .level-bar-wrap {
+    width: 100%;
+    max-width: 480px;
+    padding: 0 18px 10px;
+  }
+  .level-row {
+    display: flex;
+    justify-content: space-between;
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+  .level-row b { color: var(--gold); }
+  .progress-bg {
+    background: #ffffff20;
+    border-radius: 30px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 30px;
+    background: linear-gradient(90deg, #a855f7, #ec4899, #f97316);
+    transition: width 0.5s cubic-bezier(.47,1.64,.41,.8);
+  }
+
+  /* ─── STATS ROW ───────────────────────────────── */
+  .stats {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    gap: 10px;
+    padding: 0 18px 12px;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
     flex-direction: column;
+    align-items: center;
+    border: 1px solid #ffffff15;
+    box-shadow: 0 4px 12px #00000033;
+  }
+  .stat-label { font-size: 0.72rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-size: 1.5rem; color: white; font-weight: 800; line-height: 1.2; }
+  .stat-value.score-val { color: var(--gold); }
+  .stat-value.moves-val { color: var(--green); }
+  .stat-value.target-val { color: var(--blue); }
+
+  /* ─── GRID ────────────────────────────────────── */
+  .grid-wrap {
+    padding: 0 12px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .grid {
+    display: grid;
+    gap: 6px;
+    background: var(--panel);
+    padding: 12px;
+    border-radius: 22px;
+    border: 1px solid #ffffff10;
+    box-shadow: 0 8px 32px #00000066, inset 0 1px 0 #ffffff15;
+    margin: 0 auto;
+  }
+  .cell {
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    user-select: none;
+    will-change: transform;
+  }
+  .cell::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 45%;
+    border-radius: 14px 14px 50% 50% / 14px 14px 40% 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  .cell:hover { transform: scale(1.06); }
+  .cell:active { transform: scale(0.94); }
+
+  .cell.selected {
+    transform: scale(1.12) !important;
+    box-shadow: 0 0 0 3px #fff700, 0 0 20px #fff70099 !important;
+    z-index: 10;
+  }
+  .cell.hint {
+    animation: hint-pulse 0.6s ease-in-out 2;
   }
 
-  .btn-play, .btn-how {
+  /* Background colors per animal type */
+  .c0 { background: linear-gradient(135deg, #e63946, #c1121f); box-shadow: 0 5px 0 #8b0000, 0 6px 12px #e6394666; }
+  .c1 { background: linear-gradient(135deg, #f77f00, #d62828); box-shadow: 0 5px 0 #9c4000, 0 6px 12px #f77f0066; }
+  .c2 { background: linear-gradient(135deg, #f9c74f, #f3722c); box-shadow: 0 5px 0 #9a6500, 0 6px 12px #f9c74f66; }
+  .c3 { background: linear-gradient(135deg, #43aa8b, #277da1); box-shadow: 0 5px 0 #1a5c40, 0 6px 12px #43aa8b66; }
+  .c4 { background: linear-gradient(135deg, #4cc9f0, #4361ee); box-shadow: 0 5px 0 #1a3080, 0 6px 12px #4cc9f066; }
+  .c5 { background: linear-gradient(135deg, #7b2d8b, #c77dff); box-shadow: 0 5px 0 #4a1060, 0 6px 12px #7b2d8b66; }
+  .c6 { background: linear-gradient(135deg, #ff4d6d, #c9184a); box-shadow: 0 5px 0 #800020, 0 6px 12px #ff4d6d66; }
+  .c7 { background: linear-gradient(135deg, #52b788, #1b4332); box-shadow: 0 5px 0 #0a1e16, 0 6px 12px #52b78866; }
+
+  /* ─── BOOSTER BAR ─────────────────────────────── */
+  .boosters {
     width: 100%;
+    max-width: 480px;
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px 6px;
     justify-content: center;
   }
-}
+  .boost-btn {
+    flex: 1;
+    background: var(--panel);
+    border: none;
+    border-radius: 16px;
+    padding: 10px 6px;
+    color: white;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid #ffffff15;
+    box-shadow: 0 4px 0 #00000055;
+    position: relative;
+  }
+  .boost-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #00000055; }
+  .boost-btn.active { border-color: var(--gold); box-shadow: 0 0 12px var(--gold); }
+  .boost-label { font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+  .boost-count {
+    position: absolute; top: 4px; right: 6px;
+    background: var(--accent); border-radius: 50%;
+    width: 18px; height: 18px;
+    font-size: 0.65rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
 
+  /* ─── ACTION BTNS ─────────────────────────────── */
+  .action-row {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    gap: 10px;
+    padding: 8px 18px 16px;
+  }
+  .btn {
+    flex: 1;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    border: none;
+    color: white;
+    padding: 13px;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 5px 0 #6b21a8, 0 6px 16px #a855f755;
+    font-family: 'Nunito', sans-serif;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #6b21a8; }
+  .btn.secondary {
+    background: linear-gradient(135deg, #374151, #1f2937);
+    box-shadow: 0 5px 0 #111827;
+  }
+
+  /* ─── TOAST / POPUP ───────────────────────────── */
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(30,15,50,0.95);
+    border: 2px solid var(--accent);
+    border-radius: 24px;
+    padding: 28px 40px;
+    text-align: center;
+    color: white;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(.47,1.64,.41,.8), opacity 0.3s;
+    min-width: 260px;
+    box-shadow: 0 20px 60px #00000088, 0 0 40px #ff6bcb44;
+    opacity: 0;
+  }
+  .toast.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  .toast-icon { font-size: 4rem; margin-bottom: 8px; }
+  .toast-title { font-family: 'Fredoka One', cursive; font-size: 2rem; margin-bottom: 6px; }
+  .toast-msg { color: #ccc; font-size: 0.95rem; margin-bottom: 18px; }
+  .toast .btn { font-size: 1.1rem; padding: 14px 30px; }
+
+  /* ─── FLOATING SCORE ──────────────────────────── */
+  .float-score {
+    position: absolute;
+    color: var(--gold);
+    font-size: 1.4rem;
+    font-weight: 800;
+    pointer-events: none;
+    z-index: 50;
+    animation: float-up 0.9s ease-out forwards;
+    text-shadow: 0 2px 8px #000;
+  }
+  @keyframes float-up {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-70px) scale(1.2); }
+  }
+
+  /* ─── ANIMATIONS ──────────────────────────────── */
+  @keyframes pop-out {
+    0%   { transform: scale(1); opacity: 1; }
+    40%  { transform: scale(1.35); opacity: 0.8; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  @keyframes drop-in {
+    0%   { transform: translateY(-60px) scale(0.7); opacity: 0; }
+    70%  { transform: translateY(6px) scale(1.05); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-8px); }
+    40%     { transform: translateX(8px); }
+    60%     { transform: translateX(-5px); }
+    80%     { transform: translateX(5px); }
+  }
+  @keyframes hint-pulse {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.18); box-shadow: 0 0 20px #fff700; }
+  }
+  @keyframes level-up-bounce {
+    0%   { transform: scale(0.5) rotate(-10deg); }
+    60%  { transform: scale(1.1) rotate(3deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .cell.pop { animation: pop-out 0.35s ease-out forwards; }
+  .cell.drop { animation: drop-in 0.4s cubic-bezier(.47,1.64,.41,.8) forwards; }
+  .grid.shake { animation: shake 0.4s ease; }
+  .toast.level-anim .toast-icon { animation: level-up-bounce 0.6s ease; }
+
+  /* ─── COMBO BADGE ─────────────────────────────── */
+  .combo-badge {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5rem;
+    color: white;
+    text-shadow: 0 0 20px var(--accent), 0 3px 0 #000;
+    pointer-events: none;
+    z-index: 60;
+    transition: transform 0.3s cubic-bezier(.47,1.64,.41,.8), opacity 0.3s;
+    opacity: 0;
+  }
+  .combo-badge.show {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+    animation: combo-out 1.2s ease-out forwards;
+  }
+  @keyframes combo-out {
+    0%   { transform: translateX(-50%) scale(1.2); opacity: 1; }
+    60%  { transform: translateX(-50%) scale(1); opacity: 1; }
+    100% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+  }
+
+  /* ─── OVERLAY ─────────────────────────────────── */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: #00000088;
+    z-index: 90;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.show { display: block; }
+
+  /* ─── SCROLLBAR ────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ffffff33; border-radius: 3px; }
+
+  /* ─── RESPONSIVE ───────────────────────────────── */
+  @media (max-width: 400px) {
+    .topbar-logo { font-size: 1.4rem; }
+    .stat-value { font-size: 1.2rem; }
+  }
 </style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
-
-<!-- Leaves -->
-<div class="leaf" style="left:5%;animation-duration:12s;animation-delay:0s;font-size:20px;">🍃</div>
-<div class="leaf" style="left:15%;animation-duration:15s;animation-delay:2s;">🌿</div>
-<div class="leaf" style="left:30%;animation-duration:10s;animation-delay:4s;font-size:16px;">🍃</div>
-<div class="leaf" style="left:50%;animation-duration:14s;animation-delay:1s;">🌱</div>
-<div class="leaf" style="left:65%;animation-duration:11s;animation-delay:6s;font-size:18px;">🌿</div>
-<div class="leaf" style="left:80%;animation-duration:13s;animation-delay:3s;">🍃</div>
-<div class="leaf" style="left:90%;animation-duration:16s;animation-delay:5s;font-size:22px;">🌿</div>
-
-<!-- Fireflies -->
-<div class="firefly" style="left:10%;top:20%;animation-duration:4s;animation-delay:0s;"></div>
-<div class="firefly" style="left:25%;top:50%;animation-duration:5s;animation-delay:1s;"></div>
-<div class="firefly" style="left:60%;top:30%;animation-duration:3.5s;animation-delay:2s;"></div>
-<div class="firefly" style="left:75%;top:60%;animation-duration:6s;animation-delay:0.5s;"></div>
-<div class="firefly" style="left:45%;top:75%;animation-duration:4.5s;animation-delay:1.5s;"></div>
-<div class="firefly" style="left:85%;top:40%;animation-duration:5.5s;animation-delay:3s;"></div>
-
-<div id="wrapper">
-
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">👑 King of Jungle</div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#howto">How to Play</a>
-      <a href="game.html">▶ Play</a>
-    </div>
-  </nav>
-
-  <!-- HERO -->
-  <section id="hero">
-    <div class="hero-badge">🌿 Nepal Wild Kingdom 🌿</div>
-    <span class="hero-crown">👑</span>
-    <h1 class="hero-title">KING OF<br>JUNGLE</h1>
-    <p class="hero-sub">Match · Conquer · Rule</p>
-    <p class="hero-desc">
-      Enter the wild heart of Nepal's jungle. Match powerful animals,
-      chain combos and rise through 10 legendary levels to claim your throne
-      as the ultimate King of the Jungle.
-    </p>
-    <div class="btn-group">
-      <button class="btn-play" onclick="playNow()">▶ Play Now 🐯</button>
-      <a href="#howto" class="btn-how">📖 How to Play</a>
-    </div>
-
-    <div class="animals-row">
-      <div class="animal-chip"><span>🐯</span> Tiger</div>
-      <div class="animal-chip"><span>🦏</span> Rhino</div>
-      <div class="animal-chip"><span>🐘</span> Elephant</div>
-      <div class="animal-chip"><span>🦚</span> Peacock</div>
-      <div class="animal-chip"><span>🐒</span> Monkey</div>
-      <div class="animal-chip"><span>🦅</span> Eagle</div>
-    </div>
-
-    <div class="scroll-arrow">⬇</div>
-  <div id="authStatus" style="margin:14px 0;"></div>
-<div id="inviteBox" class="invite-box"><input id="inviteLink" class="invite-input" readonly><button class="btn-how" style="margin-top:8px;" onclick="copyInvite()">📨 Copy Invite Link</button></div>
-</section>
-
-  <!-- FEATURES -->
-  <section id="features">
-    <div class="reveal">
-      <p class="section-title">Game Features</p>
-      <p class="section-sub">🌿 What makes it legendary 🌿</p>
-      <div class="features-grid">
-        <div class="feature-card">
-          <span class="feature-icon">🏆</span>
-          <div class="feature-title">10 Epic Levels</div>
-          <div class="feature-desc">Each level harder than the last. Survive the jungle and prove your worth.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">👆</span>
-          <div class="feature-title">Swipe Controls</div>
-          <div class="feature-desc">Swipe up, down, left, right — fluid and natural on mobile & desktop.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🔥</span>
-          <div class="feature-title">Combo System</div>
-          <div class="feature-desc">Chain multiple matches for explosive combos and massive bonus points.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">⭐</span>
-          <div class="feature-title">Best Score</div>
-          <div class="feature-desc">Your highest score is saved. Beat your record and dominate the jungle.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🌿</span>
-          <div class="feature-title">Nepal Jungle Theme</div>
-          <div class="feature-desc">Deep greens, earthy tones and wild animals inspired by Nepal's Chitwan.</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🎁</span>
-          <div class="feature-title">Bonus Moves</div>
-          <div class="feature-desc">Complete levels with spare moves for extra bonus points. Be efficient!</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider">🌿 · 🐯 · 🦏 · 🐘 · 🌿</div>
-
-  <!-- ANIMALS -->
-  <section id="animals">
-    <div class="reveal">
-      <p class="section-title">Nepal's Wild Warriors</p>
-      <p class="section-sub">🌿 Match them to win 🌿</p>
-      <div class="animals-grid">
-        <div class="animal-card">
-          <span class="icon">🐯</span>
-          <div class="name">Bengal Tiger</div>
-          <div class="bio">Chitwan's apex predator. Rare & powerful.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🦏</span>
-          <div class="name">One-Horn Rhino</div>
-          <div class="bio">Nepal's pride. Protected in Chitwan.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🐘</span>
-          <div class="name">Asian Elephant</div>
-          <div class="bio">Gentle giant of the Terai forests.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🦚</span>
-          <div class="name">Peacock</div>
-          <div class="bio">National bird of Nepal's neighbour. Dazzling colours.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🐒</span>
-          <div class="name">Langur Monkey</div>
-          <div class="bio">Swings freely through Nepal's jungle canopy.</div>
-        </div>
-        <div class="animal-card">
-          <span class="icon">🦅</span>
-          <div class="name">Himalayan Eagle</div>
-          <div class="bio">Master of Nepal's skies. Soars the Himalayas.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider">🌿 · 🦅 · 🐒 · 🦚 · 🌿</div>
-
-  <!-- HOW TO PLAY -->
-  <section id="howto">
-    <div class="reveal">
-      <p class="section-title">How to Play</p>
-      <p class="section-sub">🌿 Master the jungle 🌿</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <h3>👆 Tap or Swipe an Animal</h3>
-            <p>Touch any animal tile and swipe in any direction — up, down, left or right — to move it.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <h3>🐯 Match 3 or More</h3>
-            <p>Line up 3 or more of the same animal in a row or column to eliminate them and score points.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <h3>🔥 Chain Combos</h3>
-            <p>When matches create new matches automatically, you get a combo multiplier for massive points!</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <h3>🏆 Reach the Target</h3>
-            <p>Each level has a score target. Reach it before your moves run out to advance to the next level.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">5</div>
-          <div class="step-content">
-            <h3>👑 Become the King</h3>
-            <p>Complete all 10 levels and claim your throne as the ultimate King of the Jungle!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA BOTTOM -->
-  <section id="cta">
-    <div class="reveal cta-box">
-      <h2>Ready to Rule? 👑</h2>
-      <p>The jungle awaits your command. Match the animals, master the levels, and claim your throne!</p>
-      <button class="btn-play" onclick="playNow()">▶ Start Playing 🐯</button>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">👑 King of Jungle</div>
-    <div class="footer-animals">🐯 🦏 🐘 🦚 🐒 🦅</div>
-    <p>Inspired by the wild beauty of Nepal's jungle 🌿</p>
-    <p style="margin-top:6px;">Chitwan · Bardiya · Himalaya</p>
-    <p style="margin-top:14px; color:#0d2a0d;">Made with ❤️ for Nepal's wildlife</p>
-  </footer>
-
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">🐾 Animal<span>Boom</span></div>
+  <div class="lives" id="livesEl"></div>
 </div>
 
-<script>
-// ── CANVAS BACKGROUND (animated jungle mist) ──
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
-let W, H, particles = [];
-
-function resize(){
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
-
-// Mist particles
-for(let i=0;i<60;i++){
-  particles.push({
-    x: Math.random()*2000,
-    y: Math.random()*1000,
-    r: Math.random()*120+40,
-    dx: (Math.random()-0.5)*0.2,
-    dy: (Math.random()-0.5)*0.1,
-    a: Math.random()*0.04+0.01
-  });
-}
-
-function drawBG(){
-  ctx.clearRect(0,0,W,H);
-  // Deep jungle gradient
-  const bg = ctx.createRadialGradient(W/2,H*0.3,0, W/2,H*0.3, W*0.8);
-  bg.addColorStop(0,'#0a2a0a');
-  bg.addColorStop(1,'#010801');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-
-  // Mist blobs
-  particles.forEach(p=>{
-    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-    g.addColorStop(0,`rgba(20,80,20,${p.a})`);
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x<-p.r) p.x=W+p.r;
-    if(p.x>W+p.r) p.x=-p.r;
-    if(p.y<-p.r) p.y=H+p.r;
-    if(p.y>H+p.r) p.y=-p.r;
-  });
-  requestAnimationFrame(drawBG);
-}
-drawBG();
-
-// ── SCROLL REVEAL ──
-const reveals = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.classList.add('visible');
-      // Stagger children
-      e.target.querySelectorAll('.feature-card, .animal-card, .step').forEach((el,i)=>{
-        el.style.transitionDelay = (i*0.1)+'s';
-        el.style.opacity='0';
-        el.style.transform='translateY(20px)';
-        setTimeout(()=>{
-          el.style.opacity='1';
-          el.style.transform='translateY(0)';
-          el.style.transition='opacity 0.5s ease, transform 0.5s ease, border 0.3s, box-shadow 0.3s';
-        }, i*100+200);
-      });
-    }
-  });
-},{threshold:0.1});
-reveals.forEach(r=>observer.observe(r));
-
-// ── SMOOTH SCROLL ──
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    e.preventDefault();
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t) t.scrollIntoView({behavior:'smooth'});
-  });
-});
-</script>
-
-<div id="authModal" class="auth-overlay" onclick="if(event.target===this)closeAuthModal()">
-  <div class="auth-card">
-    <h3 style="color:#f0c040;">Login to Enter Jungle</h3>
-    <p style="color:#6dbf67;margin-top:8px;">Choose your play mode</p>
-    <div class="auth-actions">
-      <button class="btn-play" onclick="loginGoogle()">Continue with Google</button>
-      <button class="btn-how" onclick="loginFacebook()">Continue with Facebook</button>
-      <button class="btn-how" onclick="loginGuest()">Play as Guest</button>
-    </div>
+<!-- LEVEL PROGRESS BAR -->
+<div class="level-bar-wrap">
+  <div class="level-row">
+    <span>Level <b id="levelNum">1</b></span>
+    <span>Score <b id="progressScore">0</b> / <b id="progressTarget">500</b></span>
+  </div>
+  <div class="progress-bg">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
   </div>
 </div>
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, signInAnonymously, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js';
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyDfsG48zCGPBREzmIe_wy7aaZxrZ0BNq7Q',
-  authDomain: 'king-of-jungle-77f06.firebaseapp.com',
-  projectId: 'king-of-jungle-77f06',
-  storageBucket: 'king-of-jungle-77f06.firebasestorage.app',
-  messagingSenderId: '993583513273',
-  appId: '1:993583513273:web:72b7f0ed9991a8f63ba568',
-  measurementId: 'G-QCTYFH80KH'
-};
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-label">Score</div>
+    <div class="stat-value score-val" id="scoreEl">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Moves</div>
+    <div class="stat-value moves-val" id="movesEl">30</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Target</div>
+    <div class="stat-value target-val" id="targetEl">500</div>
+  </div>
+</div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const functions = getFunctions(app);
-const initProfile = httpsCallable(functions, 'createOrInitUserProfile');
-const genReferral = httpsCallable(functions, 'generateReferralCode');
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="grid" id="gridEl"></div>
+</div>
 
-const authModal = document.getElementById('authModal');
-const authStatus = document.getElementById('authStatus');
-const inviteBox = document.getElementById('inviteBox');
-const AUDIO_PREF_KEY = 'koj_audio_enabled';
+<!-- BOOSTERS -->
+<div class="boosters">
+  <button class="boost-btn" id="boostHammer" onclick="activateBooster('hammer')">
+    🔨<div class="boost-label">Hammer</div>
+    <div class="boost-count" id="hammerCount">3</div>
+  </button>
+  <button class="boost-btn" id="boostBomb" onclick="activateBooster('bomb')">
+    💣<div class="boost-label">Bomb</div>
+    <div class="boost-count" id="bombCount">2</div>
+  </button>
+  <button class="boost-btn" id="boostLightning" onclick="activateBooster('lightning')">
+    ⚡<div class="boost-label">Lightning</div>
+    <div class="boost-count" id="lightningCount">2</div>
+  </button>
+  <button class="boost-btn" id="boostShuffle" onclick="activateBooster('shuffle')">
+    🔀<div class="boost-label">Shuffle</div>
+    <div class="boost-count" id="shuffleCount">2</div>
+  </button>
+</div>
 
-class HomeJungleAudio {
-  constructor() { this.ctx = null; this.master = null; this.bus = null; this.loop = null; this.enabled = localStorage.getItem(AUDIO_PREF_KEY) === '1'; }
-  build() {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx || this.ctx) return;
-    this.ctx = new Ctx();
-    this.master = this.ctx.createGain(); this.master.gain.value = 0.0001; this.master.connect(this.ctx.destination);
-    this.bus = this.ctx.createGain(); this.bus.gain.value = 0.22; this.bus.connect(this.master);
-  }
-  unlock() {
-    this.build();
-    if (!this.ctx) return;
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-    if (this.enabled) this.start();
-  }
-  tone(freq, duration = 0.4, volume = 0.03) {
-    if (!this.ctx) return;
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, now);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(volume, now + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-    osc.connect(gain); gain.connect(this.bus); osc.start(now); osc.stop(now + duration + 0.04);
-  }
-  start() {
-    if (!this.ctx || !this.enabled) return;
-    this.master.gain.setTargetAtTime(0.35, this.ctx.currentTime, 0.2);
-    if (this.loop) return;
-    const notes = [261.63, 329.63, 392, 349.23];
-    let i = 0;
-    this.loop = setInterval(() => {
-      if (!this.enabled || !this.ctx) return;
-      this.tone(notes[i++ % notes.length], 0.45, 0.03);
-    }, 900);
-  }
-  stop() { if (this.ctx) this.master.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.08); }
-  toggle() {
-    this.enabled = !this.enabled;
-    localStorage.setItem(AUDIO_PREF_KEY, this.enabled ? '1' : '0');
-    this.unlock();
-    if (this.enabled) this.start(); else this.stop();
-    this.updateUi();
-  }
-  updateUi() {
-    const btn = document.getElementById('homeAudioBtn');
-    if (!btn) return;
-    btn.textContent = this.enabled ? '🔊 Home Audio On' : '🔇 Home Audio Off';
-    btn.classList.toggle('muted', !this.enabled);
-  }
-}
-const homeAudio = new HomeJungleAudio();
+<!-- ACTION BUTTONS -->
+<div class="action-row">
+  <button class="btn secondary" onclick="restartLevel()">🔄 Restart</button>
+  <button class="btn" onclick="nextLevelBtn()">Next Level ▶</button>
+</div>
 
-function openAuthModal(){ authModal.classList.add('active'); }
-function closeAuthModal(){ authModal.classList.remove('active'); }
+<!-- OVERLAY + TOAST -->
+<div class="overlay" id="overlay"></div>
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon">🎉</div>
+  <div class="toast-title" id="toastTitle">Level Clear!</div>
+  <div class="toast-msg" id="toastMsg">Awesome work!</div>
+  <button class="btn" id="toastBtn" onclick="closeToast()">Continue</button>
+</div>
 
-window.openAuthModal = openAuthModal;
-window.closeAuthModal = closeAuthModal;
+<!-- COMBO BADGE -->
+<div class="combo-badge" id="comboBadge">🔥 COMBO x2!</div>
 
-async function loginWith(providerName){
-  try {
-    const provider = providerName === 'google' ? new GoogleAuthProvider() : new FacebookAuthProvider();
-    await signInWithPopup(auth, provider);
-    closeAuthModal();
-  } catch (e) {
-    alert(`Login failed: ${e.message}`);
-  }
+<script>
+// ═══════════════════════════════════════════════════════════
+//  ANIMAL BOOM  –  Match-3 Puzzle Game
+//  Animals: 8 types, background per type
+// ═══════════════════════════════════════════════════════════
+
+// ── ANIMALS (8 types) ──────────────────────────────────────
+const ANIMALS = ['🦁','🐯','🐼','🦊','🐸','🐨','🐵','🐺'];
+// Color class per animal index
+const COLOR_CLASS = ['c0','c1','c2','c3','c4','c5','c6','c7'];
+
+// ── GAME CONFIG ────────────────────────────────────────────
+const LEVELS = [];
+for (let i = 1; i <= 100; i++) {
+  let rows, cols, moves, target, types;
+  if      (i <= 10)  { rows=5; cols=5; moves=30; target=500  + i*80;  types=4; }
+  else if (i <= 20)  { rows=5; cols=6; moves=28; target=1200 + i*100; types=4; }
+  else if (i <= 30)  { rows=6; cols=6; moves=26; target=2500 + i*120; types=5; }
+  else if (i <= 40)  { rows=6; cols=7; moves=24; target=4500 + i*150; types=5; }
+  else if (i <= 50)  { rows=7; cols=7; moves=22; target=7000 + i*180; types=6; }
+  else if (i <= 60)  { rows=7; cols=8; moves=22; target=10000+i*200; types=6; }
+  else if (i <= 70)  { rows=8; cols=8; moves=20; target=13000+i*220; types=7; }
+  else if (i <= 85)  { rows=8; cols=8; moves=18; target=17000+i*250; types=7; }
+  else               { rows=8; cols=8; moves=16; target=22000+i*300; types=8; }
+  LEVELS.push({ rows, cols, moves, target, types });
 }
 
-window.loginGoogle = () => loginWith('google');
-window.loginFacebook = () => loginWith('facebook');
-window.loginGuest = async () => {
-  try {
-    await signInAnonymously(auth);
-    closeAuthModal();
-  } catch (e) {
-    alert(`Guest login failed: ${e.message}`);
+// ── GAME STATE ─────────────────────────────────────────────
+let state = {
+  level:   1,
+  score:   0,
+  moves:   0,
+  target:  0,
+  lives:   5,
+  rows:    5,
+  cols:    5,
+  types:   4,
+  board:   [],
+  selected: null,    // {r, c} or null
+  processing: false,
+  activeBooster: null,
+  boosters: { hammer: 3, bomb: 2, lightning: 2, shuffle: 2 },
+  combo: 0,
+};
+
+// ── CELL SIZE (responsive) ────────────────────────────────
+function cellSize() {
+  const maxW = Math.min(window.innerWidth - 60, 456);
+  const { cols } = state;
+  return Math.floor((maxW - 12*2 - 6*(cols-1)) / cols);
+}
+
+// ── BOARD INIT ────────────────────────────────────────────
+function randAnimal() {
+  return Math.floor(Math.random() * state.types);
+}
+
+function createBoard() {
+  let tries = 0;
+  do {
+    state.board = Array.from({length: state.rows}, () =>
+      Array.from({length: state.cols}, () => randAnimal())
+    );
+    tries++;
+  } while (findAllMatches().size > 0 && tries < 50);
+}
+
+// ── MATCH FINDING ─────────────────────────────────────────
+function findAllMatches() {
+  const { board, rows, cols } = state;
+  const matched = new Set();
+  // Horizontal
+  for (let r = 0; r < rows; r++) {
+    let c = 0;
+    while (c < cols) {
+      const v = board[r][c];
+      if (v === null) { c++; continue; }
+      let len = 1;
+      while (c+len < cols && board[r][c+len] === v) len++;
+      if (len >= 3) for (let i=0;i<len;i++) matched.add(`${r},${c+i}`);
+      c += len;
+    }
   }
-};
-window.logoutUser = async () => signOut(auth);
+  // Vertical
+  for (let c = 0; c < cols; c++) {
+    let r = 0;
+    while (r < rows) {
+      const v = board[r][c];
+      if (v === null) { r++; continue; }
+      let len = 1;
+      while (r+len < rows && board[r+len][c] === v) len++;
+      if (len >= 3) for (let i=0;i<len;i++) matched.add(`${r+i},${c}`);
+      r += len;
+    }
+  }
+  return matched;
+}
 
-window.copyInvite = async () => {
-  const text = document.getElementById('inviteLink').value;
-  await navigator.clipboard.writeText(text);
-  alert('Invite link copied!');
-};
+function parseCoord(s) { const [r,c] = s.split(',').map(Number); return {r,c}; }
 
-window.playNow = () => {
-  const user = auth.currentUser;
-  if (!user) return openAuthModal();
-  location.href = `game.html?uid=${encodeURIComponent(user.uid)}`;
-};
+// ── GRAVITY + REFILL ──────────────────────────────────────
+function applyGravity() {
+  const { board, rows, cols } = state;
+  for (let c = 0; c < cols; c++) {
+    let empty = rows - 1;
+    for (let r = rows-1; r >= 0; r--) {
+      if (board[r][c] !== null) {
+        if (r !== empty) { board[empty][c] = board[r][c]; board[r][c] = null; }
+        empty--;
+      }
+    }
+    for (let r = empty; r >= 0; r--) board[r][c] = randAnimal();
+  }
+}
 
-document.addEventListener('pointerdown', () => homeAudio.unlock(), { once:true });
-document.addEventListener('keydown', () => homeAudio.unlock(), { once:true });
+// ── RESOLVE MATCHES ────────────────────────────────────────
+async function resolveMatches(triggeredByMove = false) {
+  let totalCleared = 0;
+  let cascadeCount = 0;
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    authStatus.innerHTML = '<button class="btn-play" onclick="openAuthModal()">🔐 Login to Play</button>';
-    inviteBox.style.display = 'none';
+  while (true) {
+    const matched = findAllMatches();
+    if (matched.size === 0) break;
+
+    cascadeCount++;
+    totalCleared += matched.size;
+
+    // Show combo badge if cascade
+    if (cascadeCount > 1) showCombo(cascadeCount);
+
+    // Animate pop
+    await animatePop([...matched].map(parseCoord));
+
+    // Score: base 10 × multiplier for cascade
+    const gain = matched.size * 10 * cascadeCount;
+    state.score += gain;
+
+    // Show floating score
+    const coords = [...matched].map(parseCoord);
+    const midCoord = coords[Math.floor(coords.length/2)];
+    showFloatScore(`+${gain}`, midCoord.r, midCoord.c);
+
+    // Clear matched cells
+    matched.forEach(s => {
+      const {r,c} = parseCoord(s);
+      state.board[r][c] = null;
+    });
+
+    applyGravity();
+    renderBoard();
+    await sleep(220);
+  }
+
+  updateUI();
+  checkWinLose();
+}
+
+// ── SWAP ──────────────────────────────────────────────────
+function swap(r1,c1,r2,c2) {
+  const tmp = state.board[r1][c1];
+  state.board[r1][c1] = state.board[r2][c2];
+  state.board[r2][c2] = tmp;
+}
+
+async function attemptSwap(r1,c1,r2,c2) {
+  if (state.processing) return;
+  state.processing = true;
+  clearSelection();
+
+  swap(r1,c1,r2,c2);
+  const matched = findAllMatches();
+
+  if (matched.size > 0) {
+    state.moves--;
+    state.combo = 0;
+    await resolveMatches(true);
+  } else {
+    // Swap back with shake animation
+    swap(r1,c1,r2,c2);
+    renderBoard();
+    document.getElementById('gridEl').classList.add('shake');
+    setTimeout(() => document.getElementById('gridEl').classList.remove('shake'), 400);
+  }
+
+  state.processing = false;
+  renderBoard();
+  updateUI();
+}
+
+// ── CELL CLICK ────────────────────────────────────────────
+function cellClicked(r, c) {
+  if (state.processing) return;
+
+  // Booster mode
+  if (state.activeBooster) {
+    applyBoosterToCell(r, c);
     return;
   }
 
-  await initProfile();
-  authStatus.innerHTML = `
-    <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;">
-      <span style="color:#6dbf67;">Logged in as ${user.isAnonymous ? 'Guest' : (user.displayName || user.email || 'Player')}</span>
-      <button class="btn-how" onclick="logoutUser()">Logout</button>
-      <button class="btn-play" onclick="playNow()">▶ Continue</button>
-    </div>`;
+  const sel = state.selected;
 
-  try {
-    const { data } = await genReferral();
-    const link = `${location.origin}${location.pathname.replace('index.html','')}index.html?ref=${encodeURIComponent(data.code)}`;
-    document.getElementById('inviteLink').value = link;
-    inviteBox.style.display = 'block';
-  } catch {}
-});
+  if (!sel) {
+    state.selected = {r, c};
+    renderBoard();
+    return;
+  }
 
-document.body.insertAdjacentHTML('beforeend', '<button id="homeAudioBtn" class="muted" type="button">🔇 Home Audio Off</button>');
-document.getElementById('homeAudioBtn').addEventListener('click', () => homeAudio.toggle());
-homeAudio.updateUi();
-if (homeAudio.enabled) homeAudio.unlock();
+  if (sel.r === r && sel.c === c) {
+    clearSelection();
+    renderBoard();
+    return;
+  }
+
+  const dr = Math.abs(sel.r - r), dc = Math.abs(sel.c - c);
+  if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+    attemptSwap(sel.r, sel.c, r, c);
+  } else {
+    state.selected = {r, c};
+    renderBoard();
+  }
+}
+
+function clearSelection() {
+  state.selected = null;
+}
+
+// ── BOOSTERS ─────────────────────────────────────────────
+function activateBooster(type) {
+  if (state.boosters[type] <= 0) return;
+  if (state.activeBooster === type) {
+    state.activeBooster = null;
+    updateBoosterUI();
+    return;
+  }
+  state.activeBooster = type;
+  clearSelection();
+  renderBoard();
+  updateBoosterUI();
+}
+
+async function applyBoosterToCell(r, c) {
+  if (state.processing) return;
+  const type = state.activeBooster;
+  state.processing = true;
+  state.boosters[type]--;
+  state.activeBooster = null;
+  updateBoosterUI();
+
+  const { board, rows, cols } = state;
+
+  if (type === 'hammer') {
+    // Remove one cell
+    state.score += 30;
+    showFloatScore('+30', r, c);
+    board[r][c] = null;
+    applyGravity();
+    renderBoard();
+    await sleep(200);
+    await resolveMatches();
+  }
+  else if (type === 'bomb') {
+    // Remove 3×3 area
+    let cleared = 0;
+    for (let dr=-1; dr<=1; dr++) for (let dc=-1; dc<=1; dc++) {
+      const nr=r+dr, nc=c+dc;
+      if (nr>=0&&nr<rows&&nc>=0&&nc<cols&&board[nr][nc]!==null) {
+        board[nr][nc] = null; cleared++;
+      }
+    }
+    state.score += cleared * 15;
+    showFloatScore(`+${cleared*15}`, r, c);
+    applyGravity();
+    renderBoard();
+    await sleep(300);
+    await resolveMatches();
+  }
+  else if (type === 'lightning') {
+    // Remove whole row + col
+    let cleared = 0;
+    for (let cc=0; cc<cols; cc++) if(board[r][cc]!==null){ board[r][cc]=null; cleared++; }
+    for (let rr=0; rr<rows; rr++) if(board[rr][c]!==null){ board[rr][c]=null; cleared++; }
+    state.score += cleared * 12;
+    showFloatScore(`+${cleared*12}`, r, c);
+    applyGravity();
+    renderBoard();
+    await sleep(300);
+    await resolveMatches();
+  }
+  else if (type === 'shuffle') {
+    // Reshuffle board
+    createBoard();
+    renderBoard();
+    state.score += 20;
+  }
+
+  updateUI();
+  state.processing = false;
+}
+
+// ── WIN / LOSE ────────────────────────────────────────────
+function checkWinLose() {
+  if (state.score >= state.target) {
+    setTimeout(() => showToast('win'), 300);
+    return;
+  }
+  if (state.moves <= 0) {
+    if (state.score >= state.target) {
+      setTimeout(() => showToast('win'), 300);
+    } else {
+      state.lives--;
+      if (state.lives <= 0) state.lives = 0;
+      setTimeout(() => showToast('lose'), 300);
+    }
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderBoard() {
+  const grid = document.getElementById('gridEl');
+  const { board, rows, cols, selected } = state;
+  const size = cellSize();
+
+  grid.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
+  grid.innerHTML = '';
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      const v = board[r][c];
+      cell.className = `cell ${COLOR_CLASS[v]}`;
+      cell.style.width = cell.style.height = `${size}px`;
+      cell.style.fontSize = `${Math.floor(size * 0.55)}px`;
+      cell.textContent = v !== null ? ANIMALS[v] : '';
+      cell.dataset.r = r; cell.dataset.c = c;
+
+      if (selected && selected.r === r && selected.c === c) {
+        cell.classList.add('selected');
+      }
+      cell.addEventListener('click', () => cellClicked(r, c));
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ── UI UPDATES ─────────────────────────────────────────────
+function updateUI() {
+  const { score, moves, target, level, lives } = state;
+  document.getElementById('scoreEl').textContent = score.toLocaleString();
+  document.getElementById('movesEl').textContent = moves;
+  document.getElementById('targetEl').textContent = target.toLocaleString();
+  document.getElementById('levelNum').textContent = level;
+  document.getElementById('progressScore').textContent = score.toLocaleString();
+  document.getElementById('progressTarget').textContent = target.toLocaleString();
+
+  const pct = Math.min(100, Math.round(score / target * 100));
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // Lives
+  const livesEl = document.getElementById('livesEl');
+  livesEl.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const h = document.createElement('span');
+    h.className = 'heart' + (i >= lives ? ' lost' : '');
+    h.textContent = '❤️';
+    livesEl.appendChild(h);
+  }
+
+  // Moves color warning
+  const movesEl = document.getElementById('movesEl');
+  movesEl.style.color = moves <= 5 ? '#ff5555' : moves <= 10 ? '#ffb86c' : '#50fa7b';
+}
+
+function updateBoosterUI() {
+  ['hammer','bomb','lightning','shuffle'].forEach(t => {
+    const btn = document.getElementById('boost' + t.charAt(0).toUpperCase() + t.slice(1));
+    const cnt = document.getElementById(t + 'Count');
+    if (cnt) cnt.textContent = state.boosters[t];
+    if (btn) {
+      btn.classList.toggle('active', state.activeBooster === t);
+      btn.style.opacity = state.boosters[t] <= 0 ? '0.4' : '1';
+    }
+  });
+}
+
+// ── ANIMATIONS ────────────────────────────────────────────
+async function animatePop(coords) {
+  coords.forEach(({r,c}) => {
+    const el = document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+    if (el) el.classList.add('pop');
+  });
+  await sleep(320);
+}
+
+function showFloatScore(text, r, c) {
+  const grid = document.getElementById('gridEl');
+  const rect = grid.getBoundingClientRect();
+  const size = cellSize();
+  const gap = 6, pad = 12;
+  const x = rect.left + pad + c * (size + gap) + size / 2;
+  const y = rect.top + pad + r * (size + gap);
+
+  const el = document.createElement('div');
+  el.className = 'float-score';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+function showCombo(n) {
+  const el = document.getElementById('comboBadge');
+  el.textContent = `🔥 COMBO ×${n}!`;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1300);
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(type) {
+  const icon   = document.getElementById('toastIcon');
+  const title  = document.getElementById('toastTitle');
+  const msg    = document.getElementById('toastMsg');
+  const btn    = document.getElementById('toastBtn');
+  const toast  = document.getElementById('toast');
+
+  if (type === 'win') {
+    const stars = state.score >= state.target * 1.5 ? '⭐⭐⭐' :
+                  state.score >= state.target * 1.2 ? '⭐⭐' : '⭐';
+    icon.textContent = '🏆';
+    title.textContent = 'Level Clear! ' + stars;
+    msg.textContent = `Score: ${state.score.toLocaleString()} / Target: ${state.target.toLocaleString()}`;
+    btn.textContent = 'Next Level ▶';
+    btn.onclick = () => { closeToast(); startLevel(state.level + 1); };
+    toast.classList.add('level-anim');
+  } else {
+    icon.textContent = state.lives <= 0 ? '💔' : '😢';
+    title.textContent = state.lives <= 0 ? 'Game Over!' : 'Level Failed';
+    msg.textContent = state.lives <= 0
+      ? 'All lives lost. Start again!'
+      : `Score: ${state.score.toLocaleString()} — Need ${state.target.toLocaleString()}`;
+    btn.textContent = state.lives <= 0 ? 'Restart Game' : 'Try Again';
+    btn.onclick = () => {
+      closeToast();
+      if (state.lives <= 0) { state.lives = 5; startLevel(1); }
+      else restartLevel();
+    };
+    toast.classList.remove('level-anim');
+  }
+
+  document.getElementById('overlay').classList.add('show');
+  toast.classList.add('show');
+}
+
+function closeToast() {
+  document.getElementById('toast').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── LEVEL START ────────────────────────────────────────────
+function startLevel(lvl) {
+  if (lvl > 100) lvl = 100;
+  const cfg = LEVELS[lvl - 1];
+  state.level    = lvl;
+  state.moves    = cfg.moves;
+  state.target   = cfg.target;
+  state.rows     = cfg.rows;
+  state.cols     = cfg.cols;
+  state.types    = cfg.types;
+  state.score    = 0;
+  state.selected = null;
+  state.processing = false;
+  state.activeBooster = null;
+
+  createBoard();
+  renderBoard();
+  updateUI();
+  updateBoosterUI();
+}
+
+function restartLevel() {
+  closeToast();
+  startLevel(state.level);
+}
+
+function nextLevelBtn() {
+  if (state.level < 100) startLevel(state.level + 1);
+  else showToast('win');
+}
+
+// ── UTIL ──────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Resize handler
+window.addEventListener('resize', () => renderBoard());
+
+// ── START ─────────────────────────────────────────────────
+startLevel(1);
 </script>
-
 </body>
 </html>
