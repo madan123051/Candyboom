@@ -330,6 +330,123 @@ h1.hero-title {
 .animal-card .bio { color:#3a6a3a; font-size:11px; margin-top:4px; line-height:1.5; }
 
 /* ── HOW TO PLAY ── */
+/* Power Animals Section */
+#power-animals {
+  padding: 60px 20px;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(7,33,13,0.6) 100%);
+}
+.power-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+.power-card {
+  background: rgba(7,33,13,0.85);
+  border-radius: 20px;
+  padding: 24px 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(240,192,64,0.15);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.power-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+}
+.power-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.power-card.lion::before   { background: radial-gradient(circle at 50% 0%, rgba(255,200,50,0.18) 0%, transparent 70%); }
+.power-card.giraffe::before{ background: radial-gradient(circle at 50% 0%, rgba(0,220,255,0.15) 0%, transparent 70%); }
+.power-card.rhino::before  { background: radial-gradient(circle at 50% 0%, rgba(100,160,255,0.18) 0%, transparent 70%); }
+.power-card.leopard::before{ background: radial-gradient(circle at 50% 0%, rgba(200,80,255,0.18) 0%, transparent 70%); }
+.power-card:hover::before  { opacity: 1; }
+.power-tile-demo {
+  width: 70px;
+  height: 70px;
+  border-radius: 16px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4), inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 3px 8px rgba(255,255,255,0.15);
+  animation: pwDemoGlow 2.5s ease-in-out infinite alternate;
+}
+.power-tile-demo.lion    { background: linear-gradient(135deg,#ffd700,#ff8c00); box-shadow: 0 0 20px rgba(255,180,0,0.6), 0 6px 18px rgba(0,0,0,0.4); }
+.power-tile-demo.giraffe { background: linear-gradient(135deg,#00d4ff,#0066ff); box-shadow: 0 0 20px rgba(0,180,255,0.6), 0 6px 18px rgba(0,0,0,0.4); }
+.power-tile-demo.rhino   { background: linear-gradient(135deg,#a0c4ff,#4488ff); box-shadow: 0 0 20px rgba(100,160,255,0.6), 0 6px 18px rgba(0,0,0,0.4); }
+.power-tile-demo.leopard { background: linear-gradient(135deg,#cc44ff,#8800ff); box-shadow: 0 0 20px rgba(180,80,255,0.6), 0 6px 18px rgba(0,0,0,0.4); }
+@keyframes pwDemoGlow {
+  from { filter: brightness(1); }
+  to   { filter: brightness(1.25) saturate(1.3); }
+}
+.power-stars {
+  position: absolute;
+  inset: -4px;
+  border-radius: 18px;
+  pointer-events: none;
+  animation: pwStarSpin 3s linear infinite;
+  background: conic-gradient(transparent 60%, rgba(255,255,255,0.6) 70%, transparent 80%);
+  border: 2px solid transparent;
+}
+@keyframes pwStarSpin { to { transform: rotate(360deg); } }
+.power-card .power-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f0c040;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.power-card .power-trigger {
+  font-size: 12px;
+  color: #5ba65b;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.power-card .power-effect {
+  font-size: 13px;
+  color: #a0c8a0;
+  line-height: 1.6;
+}
+.power-card .power-badge {
+  display: inline-block;
+  background: rgba(240,192,64,0.15);
+  border: 1px solid rgba(240,192,64,0.3);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #f0c040;
+  margin-top: 10px;
+  font-weight: 700;
+}
+.combo-banner-demo {
+  margin: 30px auto 0;
+  max-width: 480px;
+  background: linear-gradient(90deg, #ffd700, #ff6600, #cc00ff, #ffd700);
+  background-size: 200% auto;
+  animation: comboBannerAnim 3s linear infinite;
+  border-radius: 14px;
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  letter-spacing: 1px;
+}
+@keyframes comboBannerAnim { to { background-position: 200% center; } }
+
 #howto {
   width:100%; padding:80px 20px;
   max-width:700px; margin:0 auto;
@@ -551,9 +668,9 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
           <div class="feature-desc">Deep greens, earthy tones and wild animals inspired by Nepal's Chitwan.</div>
         </div>
         <div class="feature-card">
-          <span class="feature-icon">🔮</span>
-          <div class="feature-title">Power Boosters</div>
-          <div class="feature-desc">Use Hammer, Bomb, Lightning and Shuffle boosters to conquer tough levels.</div>
+          <span class="feature-icon">⚡</span>
+          <div class="feature-title">Power Animal Tiles</div>
+          <div class="feature-desc">Match 4-5 animals in special shapes to unleash Lion, Giraffe, Rhino & Leopard powers — each with devastating effects!</div>
         </div>
       </div>
     </div>
@@ -612,6 +729,80 @@ footer p { color:#1a4a1a; font-size:12px; line-height:1.8; }
   </section>
 
   <div class="divider">🌿 · 🦅 · 🐒 · 🦚 · 🌿</div>
+
+  <!-- POWER ANIMALS -->
+  <section id="power-animals">
+    <div class="reveal">
+      <p class="section-title">⚡ Power Animal Tiles</p>
+      <p class="section-sub">🔥 Special matches unleash legendary beasts 🔥</p>
+      <div class="power-grid">
+
+        <!-- LION -->
+        <div class="power-card lion reveal">
+          <div class="power-tile-demo lion">
+            <div class="power-stars"></div>
+            🦁
+          </div>
+          <div class="power-name">🦁 Lion</div>
+          <div class="power-trigger">⚡ Match 5 in a Line</div>
+          <div class="power-effect">
+            Swap with any animal tile — the Lion <strong>devours every tile of that animal type</strong> on the entire board. Monkeys? Gone. Eagles? Wiped out.
+          </div>
+          <span class="power-badge">🌍 Whole Board Clear</span>
+        </div>
+
+        <!-- GIRAFFE -->
+        <div class="power-card giraffe reveal">
+          <div class="power-tile-demo giraffe">
+            <div class="power-stars"></div>
+            🦒
+          </div>
+          <div class="power-name">🦒 Giraffe</div>
+          <div class="power-trigger">⚡ Match 4 in a Line</div>
+          <div class="power-effect">
+            Horizontal line → clears the <strong>entire row</strong>.<br>Vertical line → clears the <strong>entire column</strong>. Full electric sweep!
+          </div>
+          <span class="power-badge">↔ Full Row / Column</span>
+        </div>
+
+        <!-- RHINO -->
+        <div class="power-card rhino reveal">
+          <div class="power-tile-demo rhino">
+            <div class="power-stars"></div>
+            🦏
+          </div>
+          <div class="power-name">🦏 Rhino</div>
+          <div class="power-trigger">⚡ L or T Shape Match</div>
+          <div class="power-effect">
+            Charges in a <strong>+ cross pattern</strong> — 3 tiles in all 4 directions (up, down, left, right). Nothing survives the charge.
+          </div>
+          <span class="power-badge">➕ Cross Blast</span>
+        </div>
+
+        <!-- LEOPARD -->
+        <div class="power-card leopard reveal">
+          <div class="power-tile-demo leopard">
+            <div class="power-stars"></div>
+            🐆
+          </div>
+          <div class="power-name">🐆 Leopard</div>
+          <div class="power-trigger">⚡ 2×2 Square Match</div>
+          <div class="power-effect">
+            The stealthiest power — swap it to <strong>clear the full row AND full column</strong> simultaneously. A giant cross of destruction!
+          </div>
+          <span class="power-badge">✚ Row + Column Combo</span>
+        </div>
+
+      </div>
+
+      <!-- Double power combo banner -->
+      <div class="combo-banner-demo reveal">
+        ⚡ DOUBLE POWER COMBO — Crash 2 Power Tiles Together for 50% Bonus Score! ⚡
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">⚡ · 🦁 · 🦒 · 🦏 · 🐆 · ⚡</div>
 
   <!-- HOW TO PLAY -->
   <section id="howto">
