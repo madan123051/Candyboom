@@ -872,11 +872,11 @@ h1 {
   0%,100%{box-shadow:0 0 8px 3px var(--pw-color,#FFD700),0 5px 0 #0007;transform:scale(1);}
   50%    {box-shadow:0 0 20px 8px var(--pw-color,#FFD700),0 5px 0 #0007;transform:scale(1.08);}
 }
-.pw-emoji{font-size:1.55em;line-height:1.1;filter:drop-shadow(0 0 6px var(--pw-color,#FFD700));display:block;}
+.pw-emoji{font-size:2.4em;line-height:1;filter:drop-shadow(0 0 10px var(--pw-color,#FFD700));display:block;width:100%;text-align:center;margin-bottom:-2px;}
 .pw-label{
-  font-size:0.40em;font-weight:900;letter-spacing:-0.3px;
+  font-size:0.34em;font-weight:900;letter-spacing:-0.5px;
   background:var(--pw-color,#FFD700);color:#111;
-  border-radius:3px;padding:1px 3px;margin-top:1px;line-height:1.3;display:block;
+  border-radius:3px;padding:1px 4px;margin-top:0px;line-height:1.3;display:block;opacity:0.95;
 }
 /* Spinning star ring */
 .power-tile::before{
@@ -893,6 +893,14 @@ h1 {
 .power-giraffe {--pw-color:#00EFFF;background:radial-gradient(circle at 30% 25%,#d0fbff,#00EFFF 45%,#003399);}
 .power-rhino   {--pw-color:#A8C8E8;background:radial-gradient(circle at 30% 25%,#eaf2ff,#A8C8E8 45%,#334455);}
 .power-leopard {--pw-color:#E070E0;background:radial-gradient(circle at 30% 25%,#ffd0ff,#E070E0 45%,#5a005a);}
+/* Double Power Combo banner */
+.combo-banner.double-power {
+  background: linear-gradient(135deg, #FFD700 0%, #FF6600 50%, #FF00FF 100%);
+  font-size: 1.25em;
+  animation: comboPop 1.8s ease-out forwards;
+  box-shadow: 0 0 30px #FFD70088, 0 0 60px #FF660066;
+  letter-spacing: 1px;
+}
 /* Power activation blast ring */
 .power-blast{
   position:fixed;border-radius:50%;
@@ -1731,6 +1739,7 @@ function makeTileEl(animalIdx, r, c, iSize) {
     d.style.gridRow    = (r+1)+'';
     d.style.gridColumn = (c+1)+'';
     d.style.setProperty('--pw-color', POWER_COLOR[animalIdx]||'#FFD700');
+    d.style.fontSize = iSize + 'px';
     d.innerHTML = '<span class="pw-emoji">'+POWER_EMOJI[animalIdx]+'</span>'
                 + '<span class="pw-label">'+POWER_LABEL[animalIdx]+'</span>';
     return d;
@@ -1835,8 +1844,32 @@ async function doSwap(r1,c1,r2,c2) {
     const mEl=document.getElementById('moves');
     mEl.textContent=movesLeft; mEl.classList.remove('pop'); void mEl.offsetWidth; mEl.classList.add('pop');
     jungleAudio.play('bigpop',pan);
+    const isDoubleCombo = isPow1 && isPow2;
+    // Save second power kind before first activation (first blast may clear r2,c2)
+    const _pow2Kind = isPow2 ? board[r2][c2] : -1;
+    if (isDoubleCombo) {
+      // ⚡ DOUBLE POWER COMBO — flash banner + twin blast rings
+      showComboBanner('⚡ DOUBLE POWER COMBO! ⚡');
+      showPowerBlast(r1,c1,board[r1][c1]);
+      showPowerBlast(r2,c2,board[r2][c2]);
+      drawBlastRing(r1,c1); drawBlastRing(r2,c2);
+      jungleAudio.play('bigpop',jungleAudio.panFromCell(c1));
+      await delay(300);
+    }
     if (isPow1) await activatePowerTile(r1,c1,r2,c2);
-    if (isPow2) await activatePowerTile(r2,c2,r1,c1);
+    if (isPow2) {
+      // Restore kind if first blast already cleared this cell
+      if (board[r2][c2] < 100) board[r2][c2] = _pow2Kind;
+      await activatePowerTile(r2,c2,r1,c1);
+    }
+    if (isDoubleCombo) {
+      // Double score bonus: +50% of current score added
+      const bonusPts = Math.floor(score * 0.5);
+      score += bonusPts;
+      updateScore();
+      showScoreFloat(Math.floor((r1+r2)/2), Math.floor((c1+c2)/2), '🔥 ×2 COMBO +'+bonusPts);
+      showMsg('🔥 DOUBLE POWER! Score ×1.5!', true);
+    }
     // Drop and fill gaps from power blast
     const _pwCfg = getConfig(level);
     drop(); fill(_pwCfg.animalTypes);
