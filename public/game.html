@@ -7,412 +7,632 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Lato:wght@400;700&display=swap');
 
+/* ═══════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════ */
 :root {
-  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-top:    env(safe-area-inset-top,    0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+  --board-gap:   4px;
+  --board-pad:   6px;
+  --gold:        #f0c040;
+  --gold-glow:   #f0c04088;
+  --green-dark:  #0a2e0f;
+  --green-mid:   #0d3b1e;
+  --green-light: #6dbf67;
+  --green-bright:#2d8a2d;
+  --border-c:    #1a5c28;
+  --tile-radius: 10px;
 }
-
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
+/* ═══════════════════════════════════════════
+   BODY & BACKGROUND
+═══════════════════════════════════════════ */
 body {
   font-family: 'Lato', sans-serif;
   background:
     radial-gradient(ellipse at top, #0d3b1e 0%, #081f0e 60%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='20' cy='20' r='2' fill='%23ffffff08'/%3E%3Ccircle cx='80' cy='60' r='1.5' fill='%23ffffff06'/%3E%3C/svg%3E");
-  display: flex; justify-content: center; align-items: flex-start;
-  min-height: 100dvh; padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(10px + var(--safe-left));
-  touch-action: none; user-select: none;
-  overflow-x: hidden;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='20' cy='20' r='2' fill='%23ffffff08'/%3E%3Ccircle cx='80' cy='60' r='1.5' fill='%23ffffff06'/%3E%3Ccircle cx='50' cy='80' r='1' fill='%23ffffff05'/%3E%3C/svg%3E");
+  display:flex; justify-content:center; align-items:flex-start;
+  min-height:100dvh;
+  padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right))
+           calc(12px + var(--safe-bottom)) calc(10px + var(--safe-left));
+  touch-action:none; user-select:none;
+  overflow-x:hidden;
 }
-
 body::before, body::after {
   content:'🌿';
   position:fixed; font-size:80px; opacity:0.07;
   pointer-events:none; z-index:0;
 }
-body::before { top:-10px; left:-10px; transform:rotate(-20deg); }
+body::before { top:-10px; left:-10px;  transform:rotate(-20deg); }
 body::after  { bottom:-10px; right:-10px; transform:rotate(160deg); }
 
+/* ═══════════════════════════════════════════
+   GAME CONTAINER
+═══════════════════════════════════════════ */
 #gameContainer {
   position:relative; z-index:1;
-  background: linear-gradient(180deg, #0a2e0f 0%, #0d3b1e 50%, #081a0b 100%);
-  border-radius: 24px;
-  padding: clamp(10px, 3vw, 18px);
-  box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,80,0,0.15);
-  border: 2px solid #1a5c28;
-  width: 100%;
-  max-width: 480px;
-  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 20px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  box-sizing:border-box;
+  background:linear-gradient(180deg,#0a2e0f 0%,#0d3b1e 50%,#081a0b 100%);
+  border-radius:24px;
+  padding:clamp(10px,3vw,18px);
+  box-shadow:0 0 40px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,80,0,0.15);
+  border:2px solid var(--border-c);
+  width:100%; max-width:480px;
+  max-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 20px);
+  overflow-y:auto; overscroll-behavior:contain;
+}
+#gameContainer.screen-shake { animation:screenShake .38s ease; }
+@keyframes screenShake {
+  0%,100%{transform:translate(0,0)}
+  20%{transform:translate(-5px,3px)}
+  40%{transform:translate(5px,-3px)}
+  60%{transform:translate(-3px,-2px)}
+  80%{transform:translate(3px,2px)}
 }
 
-#titleArea {
-  text-align:center; margin-bottom:4px; position:relative;
+/* ═══════════════════════════════════════════
+   HEADER: CROWN, TITLE, SUBTITLE
+═══════════════════════════════════════════ */
+#titleArea { text-align:center; margin-bottom:4px; position:relative; }
+#titleArea .crown {
+  font-size:28px; display:block;
+  animation:crownBob 3s ease-in-out infinite;
 }
-#titleArea .crown { font-size:28px; display:block; }
+@keyframes crownBob {
+  0%,100%{transform:translateY(0) rotate(-3deg)}
+  50%{transform:translateY(-4px) rotate(3deg)}
+}
 h1 {
-  font-family: 'Cinzel Decorative', serif;
-  color: #f0c040;
-  font-size: 22px;
-  text-shadow: 0 0 20px #f0c04088, 2px 2px 4px #000;
-  letter-spacing: 1px;
-  line-height:1.2;
+  font-family:'Cinzel Decorative',serif;
+  color:var(--gold);
+  font-size:22px;
+  text-shadow:0 0 20px var(--gold-glow), 2px 2px 4px #000;
+  letter-spacing:1px; line-height:1.2;
 }
 #titleArea .subtitle {
-  font-size:11px; color:#6dbf67; letter-spacing:3px;
-  text-transform:uppercase; margin-top:2px;
+  font-size:11px; color:var(--green-light);
+  letter-spacing:3px; text-transform:uppercase; margin-top:2px;
 }
 
-/* Zone bar */
-#zoneBar {
-  text-align:center;
-  font-size:10px; color:#6dbf67;
-  letter-spacing:2px; text-transform:uppercase;
-  margin: 4px 0 8px;
-  padding: 4px 14px;
-  background: rgba(45,138,45,0.12);
-  border-radius: 20px;
-  border: 1px solid rgba(45,138,45,0.25);
+/* ═══════════════════════════════════════════
+   PROFILE BAR & SHARE
+═══════════════════════════════════════════ */
+#profileBar {
+  text-align:center; color:#8adf80;
+  font-size:12px; margin:4px 0 8px;
 }
-
-#gameInfo {
-  display:flex; justify-content:space-around; margin:8px 0;
-  padding:10px 6px;
-  background: linear-gradient(135deg, #1a4a1a, #0d2e0d);
-  border-radius:14px;
-  border: 1px solid #2a6a2a;
+.share-row {
+  display:flex; gap:8px; margin-bottom:8px;
 }
-.info-item { text-align:center; }
-.info-label { font-size:9px; color:#6dbf67; font-weight:bold; letter-spacing:1px; }
-.info-value { font-size:20px; color:#f0c040; font-weight:bold; text-shadow:0 0 8px #f0c04066; }
-
-/* Objective box */
-#objectiveBox {
-  background: linear-gradient(135deg, rgba(0,60,0,0.4), rgba(0,30,0,0.4));
-  border: 1px solid #2a6a2a;
-  border-radius: 12px;
-  padding: 7px 12px;
-  margin-bottom: 7px;
-  text-align: center;
+#shareLink {
+  flex:1; padding:8px; border-radius:10px;
+  border:1px solid #2a6a2a; background:#0a1f0a;
+  color:#8adf80; font-size:11px;
 }
-#objectiveLabel { font-size:9px; color:#6dbf67; letter-spacing:1px; text-transform:uppercase; font-weight:bold; }
-#objectiveText  { font-size:13px; color:#f0c040; font-weight:bold; margin-top:2px; }
-#huntCounter    { font-size:12px; color:#8adf80; margin-top:3px; }
-
-#progressBar {
-  width:100%; height:10px;
-  background:#0a1f0a; border-radius:10px; margin-bottom:8px;
-  border:1px solid #1a4a1a; overflow:hidden;
-}
-#progressFill {
-  height:100%;
-  background: linear-gradient(90deg, #2d8a2d, #6dbf67, #f0c040);
-  border-radius:10px; transition:width 0.4s; width:0%;
-  box-shadow: 0 0 8px #6dbf6788;
-}
-
-#board {
-  display:grid;
-  gap:3px;
-  background: linear-gradient(135deg, #051208, #0a2010);
-  padding:6px;
-  border-radius:16px; margin-bottom:8px;
-  border:2px solid #1a4a1a;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-  touch-action:none;
-  width:100%;
-}
-
-.candy {
-  aspect-ratio:1;
-  border-radius:8px;
-  display:flex; align-items:center; justify-content:center;
-  line-height:1;
-  overflow:hidden;
-  transition:transform 0.15s, box-shadow 0.15s, filter 0.15s;
-  cursor:pointer;
-  -webkit-user-select:none; user-select:none;
-  min-width:0; min-height:0;
-  width:100%; height:100%;
-  position:relative;
-  isolation:isolate;
-  border:1px solid rgba(255,255,255,0.08);
-  text-shadow:0 2px 3px rgba(0,0,0,0.45);
-}
-.candy::before {
-  content:'';
-  position:absolute; inset:5px 6px auto 6px; height:30%;
-  border-radius:50%;
-  background:linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0));
-  pointer-events:none; z-index:-1;
-}
-.candy.spawned { animation:tileSpawn 0.36s cubic-bezier(.2,1.4,.5,1) both; }
-.candy.swapping { animation:swapPop 0.28s ease both; z-index:20; }
-.candy.invalid { animation:invalidShake 0.34s ease both; }
-.candy.predator-strike { animation:predatorStrike 0.46s ease both; filter:brightness(1.45); z-index:25; }
-.candy.prey-hit { animation:preyHit 0.46s ease both; box-shadow:0 0 22px #ffdc73, inset 0 0 18px rgba(255,255,255,0.22); }
-.candy.special-sweep { animation:specialSweep 0.7s ease both; }
-@keyframes tileSpawn { from{opacity:0; transform:translateY(-28px) scale(.55) rotate(-10deg)} to{opacity:1; transform:translateY(0) scale(1) rotate(0)} }
-@keyframes swapPop { 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(1)} }
-@keyframes invalidShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 50%{transform:translateX(7px)} 75%{transform:translateX(-4px)} }
-@keyframes predatorStrike { 0%{transform:scale(1)} 35%{transform:scale(1.25) rotate(-8deg)} 70%{transform:scale(1.08) rotate(8deg)} 100%{transform:scale(1)} }
-@keyframes preyHit { 0%{transform:scale(1)} 45%{transform:scale(.72) rotate(10deg)} 100%{transform:scale(0) rotate(22deg); opacity:0} }
-@keyframes specialSweep { 0%{transform:scale(1); filter:brightness(1)} 40%{transform:scale(1.28); filter:brightness(1.8)} 100%{transform:scale(1); filter:brightness(1)} }
-.candy.selected {
-  transform:scale(1.12);
-  box-shadow:0 0 18px #f0c040, 0 0 6px #fff;
-  border:2px solid #f0c040;
-  z-index:10; position:relative;
-}
-@keyframes fadeOut { to { opacity:0; transform:scale(0) rotate(20deg); filter:brightness(1.7); } }
-.removing { animation:fadeOut 0.35s forwards; }
-.attack-line {
-  position:fixed; height:4px; border-radius:20px; pointer-events:none; z-index:180;
-  transform-origin:left center;
-  background:linear-gradient(90deg, rgba(240,192,64,0), #f0c040, rgba(255,90,30,0));
-  box-shadow:0 0 14px #f0c040;
-  animation:attackLine 0.42s ease forwards;
-}
-@keyframes attackLine { from{opacity:0; transform:scaleX(.2)} 35%{opacity:1} to{opacity:0; transform:scaleX(1)} }
-.screen-shake { animation:screenShake 0.28s ease; }
-@keyframes screenShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 50%{transform:translateX(3px)} 75%{transform:translateX(-2px)} }
-
-/* Animal tile colors */
-.candy-0 { background: linear-gradient(135deg, #6a2000, #aa4010); box-shadow:0 3px 8px rgba(0,0,0,0.5); } /* Tiger - deep orange */
-.candy-1 { background: linear-gradient(135deg, #5a3a10, #9a6a25); box-shadow:0 3px 8px rgba(0,0,0,0.4); } /* Deer  - warm tan   */
-.candy-2 { background: linear-gradient(135deg, #3a3a3a, #686060); box-shadow:0 3px 8px rgba(0,0,0,0.4); } /* Goat  - slate gray */
-.candy-3 { background: linear-gradient(135deg, #1a1a4a, #2a408a); box-shadow:0 3px 8px rgba(0,0,0,0.4); } /* Eagle - navy blue  */
-.candy-4 { background: linear-gradient(135deg, #0a3a0a, #186a18); box-shadow:0 3px 8px rgba(0,0,0,0.4); } /* Snake - dark green */
-.candy-5 { background: linear-gradient(135deg, #3a2010, #6a4020); box-shadow:0 3px 8px rgba(0,0,0,0.4); } /* Monkey- dark brown */
-
-#message {
-  text-align:center; font-size:15px; color:#6dbf67;
-  min-height:22px; font-weight:bold; margin-bottom:4px;
-  text-shadow: 0 0 8px #6dbf6766;
-}
-@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
-.combo { animation:pulse 0.5s; color:#f0c040 !important; text-shadow:0 0 12px #f0c040 !important; }
-
-#hint { text-align:center; font-size:11px; color:#3a6a3a; margin-bottom:6px; }
-
-#restartBtn {
-  width:100%; padding:10px; font-size:15px;
-  background: linear-gradient(135deg, #1a5c1a, #2d8a2d);
-  color:#f0c040; border:1px solid #2d8a2d; border-radius:12px;
+#shareBtn {
+  padding:8px 14px; border-radius:10px;
+  background:linear-gradient(135deg,#1a5c1a,#2d8a2d);
+  color:var(--gold); border:1px solid #2d8a2d;
   cursor:pointer; font-weight:bold;
   font-family:'Cinzel Decorative',serif;
-  letter-spacing:1px;
-  text-shadow:0 1px 3px #000;
-  transition:transform 0.2s, box-shadow 0.2s;
+  font-size:12px; letter-spacing:0.5px;
+  transition:transform 0.15s;
+  white-space:nowrap;
 }
-#restartBtn:hover { transform:scale(1.03); box-shadow:0 0 15px #2d8a2d66; }
+#shareBtn:active { transform:scale(0.95); }
 
-#audioBtn {
-  width:100%; margin-top:8px; padding:9px; font-size:13px;
-  background:linear-gradient(135deg,#0e3516,#174f23);
-  color:#8adf80; border:1px solid #256a32; border-radius:12px;
-  cursor:pointer; font-weight:bold; letter-spacing:.5px;
-  transition:transform .2s, box-shadow .2s, color .2s;
-}
-#audioBtn:hover { transform:scale(1.02); box-shadow:0 0 12px #2d8a2d55; color:#f0c040; }
-#audioBtn.muted { color:#6a7a67; border-color:#315036; }
-
-#animationBtn {
-  width:100%; margin-top:8px; padding:9px; font-size:13px;
-  background:linear-gradient(135deg,#40280a,#7a4a12);
-  color:#ffd88a; border:1px solid #9b6a28; border-radius:12px;
-  cursor:pointer; font-weight:bold; letter-spacing:.5px;
-}
-#animationBtn.off { color:#bca988; border-color:#6f5a3a; background:linear-gradient(135deg,#2e2416,#4a3a25); }
-.no-level1-animations *,
-.no-level1-animations *::before,
-.no-level1-animations *::after {
-  animation: none !important;
-  transition: none !important;
+/* ═══════════════════════════════════════════
+   ZONE BAR
+═══════════════════════════════════════════ */
+#zoneBar {
+  text-align:center; font-size:10px;
+  color:var(--green-light); letter-spacing:2px;
+  text-transform:uppercase; margin:4px 0 8px;
+  padding:4px 14px;
+  background:rgba(45,138,45,0.12);
+  border-radius:20px; border:1px solid rgba(45,138,45,0.25);
 }
 
+/* ═══════════════════════════════════════════
+   STATS BAR (Level / Score / Moves / Best)
+═══════════════════════════════════════════ */
+#gameInfo {
+  display:flex; justify-content:space-around;
+  margin:8px 0; padding:10px 6px;
+  background:linear-gradient(135deg,#1a4a1a,#0d2e0d);
+  border-radius:14px; border:1px solid #2a6a2a;
+}
+.info-item { text-align:center; }
+.info-label { font-size:9px; color:var(--green-light); font-weight:bold; letter-spacing:1px; }
+.info-value {
+  font-size:20px; color:var(--gold);
+  font-weight:bold; text-shadow:0 0 8px var(--gold-glow);
+  transition:transform 0.2s;
+}
+.info-value.pop { animation:statPop 0.35s cubic-bezier(.2,1.4,.5,1); }
+@keyframes statPop { 0%{transform:scale(1)} 50%{transform:scale(1.35)} 100%{transform:scale(1)} }
 
+/* ═══════════════════════════════════════════
+   OBJECTIVE BOX
+═══════════════════════════════════════════ */
+#objectiveBox {
+  background:linear-gradient(135deg,rgba(0,60,0,0.4),rgba(0,30,0,0.4));
+  border:1px solid #2a6a2a; border-radius:12px;
+  padding:7px 12px; margin-bottom:7px; text-align:center;
+}
+#objectiveLabel { font-size:9px; color:var(--green-light); letter-spacing:1px; text-transform:uppercase; font-weight:bold; }
+#objectiveText  { font-size:13px; color:var(--gold); font-weight:bold; margin-top:2px; }
+#huntCounter    { font-size:12px; color:#8adf80; margin-top:3px; }
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+#progressBar {
+  width:100%; height:12px;
+  background:#0a1f0a; border-radius:10px;
+  margin-bottom:8px; border:1px solid #1a4a1a; overflow:hidden;
+}
+#progressFill {
+  height:100%; width:0%;
+  background:linear-gradient(90deg,#2d8a2d,#6dbf67,var(--gold));
+  border-radius:10px; transition:width 0.5s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 10px #6dbf6788;
+  position:relative; overflow:hidden;
+}
+#progressFill::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.25) 50%,transparent 100%);
+  animation:progressShine 2s linear infinite;
+}
+@keyframes progressShine {
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(200%)}
+}
+
+/* ═══════════════════════════════════════════
+   ANIMAL LEGEND
+═══════════════════════════════════════════ */
 #legend {
-  display:flex; justify-content:center; gap:6px;
-  flex-wrap:wrap; margin-bottom:8px;
+  display:flex; justify-content:center;
+  gap:6px; flex-wrap:wrap; margin-bottom:8px;
 }
 .legend-item {
   display:flex; align-items:center; gap:3px;
   font-size:10px; color:#4a8a4a;
-  background: rgba(0,40,0,0.4);
-  padding: 3px 8px; border-radius: 10px;
-  border: 1px solid rgba(45,138,45,0.2);
+  background:rgba(0,40,0,0.4);
+  padding:3px 8px; border-radius:10px;
+  border:1px solid rgba(45,138,45,0.2);
 }
 
-.overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.85); z-index:100;
-  justify-content:center; align-items:center;
+/* ═══════════════════════════════════════════
+   BOARD (CSS Grid, tiles overlappable)
+═══════════════════════════════════════════ */
+#board {
+  display:grid;
+  gap:var(--board-gap);
+  background:linear-gradient(135deg,#051208,#0a2010);
+  padding:var(--board-pad);
+  border-radius:16px; margin-bottom:8px;
+  border:2px solid #1a4a1a;
+  box-shadow:inset 0 0 24px rgba(0,0,0,0.6);
+  touch-action:none;
+  width:100%;
+  position:relative; /* needed for overlay effects */
 }
-.overlay.active { display:flex; }
-.overlay-box {
-  background: linear-gradient(180deg, #0a2e0f, #051208);
-  border-radius:24px; padding:35px 25px;
-  text-align:center; max-width:320px; width:90%;
-  border:2px solid #2d8a2d;
-  box-shadow:0 0 40px rgba(0,150,0,0.3);
-  animation:popIn 0.4s ease;
-}
-@keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
-.overlay-box h2 { font-size:28px; margin-bottom:8px; font-family:'Cinzel Decorative',serif; color:#f0c040; text-shadow:0 0 15px #f0c040; }
-.overlay-box p { font-size:15px; color:#6dbf67; margin:5px 0; }
-.overlay-box .big { font-size:24px; color:#f0c040; font-weight:bold; margin:8px 0; }
-.overlay-btn {
-  margin-top:12px; padding:12px 24px; font-size:16px;
-  background:linear-gradient(135deg,#1a5c1a,#2d8a2d);
-  color:#f0c040; border:1px solid #2d8a2d; border-radius:12px;
-  cursor:pointer; font-weight:bold; width:100%;
-  font-family:'Cinzel Decorative',serif;
-  transition:transform 0.2s;
-}
-.overlay-btn:hover { transform:scale(1.04); }
-.overlay-btn.red { background:linear-gradient(135deg,#5a1a1a,#8a2a2a); border-color:#8a2a2a; margin-top:8px; }
 
-.particles {
-  position:fixed; pointer-events:none; font-size:16px;
-  animation:floatUp 1s forwards; z-index:200;
-}
-@keyframes floatUp { to { transform:translateY(-100px); opacity:0; } }
-
-
-/* Pro jungle match-3 animation layer */
-#board { position:relative; perspective:900px; }
+/* ═══════════════════════════════════════════
+   TILE BASE STYLES
+═══════════════════════════════════════════ */
 .candy {
-  position:relative;
-  will-change:transform, opacity, filter;
-  border:1px solid rgba(255,255,255,0.08);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 14px rgba(0,0,0,0.42);
+  aspect-ratio:1;
+  border-radius:var(--tile-radius);
+  display:flex; align-items:center; justify-content:center;
+  line-height:1; overflow:hidden;
+  cursor:pointer;
+  -webkit-user-select:none; user-select:none;
+  min-width:0; min-height:0;
+  width:100%; height:100%;
+  position:relative; isolation:isolate;
+  border:1.5px solid rgba(255,255,255,0.12);
+  text-shadow:0 2px 4px rgba(0,0,0,0.5);
+  will-change:transform,opacity,filter;
+  /* Explicit grid placement set via JS (gridRow, gridColumn) */
 }
+
+/* Gloss top-shine overlay */
 .candy::before {
   content:'';
-  position:absolute; inset:10%; border-radius:inherit;
-  background:radial-gradient(circle at 30% 25%, rgba(255,255,255,0.34), transparent 38%);
-  pointer-events:none;
+  position:absolute; inset:0; border-radius:inherit;
+  background:radial-gradient(circle at 35% 22%, rgba(255,255,255,0.35) 0%, transparent 45%);
+  pointer-events:none; z-index:1;
 }
+/* Bottom shadow inner */
 .candy::after {
   content:'';
-  position:absolute; inset:-2px; border-radius:inherit;
-  background:linear-gradient(135deg, transparent, rgba(240,192,64,0.22), transparent);
-  opacity:0; pointer-events:none;
+  position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,0.28) 100%);
+  pointer-events:none; z-index:1;
 }
-.candy.hint-pulse { animation:hintPulse 1.2s ease-in-out infinite; }
-.candy.swapping { z-index:30; animation:tileSwap 0.34s cubic-bezier(.2,.9,.2,1.15); }
-.candy.invalid { animation:invalidShake 0.38s ease; }
-.candy.predator-strike { z-index:35; animation:predatorPounce 0.48s cubic-bezier(.16,1,.3,1); filter:drop-shadow(0 0 16px #ffb000); }
-.candy.prey-hit { z-index:34; animation:preyHit 0.48s ease forwards; }
-.candy.special-line { z-index:32; animation:lineRoar 0.55s ease; }
-.candy.special-bomb { z-index:32; animation:bombPulse 0.65s ease; }
-.candy.drop-in { animation:dropIn 0.34s cubic-bezier(.25,.9,.25,1); }
-.candy.new-spawn { animation:newSpawn 0.42s cubic-bezier(.18,1.2,.3,1); }
-.removing { animation:fadeOut 0.35s forwards; }
-@keyframes tileSwap { 0%{transform:scale(.96)} 55%{transform:scale(1.12) rotate(3deg)} 100%{transform:scale(1)} }
-@keyframes invalidShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-@keyframes predatorPounce { 0%{transform:scale(1)} 35%{transform:scale(1.26) rotate(-7deg)} 70%{transform:scale(1.08) rotate(5deg)} 100%{transform:scale(1)} }
-@keyframes preyHit { 0%{transform:scale(1);opacity:1} 45%{transform:scale(1.22) rotate(12deg);filter:brightness(1.5)} 100%{transform:scale(.1) rotate(35deg);opacity:0} }
-@keyframes lineRoar { 0%{box-shadow:0 0 0 rgba(240,192,64,0)} 50%{transform:scale(1.18);box-shadow:0 0 28px #f0c040} 100%{transform:scale(1)} }
-@keyframes bombPulse { 0%{transform:scale(1)} 45%{transform:scale(1.28);filter:brightness(1.7)} 100%{transform:scale(1)} }
-@keyframes dropIn { from{transform:translateY(-42px) scale(.92);opacity:.3} to{transform:translateY(0) scale(1);opacity:1} }
-@keyframes newSpawn { from{transform:translateY(-70px) rotate(-12deg) scale(.4);opacity:0} to{transform:translateY(0) rotate(0) scale(1);opacity:1} }
-@keyframes hintPulse { 0%,100%{box-shadow:0 6px 14px rgba(0,0,0,.42)} 50%{transform:translateY(-2px) scale(1.05);box-shadow:0 0 22px #f0c040} }
 
+/* ── SELECTED ── */
+.candy.selected {
+  transform:scale(1.14);
+  box-shadow:0 0 0 3px var(--gold), 0 0 18px var(--gold-glow), 0 8px 16px rgba(0,0,0,0.5);
+  z-index:20; position:relative;
+}
+
+/* ── HINT PULSE ── */
+.candy.hint-pulse { animation:hintPulse 1.4s ease-in-out infinite; }
+@keyframes hintPulse {
+  0%,100%{transform:scale(1); box-shadow:0 4px 10px rgba(0,0,0,0.4);}
+  50%{transform:translateY(-3px) scale(1.08); box-shadow:0 0 24px var(--gold), 0 6px 14px rgba(0,0,0,0.4);}
+}
+
+/* ═══════════════════════════════════════════
+   TILE COLOR VARIANTS (0–7)
+═══════════════════════════════════════════ */
+.candy-0 { /* Tiger – fiery orange */
+  background:linear-gradient(145deg,#7a2800,#c84a10,#ff6020);
+  box-shadow:0 4px 12px rgba(200,74,16,0.5);
+  border-color:rgba(255,150,80,0.3);
+}
+.candy-1 { /* Deer – warm tan */
+  background:linear-gradient(145deg,#6b3e10,#a8681e,#d48c38);
+  box-shadow:0 4px 12px rgba(168,104,30,0.5);
+  border-color:rgba(220,160,60,0.3);
+}
+.candy-2 { /* Goat – slate */
+  background:linear-gradient(145deg,#3a3d45,#5a6070,#7a8090);
+  box-shadow:0 4px 12px rgba(90,96,112,0.5);
+  border-color:rgba(160,170,190,0.25);
+}
+.candy-3 { /* Eagle – navy */
+  background:linear-gradient(145deg,#10164a,#202878,#3040a8);
+  box-shadow:0 4px 12px rgba(48,64,168,0.5);
+  border-color:rgba(100,130,220,0.3);
+}
+.candy-4 { /* Snake – jungle green */
+  background:linear-gradient(145deg,#083808,#186818,#28a828);
+  box-shadow:0 4px 12px rgba(40,168,40,0.5);
+  border-color:rgba(60,200,60,0.3);
+}
+.candy-5 { /* Monkey – dark brown */
+  background:linear-gradient(145deg,#3c1e08,#6a3a12,#9a5820);
+  box-shadow:0 4px 12px rgba(106,58,18,0.5);
+  border-color:rgba(180,120,60,0.3);
+}
+/* Reuse for index 6, 7 with slight hue difference */
+.candy-0.type-6 {
+  background:linear-gradient(145deg,#4a1055,#7a2090,#aa40c0);
+  box-shadow:0 4px 12px rgba(170,64,192,0.5);
+  border-color:rgba(210,130,240,0.3);
+}
+.candy-0.type-7 {
+  background:linear-gradient(145deg,#0a3a50,#1060a0,#2090d0);
+  box-shadow:0 4px 12px rgba(32,144,208,0.5);
+  border-color:rgba(80,180,240,0.3);
+}
+
+/* ═══════════════════════════════════════════
+   TILE ANIMATION 1: INITIAL SPAWN (board load)
+═══════════════════════════════════════════ */
+.candy.spawned {
+  animation:tileSpawn 0.38s cubic-bezier(.2,1.4,.5,1) both;
+}
+@keyframes tileSpawn {
+  from{opacity:0;transform:translateY(-30px) scale(0.5) rotate(-12deg)}
+  to{opacity:1;transform:translateY(0) scale(1) rotate(0)}
+}
+
+/* ═══════════════════════════════════════════
+   TILE ANIMATION 2: SWAP
+═══════════════════════════════════════════ */
+.candy.swapping { z-index:30; animation:tileSwap 0.32s cubic-bezier(.2,.9,.2,1.2); }
+@keyframes tileSwap {
+  0%{transform:scale(0.96)}
+  50%{transform:scale(1.14) rotate(4deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+
+/* ═══════════════════════════════════════════
+   TILE ANIMATION 3: INVALID SHAKE
+═══════════════════════════════════════════ */
+.candy.invalid { animation:invalidShake 0.4s ease; }
+@keyframes invalidShake {
+  0%,100%{transform:translateX(0)}
+  15%{transform:translateX(-8px) rotate(-3deg)}
+  35%{transform:translateX(8px) rotate(3deg)}
+  55%{transform:translateX(-5px)}
+  75%{transform:translateX(5px)}
+}
+
+/* ═══════════════════════════════════════════
+   TILE ANIMATION 4: MATCH POP (key improvement!)
+   Tiles burst outward then shrink to nothing
+═══════════════════════════════════════════ */
+.candy.match-pop {
+  animation:matchPop 0.38s cubic-bezier(.36,.07,.19,.97) forwards;
+  z-index:25;
+  pointer-events:none;
+}
+@keyframes matchPop {
+  0%   {transform:scale(1);    opacity:1;  filter:brightness(1);}
+  25%  {transform:scale(1.35); opacity:1;  filter:brightness(2) saturate(1.8);}
+  60%  {transform:scale(0.8);  opacity:0.7;filter:brightness(1.5);}
+  100% {transform:scale(0) rotate(25deg); opacity:0; filter:brightness(0);}
+}
+
+/* ═══════════════════════════════════════════
+   TILE ANIMATION 5: SMOOTH DROP
+   Applied via JS transform — tile starts above its final grid cell
+   and transitions down to translateY(0)
+═══════════════════════════════════════════ */
+.tile-dropping {
+  /* transform set by JS; transition added by JS after reflow */
+  z-index:15;
+}
+/* Bounce easing for final landing */
+.tile-landing { animation:tileLand 0.12s ease-out; }
+@keyframes tileLand {
+  0%{transform:scaleY(1.06) scaleX(0.95)}
+  100%{transform:scaleY(1) scaleX(1)}
+}
+
+/* ═══════════════════════════════════════════
+   TILE ANIMATION 6: SPAWN FROM ABOVE (new tiles)
+   Also uses JS transform — tiles start above board
+═══════════════════════════════════════════ */
+.tile-spawning {
+  z-index:14;
+}
+
+/* ═══════════════════════════════════════════
+   SKELETON SHIMMER (empty cells during drop)
+   Candy Crush-style loading placeholder
+═══════════════════════════════════════════ */
+.skeleton-tile {
+  border-radius:var(--tile-radius);
+  background:linear-gradient(
+    90deg,
+    rgba(10,40,16,0.8) 0%,
+    rgba(30,90,40,0.5) 25%,
+    rgba(20,60,28,0.9) 50%,
+    rgba(30,90,40,0.5) 75%,
+    rgba(10,40,16,0.8) 100%
+  );
+  background-size:300% 100%;
+  animation:skeletonShimmer 1.1s ease-in-out infinite;
+  border:1.5px dashed rgba(45,138,45,0.3);
+  z-index:5;
+  pointer-events:none;
+}
+@keyframes skeletonShimmer {
+  0%   {background-position:100% 0}
+  100% {background-position:-100% 0}
+}
+
+/* ═══════════════════════════════════════════
+   MESSAGE & HINT
+═══════════════════════════════════════════ */
+#message {
+  text-align:center; font-size:15px;
+  color:var(--green-light); min-height:24px;
+  font-weight:bold; margin-bottom:4px;
+  text-shadow:0 0 8px rgba(109,191,103,0.5);
+  transition:color 0.2s;
+}
+.msg-combo { color:var(--gold) !important; animation:comboMsg 0.4s ease; }
+@keyframes comboMsg {
+  0%{transform:scale(0.8);opacity:0}
+  60%{transform:scale(1.08)}
+  100%{transform:scale(1);opacity:1}
+}
+#hint { text-align:center; font-size:11px; color:#3a6a3a; margin-bottom:6px; }
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+#restartBtn {
+  width:100%; padding:11px; font-size:15px;
+  background:linear-gradient(135deg,#1a5c1a,#2d8a2d);
+  color:var(--gold); border:1px solid #2d8a2d;
+  border-radius:12px; cursor:pointer; font-weight:bold;
+  font-family:'Cinzel Decorative',serif;
+  letter-spacing:1px; text-shadow:0 1px 3px #000;
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+#restartBtn:hover { transform:scale(1.03); box-shadow:0 0 18px #2d8a2d66; }
+#restartBtn:active { transform:scale(0.97); }
+
+#audioBtn {
+  width:100%; margin-top:8px; padding:9px; font-size:13px;
+  background:linear-gradient(135deg,#0e3516,#174f23);
+  color:#8adf80; border:1px solid #256a32;
+  border-radius:12px; cursor:pointer; font-weight:bold;
+  letter-spacing:.5px; transition:transform .15s, color .2s;
+}
+#audioBtn:hover { transform:scale(1.02); color:var(--gold); }
+#audioBtn.muted { color:#5a7a57; border-color:#2a4030; }
+
+/* ═══════════════════════════════════════════
+   OVERLAY (Level Complete / Game Over)
+═══════════════════════════════════════════ */
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.88); z-index:100;
+  justify-content:center; align-items:center;
+  backdrop-filter:blur(3px);
+}
+.overlay.active { display:flex; animation:overlayIn 0.3s ease; }
+@keyframes overlayIn { from{opacity:0} to{opacity:1} }
+
+.overlay-box {
+  background:linear-gradient(180deg,#0a2e0f,#051208);
+  border-radius:24px; padding:30px 24px;
+  text-align:center; max-width:320px; width:90%;
+  border:2px solid var(--green-bright);
+  box-shadow:0 0 50px rgba(0,150,0,0.35);
+  animation:overlayBox 0.4s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes overlayBox {
+  from{transform:scale(0.6) translateY(30px);opacity:0}
+  to{transform:scale(1) translateY(0);opacity:1}
+}
+.overlay-box h2 {
+  font-size:26px; margin-bottom:8px;
+  font-family:'Cinzel Decorative',serif;
+  color:var(--gold); text-shadow:0 0 18px var(--gold);
+}
+.overlay-box p  { font-size:14px; color:var(--green-light); margin:5px 0; }
+.overlay-box .big { font-size:22px; color:var(--gold); font-weight:bold; margin:8px 0; }
+.overlay-stars { font-size:28px; letter-spacing:4px; margin:6px 0; }
+
+.overlay-btn {
+  margin-top:12px; padding:12px 20px; font-size:15px;
+  background:linear-gradient(135deg,#1a5c1a,#2d8a2d);
+  color:var(--gold); border:1px solid #2d8a2d;
+  border-radius:12px; cursor:pointer; font-weight:bold; width:100%;
+  font-family:'Cinzel Decorative',serif;
+  transition:transform 0.15s;
+}
+.overlay-btn:hover { transform:scale(1.04); }
+.overlay-btn:active { transform:scale(0.96); }
+.overlay-btn.red {
+  background:linear-gradient(135deg,#5a1a1a,#8a2a2a);
+  border-color:#8a2a2a; margin-top:8px;
+}
+
+/* ═══════════════════════════════════════════
+   FX LAYER (particles, floats, rings, trails)
+═══════════════════════════════════════════ */
 .fx-layer { position:fixed; inset:0; pointer-events:none; z-index:180; overflow:hidden; }
-.attack-trail {
-  position:fixed; height:4px; transform-origin:left center; border-radius:8px;
-  background:linear-gradient(90deg, rgba(240,192,64,0), #f0c040, rgba(255,95,28,.95));
-  box-shadow:0 0 16px #ffb000; animation:trailFlash .42s ease forwards;
-}
-.blast-ring {
-  position:fixed; width:28px; height:28px; border:2px solid #f0c040; border-radius:50%;
-  transform:translate(-50%,-50%) scale(.2); box-shadow:0 0 24px #f0c040;
-  animation:ringBlast .62s ease-out forwards;
-}
-.combo-banner {
-  position:fixed; left:50%; top:44%; transform:translate(-50%,-50%) scale(.8);
-  padding:10px 18px; border-radius:28px; z-index:210; pointer-events:none;
-  background:rgba(5,22,8,.88); border:1px solid #f0c040; color:#f0c040;
-  font-family:'Cinzel Decorative',serif; font-size:18px; text-shadow:0 0 12px #f0c040;
-  animation:comboBanner .9s ease forwards;
-}
-@keyframes trailFlash { 0%{opacity:0;transform:scaleX(.1)} 35%{opacity:1} 100%{opacity:0;transform:scaleX(1)} }
-@keyframes ringBlast { to{transform:translate(-50%,-50%) scale(5);opacity:0} }
-@keyframes comboBanner { 0%{opacity:0;transform:translate(-50%,-55%) scale(.65)} 25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)} 100%{opacity:0;transform:translate(-50%,-70%) scale(1)} }
 
-#gameContainer.screen-shake { animation:screenShake .38s ease; }
+/* Score float popup */
+.score-float {
+  position:fixed; pointer-events:none; z-index:205;
+  font-family:'Cinzel Decorative',serif;
+  font-size:15px; font-weight:bold;
+  color:var(--gold);
+  text-shadow:0 0 10px #000, 0 0 14px var(--gold);
+  animation:scoreFloat 0.85s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes scoreFloat {
+  0%  {transform:translateY(0)   scale(0.8); opacity:1;}
+  30% {transform:translateY(-12px) scale(1.1); opacity:1;}
+  100%{transform:translateY(-48px) scale(0.9); opacity:0;}
+}
+
+/* Emoji particle */
+.match-particle {
+  position:fixed; pointer-events:none; z-index:200;
+  font-size:14px;
+  animation:particleFly var(--dur,0.8s) ease-out forwards;
+}
+@keyframes particleFly {
+  0%  {transform:translate(0,0) scale(1); opacity:1;}
+  100%{transform:translate(var(--tx,0px),var(--ty,-60px)) scale(0.3); opacity:0;}
+}
+
+/* Blast ring */
+.blast-ring {
+  position:fixed; width:32px; height:32px;
+  border:2.5px solid var(--gold); border-radius:50%;
+  transform:translate(-50%,-50%) scale(0.2);
+  box-shadow:0 0 24px var(--gold);
+  animation:ringBlast 0.6s ease-out forwards;
+}
+@keyframes ringBlast { to{transform:translate(-50%,-50%) scale(4.5);opacity:0;} }
+
+/* Attack trail */
+.attack-trail {
+  position:fixed; height:4px; transform-origin:left center;
+  border-radius:8px;
+  background:linear-gradient(90deg,rgba(240,192,64,0),var(--gold),rgba(255,95,28,0.9));
+  box-shadow:0 0 14px #ffb000;
+  animation:trailFlash 0.42s ease forwards;
+}
+@keyframes trailFlash {
+  0%{opacity:0;transform:scaleX(0.1)}
+  35%{opacity:1}
+  100%{opacity:0;transform:scaleX(1)}
+}
+
+/* Combo banner */
+.combo-banner {
+  position:fixed; left:50%; top:42%;
+  transform:translate(-50%,-50%) scale(0.8);
+  padding:12px 24px; border-radius:30px;
+  z-index:210; pointer-events:none;
+  background:rgba(5,22,8,0.92);
+  border:2px solid var(--gold);
+  color:var(--gold);
+  font-family:'Cinzel Decorative',serif;
+  font-size:18px; text-shadow:0 0 14px var(--gold);
+  animation:comboBanner 0.95s ease forwards;
+}
+@keyframes comboBanner {
+  0%  {opacity:0;transform:translate(-50%,-60%) scale(0.65);}
+  20% {opacity:1;transform:translate(-50%,-50%) scale(1.08);}
+  75% {opacity:1;transform:translate(-50%,-50%) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-68%) scale(0.95);}
+}
+
+/* ═══════════════════════════════════════════
+   LEVEL INTRO ANIMATION
+═══════════════════════════════════════════ */
 .level-intro {
   position:fixed; inset:0; z-index:220; pointer-events:none;
   display:flex; align-items:center; justify-content:center;
-  background:radial-gradient(circle at center, rgba(240,192,64,.16), rgba(0,0,0,.72));
-  animation:introFade 1.5s ease forwards;
+  background:radial-gradient(circle at center,rgba(240,192,64,0.14),rgba(0,0,0,0.75));
+  animation:introFade 1.6s ease forwards;
 }
 .level-intro::before, .level-intro::after {
   content:''; position:absolute; top:0; bottom:0; width:52%;
   background:linear-gradient(90deg,#061407,#123a17,#061407);
-  box-shadow:inset 0 0 50px rgba(0,0,0,.9);
-  animation:jungleGateLeft 1.35s cubic-bezier(.2,.75,.2,1) forwards;
+  box-shadow:inset 0 0 50px rgba(0,0,0,0.9);
+  animation:jungleGateLeft 1.4s cubic-bezier(.2,.75,.2,1) forwards;
 }
-.level-intro::before { left:0; border-right:2px solid rgba(240,192,64,.25); }
-.level-intro::after { right:0; border-left:2px solid rgba(240,192,64,.25); animation-name:jungleGateRight; }
+.level-intro::before { left:0; border-right:2px solid rgba(240,192,64,0.22); }
+.level-intro::after  { right:0; border-left:2px solid rgba(240,192,64,0.22); animation-name:jungleGateRight; }
 .level-intro-text {
-  position:relative; z-index:2; padding:18px 24px; border-radius:22px;
-  color:#f0c040; background:rgba(5,22,8,.86); border:1px solid #f0c040;
-  font-family:'Cinzel Decorative',serif; text-align:center; font-size:20px;
-  text-shadow:0 0 18px #f0c040; transform:scale(.8); animation:introText 1.25s ease forwards;
+  position:relative; z-index:2; padding:20px 28px;
+  border-radius:22px; color:var(--gold);
+  background:rgba(5,22,8,0.88); border:1.5px solid var(--gold);
+  font-family:'Cinzel Decorative',serif; text-align:center;
+  font-size:20px; text-shadow:0 0 20px var(--gold);
+  transform:scale(0.8); animation:introText 1.3s ease forwards;
 }
-.score-float {
-  position:fixed; pointer-events:none; z-index:205; color:#f0c040;
-  font-family:'Cinzel Decorative',serif; font-size:16px; text-shadow:0 0 10px #000, 0 0 12px #f0c040;
-  animation:scoreFloat .9s ease-out forwards;
-}
-@keyframes screenShake { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-5px,3px)} 40%{transform:translate(5px,-3px)} 60%{transform:translate(-3px,-2px)} 80%{transform:translate(3px,2px)} }
-@keyframes introFade { 0%,75%{opacity:1} 100%{opacity:0;visibility:hidden} }
-@keyframes jungleGateLeft { 0%{transform:translateX(0)} 100%{transform:translateX(-82%)} }
+@keyframes introFade { 0%,72%{opacity:1} 100%{opacity:0;visibility:hidden} }
+@keyframes jungleGateLeft  { 0%{transform:translateX(0)} 100%{transform:translateX(-82%)} }
 @keyframes jungleGateRight { 0%{transform:translateX(0)} 100%{transform:translateX(82%)} }
-@keyframes introText { 0%{opacity:0;transform:scale(.7)} 25%{opacity:1;transform:scale(1.06)} 85%{opacity:1} 100%{opacity:0;transform:scale(.96)} }
-@keyframes scoreFloat { to{transform:translateY(-44px) scale(1.12);opacity:0} }
+@keyframes introText {
+  0%{opacity:0;transform:scale(0.7)}
+  22%{opacity:1;transform:scale(1.06)}
+  82%{opacity:1}
+  100%{opacity:0;transform:scale(0.95)}
+}
 
-
-
-
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
 @supports not (height: 100dvh) {
-  body { min-height: 100vh; }
-  #gameContainer { max-height: calc(100vh - 20px); }
+  body { min-height:100vh; }
+  #gameContainer { max-height:calc(100vh - 20px); }
 }
-
-@media (max-width: 600px) {
-  body { align-items: stretch; }
-
-  #gameContainer {
-    border-radius: 16px;
-    padding: 10px;
-  }
-
-  #gameInfo {
-    gap: 4px;
-    padding: 8px 4px;
-  }
-
-  .info-value { font-size: 18px; }
-
-  #board {
-    gap: 2px;
-    padding: 4px;
-  }
-
-  .overlay-box {
-    padding-bottom: calc(28px + var(--safe-bottom));
-  }
+@media (max-width:600px) {
+  body { align-items:stretch; }
+  #gameContainer { border-radius:16px; padding:10px; }
+  #gameInfo { gap:4px; padding:8px 4px; }
+  .info-value { font-size:18px; }
+  #board { gap:2px; padding:4px; }
+  .overlay-box { padding-bottom:calc(24px + var(--safe-bottom)); }
 }
-
 </style>
 </head>
 <body>
@@ -423,52 +643,58 @@ h1 {
     <h1>KING OF JUNGLE</h1>
     <div class="subtitle">🌿 Nepal Wild Kingdom 🌿</div>
   </div>
-  <div id="profileBar" style="text-align:center;color:#8adf80;font-size:12px;margin:4px 0 8px;">Guest mode</div>
-  <div style="display:flex;gap:8px;margin-bottom:8px;">
-    <input id="shareLink" readonly style="flex:1;padding:8px;border-radius:10px;border:1px solid #2a6a2a;background:#0a1f0a;color:#8adf80;" placeholder="Invite link">
-    <button id="shareBtn" class="overlay-btn" style="margin:0;padding:8px 12px;width:auto;">Share</button>
+
+  <div id="profileBar">Guest mode</div>
+
+  <div class="share-row">
+    <input id="shareLink" readonly placeholder="Invite link">
+    <button id="shareBtn">SHARE</button>
   </div>
 
-  <!-- Zone identifier (updates per level) -->
   <div id="zoneBar">Zone I — Starter Plains 🌾</div>
 
-  <!-- Stats bar: Level | Score | Moves | Best -->
   <div id="gameInfo">
-    <div class="info-item"><div class="info-label">🌿 LEVEL</div><div class="info-value" id="levelDisplay">1</div></div>
-    <div class="info-item"><div class="info-label">🏆 SCORE</div><div class="info-value" id="score">0</div></div>
-    <div class="info-item"><div class="info-label">🎯 MOVES</div><div class="info-value" id="moves">30</div></div>
-    <div class="info-item"><div class="info-label">⭐ BEST</div><div class="info-value" id="bestScore">0</div></div>
+    <div class="info-item">
+      <div class="info-label">🌿 LEVEL</div>
+      <div class="info-value" id="levelDisplay">1</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">🏆 SCORE</div>
+      <div class="info-value" id="score">0</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">🎯 MOVES</div>
+      <div class="info-value" id="moves">22</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">⭐ BEST</div>
+      <div class="info-value" id="bestScore">0</div>
+    </div>
   </div>
 
-  <!-- Objective display -->
   <div id="objectiveBox">
-    <div id="objectiveLabel">🎯 HUNT OBJECTIVE</div>
-    <div id="objectiveText">Hunt 15 Deer before moves run out</div>
-    <div id="huntCounter">🦌 Hunted: 0 / 15</div>
+    <div id="objectiveLabel">🎯 SCORE OBJECTIVE</div>
+    <div id="objectiveText">Score 250 points</div>
+    <div id="huntCounter">🏆 Score: 0 / 250</div>
   </div>
 
-  <!-- Progress bar -->
   <div id="progressBar"><div id="progressFill"></div></div>
 
-  <!-- Active animal legend -->
-  <div id="legend">
-    <div class="legend-item">🐯 Tiger</div>
-    <div class="legend-item">🦌 Deer</div>
-    <div class="legend-item">🐐 Goat</div>
-  </div>
-
+  <div id="legend"></div>
   <div id="board"></div>
-  <div id="message">🐯 Build Tiger matches to hunt Deer — direct Deer matches only scatter!</div>
-  <div id="hint">👆 Swipe like Candy Crush: Tigers hunt adjacent Deer/Goat, 5 Tigers trigger a full deer sweep</div>
+
+  <div id="message">🌿 Swap animals to match 3 or more!</div>
+  <div id="hint">👆 Swipe adjacent animals to match 3 or more!</div>
+
   <button id="restartBtn">🔄 Restart Jungle</button>
-  <button id="audioBtn" class="muted" type="button">🔊 Enable Jungle Audio</button>
-  <button id="animationBtn" type="button">✨ Level 1 Animation: ON</button>
+  <button id="audioBtn" class="muted">🔊 Enable Jungle Audio</button>
 </div>
 
-<!-- Level Complete overlay -->
+<!-- Level Complete Overlay -->
 <div class="overlay" id="lvlOverlay">
   <div class="overlay-box">
     <h2>👑 Level Clear!</h2>
+    <div class="overlay-stars" id="lvlStars">⭐⭐⭐</div>
     <p>🌿 Level <span id="completedLevel">1</span> conquered!</p>
     <div class="big">🏆 <span id="levelScore">0</span></div>
     <p>🎁 Bonus: <span id="bonusMoves">0</span> moves × 50 = <span id="bonusPts">0</span></p>
@@ -476,44 +702,35 @@ h1 {
   </div>
 </div>
 
-<!-- Game Over overlay -->
+<!-- Game Over Overlay -->
 <div class="overlay" id="overOverlay">
   <div class="overlay-box">
     <h2>💀 Defeated!</h2>
     <p>🌿 Level <span id="failedLevel">1</span> failed</p>
     <div class="big">🏆 <span id="finalScore">0</span></div>
-    <p id="failInfo">🦌 Deer hunted: <span id="failProgress">0</span> / <span id="failTarget">15</span></p>
+    <p id="failInfo">Score: <span id="failProgress">0</span> / <span id="failTarget">250</span></p>
     <button class="overlay-btn" onclick="retryLevel()">🔄 Retry Level</button>
     <button class="overlay-btn red" onclick="restartGame()">🏠 Main Menu</button>
   </div>
 </div>
 
-
 <script>
-// Local progress management (no Firebase)
+/* ════════════════════════════════════════════════════
+   LOCAL PROGRESS (localStorage, no Firebase)
+════════════════════════════════════════════════════ */
 (function() {
   const SAVE_KEY = 'koj_progress';
-  
   function loadProgress() {
     try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch { return {}; }
   }
-  
   function saveProgress(data) {
-    const current = loadProgress();
-    Object.assign(current, data);
-    localStorage.setItem(SAVE_KEY, JSON.stringify(current));
+    const cur = loadProgress();
+    Object.assign(cur, data);
+    localStorage.setItem(SAVE_KEY, JSON.stringify(cur));
   }
-  
-  // Load saved level
-  const progress = loadProgress();
-  const playerName = localStorage.getItem('koj_player_name') || 'Player';
+  const progress  = loadProgress();
+  const playerName = localStorage.getItem('koj_player_name') || 'Guest';
   document.getElementById('profileBar').textContent = 'Player: ' + playerName;
-  
-  if (progress.currentLevel && window.setServerCurrentLevel) {
-    window.setServerCurrentLevel(progress.currentLevel);
-  }
-  
-  // Save progress after each level
   window.saveProgressToCloud = async (payload) => {
     saveProgress({
       currentLevel: payload.level,
@@ -521,267 +738,163 @@ h1 {
       lastPlayed: new Date().toISOString()
     });
   };
-  
-  // Share link (no referral code, just page URL)
   const shareLink = document.getElementById('shareLink');
   if (shareLink) shareLink.value = location.origin + '/index.html';
-})()
+})();
 
 document.getElementById('shareBtn').addEventListener('click', async () => {
   const link = document.getElementById('shareLink').value;
   if (!link) return;
   if (navigator.share) {
-    try { await navigator.share({ title:'King of Jungle', text:'Join me in King of Jungle!', url: link }); } catch {}
+    try { await navigator.share({ title:'King of Jungle', text:'Join me!', url:link }); } catch {}
   } else {
     await navigator.clipboard.writeText(link);
-    alert('Invite link copied');
+    alert('Link copied!');
   }
 });
-</script>
 
-<script>
-window.saveProgressToCloud = async ()=>{};
-window.setServerCurrentLevel = (lvl)=>{};
-
-// =================================================================
-// KING OF JUNGLE — Pro animated match-3 engine
-// Level 1 follows KING_OF_JUNGLE_DESIGN_RULES.md strictly:
-// 6×6 board, Zone I animals only, 30 moves, realistic Tiger hunts.
-// =================================================================
-const ALL_ANIMALS  = ['🐯','🦌','🐐','🦅','🐍','🐒','🐘','🦚'];
-const ANIMAL_NAMES = ['Tiger','Deer','Goat','Eagle','Snake','Monkey','Elephant','Peacock'];
-// FOOD_CHAIN removed — simple match-3 logic
-const ZONE_ICONS = { 'I':'🌾', 'II':'🌴', 'III':'💧', 'IV':'⛰️', 'V':'🌺' };
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+/* ════════════════════════════════════════════════════
+   AUDIO ENGINE (procedural, no external files)
+════════════════════════════════════════════════════ */
 const AUDIO_PREF_KEY = 'koj_audio_enabled';
-
-
-// Copyright-safe procedural audio: no external music files, samples, or licensed assets.
-// Web Audio synthesizes flute/tablatone ambience, jungle beds, combo drums, and spatial SFX at runtime.
 class JungleAudioEngine {
   constructor() {
-    this.ctx = null;
-    this.master = null;
-    this.bgm = null;
-    this.ambience = null;
-    this.drumBus = null;
-    this.enabled = localStorage.getItem(AUDIO_PREF_KEY) === '1';
-    this.started = false;
-    this.loops = [];
-    this.noiseBuffer = null;
+    this.ctx=null; this.master=null; this.bgm=null;
+    this.ambience=null; this.drumBus=null;
+    this.enabled = localStorage.getItem(AUDIO_PREF_KEY)==='1';
+    this.started=false; this.loops=[]; this.noiseBuffer=null;
   }
-
   unlock() {
     if (!this.ctx) this.buildGraph();
     if (!this.ctx) return;
-    if (this.ctx.state === 'suspended') this.ctx.resume();
+    if (this.ctx.state==='suspended') this.ctx.resume();
     if (!this.started) this.startAmbientBgm();
-    this.enabled = true;
-    localStorage.setItem(AUDIO_PREF_KEY, '1');
-    this.setButton();
+    this.enabled=true; localStorage.setItem(AUDIO_PREF_KEY,'1'); this.setButton();
   }
-
   toggle() {
-    if (!this.ctx || !this.enabled) {
-      this.unlock();
-      if (!this.ctx) return;
-      return;
-    }
-    this.enabled = false;
-    this.master.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.05);
-    localStorage.setItem(AUDIO_PREF_KEY, this.enabled ? '1' : '0');
-    this.setButton();
+    if (!this.ctx||!this.enabled) { this.unlock(); return; }
+    this.enabled=false;
+    this.master.gain.setTargetAtTime(0.0001,this.ctx.currentTime,0.05);
+    localStorage.setItem(AUDIO_PREF_KEY,'0'); this.setButton();
   }
-
   buildGraph() {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-    this.ctx = new AudioContextClass();
-    this.master = this.ctx.createGain();
-    this.master.gain.value = 0.42;
+    const AC = window.AudioContext||window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx=new AC();
+    this.master=this.ctx.createGain(); this.master.gain.value=0.42;
     this.master.connect(this.ctx.destination);
-
-    this.bgm = this.ctx.createGain();
-    this.bgm.gain.value = 0.28;
-    this.ambience = this.ctx.createGain();
-    this.ambience.gain.value = 0.18;
-    this.drumBus = this.ctx.createGain();
-    this.drumBus.gain.value = 0.14;
-    this.bgm.connect(this.master);
-    this.ambience.connect(this.master);
-    this.drumBus.connect(this.master);
-    this.noiseBuffer = this.makeNoiseBuffer(2);
+    this.bgm=this.ctx.createGain(); this.bgm.gain.value=0.28;
+    this.ambience=this.ctx.createGain(); this.ambience.gain.value=0.18;
+    this.drumBus=this.ctx.createGain(); this.drumBus.gain.value=0.14;
+    this.bgm.connect(this.master); this.ambience.connect(this.master); this.drumBus.connect(this.master);
+    this.noiseBuffer=this.makeNoiseBuffer(2);
   }
-
   setButton() {
-    const btn = document.getElementById('audioBtn');
-    if (!btn) return;
-    btn.textContent = this.enabled ? '🔊 Jungle Audio On' : '🔇 Jungle Audio Off';
-    btn.classList.toggle('muted', !this.enabled);
-    if (this.master && this.enabled) this.master.gain.setTargetAtTime(0.42, this.ctx.currentTime, 0.08);
+    const btn=document.getElementById('audioBtn'); if (!btn) return;
+    btn.textContent=this.enabled?'🔊 Jungle Audio: ON':'🔇 Jungle Audio: OFF';
+    btn.classList.toggle('muted',!this.enabled);
+    if (this.master&&this.enabled) this.master.gain.setTargetAtTime(0.42,this.ctx.currentTime,0.08);
   }
-
   startAmbientBgm() {
-    if (!this.ctx) return;
-    this.started = true;
-    this.master.gain.value = 0.0001;
-    this.master.gain.setTargetAtTime(0.42, this.ctx.currentTime + 0.05, 0.7);
-    this.scheduleFluteLoop();
-    this.scheduleTablaLoop();
-    this.scheduleJungleAmbience();
+    if (!this.ctx) return; this.started=true;
+    this.master.gain.value=0.0001;
+    this.master.gain.setTargetAtTime(0.42,this.ctx.currentTime+0.05,0.7);
+    this.scheduleFluteLoop(); this.scheduleTablaLoop(); this.scheduleJungleAmbience();
   }
-
   scheduleFluteLoop() {
-    const notes = [392, 440, 523.25, 493.88, 440, 392, 329.63, 392];
-    let step = 0;
-    const loop = setInterval(() => {
-      if (!this.enabled || !this.ctx) return;
-      this.tone(notes[step % notes.length], 0.55, 'sine', this.bgm, 0.045, {attack:0.08, release:0.45});
-      step++;
-    }, 860);
-    this.loops.push(loop);
+    const notes=[392,440,523.25,493.88,440,392,329.63,392]; let step=0;
+    const lp=setInterval(()=>{ if(!this.enabled||!this.ctx)return; this.tone(notes[step++%notes.length],0.55,'sine',this.bgm,0.045,{attack:0.08,release:0.45}); },860);
+    this.loops.push(lp);
   }
-
   scheduleTablaLoop() {
-    let step = 0;
-    const loop = setInterval(() => {
-      if (!this.enabled || !this.ctx) return;
-      if (step % 4 === 0) this.drum(120, 0.08, 0.13, -0.15);
-      if (step % 4 === 2) this.drum(210, 0.05, 0.08, 0.18);
-      step++;
-    }, 430);
-    this.loops.push(loop);
+    let step=0;
+    const lp=setInterval(()=>{ if(!this.enabled||!this.ctx)return; if(step%4===0)this.drum(120,0.08,0.13,-0.15); if(step%4===2)this.drum(210,0.05,0.08,0.18); step++; },430);
+    this.loops.push(lp);
   }
-
   scheduleJungleAmbience() {
-    const loop = setInterval(() => {
-      if (!this.enabled || !this.ctx) return;
-      const pan = Math.random() * 1.6 - 0.8;
-      const pick = Math.random();
-      if (pick < 0.45) this.birdChirp(pan);
-      else if (pick < 0.75) this.leafRustle(pan);
-      else this.cricket(pan);
-    }, 650);
-    this.loops.push(loop);
+    const lp=setInterval(()=>{
+      if(!this.enabled||!this.ctx)return;
+      const pan=Math.random()*1.6-0.8, pick=Math.random();
+      if(pick<0.45)this.birdChirp(pan); else if(pick<0.75)this.leafRustle(pan); else this.cricket(pan);
+    },650); this.loops.push(lp);
   }
-
-  panFromCell(c) {
-    if (COLS <= 1) return 0;
-    return Math.max(-1, Math.min(1, (c / (COLS - 1)) * 2 - 1));
+  panFromCell(c){ return COLS<=1?0:Math.max(-1,Math.min(1,(c/(COLS-1))*2-1)); }
+  makePanner(pan=0){ const p=this.ctx.createStereoPanner(); p.pan.value=Math.max(-1,Math.min(1,pan)); return p; }
+  makeNoiseBuffer(s){ const len=this.ctx.sampleRate*s,buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate),d=buf.getChannelData(0); for(let i=0;i<len;i++)d[i]=Math.random()*2-1; return buf; }
+  tone(freq,dur,type,dest,vol=0.08,env={},pan=0){
+    if(!this.enabled||!this.ctx)return; const now=this.ctx.currentTime;
+    const osc=this.ctx.createOscillator(),gain=this.ctx.createGain(),panner=this.makePanner(pan);
+    osc.type=type; osc.frequency.setValueAtTime(freq,now);
+    if(env.slideTo)osc.frequency.exponentialRampToValueAtTime(Math.max(20,env.slideTo),now+dur);
+    const atk=env.attack??0.01,rel=env.release??0.12;
+    gain.gain.setValueAtTime(0.0001,now);
+    gain.gain.exponentialRampToValueAtTime(vol,now+atk);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+Math.max(atk+0.02,dur-rel));
+    osc.connect(gain);gain.connect(panner);panner.connect(dest||this.master);
+    osc.start(now);osc.stop(now+dur+0.05);
   }
-
-  makePanner(pan = 0) {
-    const panner = this.ctx.createStereoPanner();
-    panner.pan.value = Math.max(-1, Math.min(1, pan));
-    return panner;
+  noise(dur,dest,vol=0.08,pan=0,ff=1200,ft='bandpass'){
+    if(!this.enabled||!this.ctx)return; const now=this.ctx.currentTime;
+    const src=this.ctx.createBufferSource(),filt=this.ctx.createBiquadFilter(),gain=this.ctx.createGain(),panner=this.makePanner(pan);
+    src.buffer=this.noiseBuffer; filt.type=ft; filt.frequency.setValueAtTime(ff,now);
+    gain.gain.setValueAtTime(vol,now); gain.gain.exponentialRampToValueAtTime(0.0001,now+dur);
+    src.connect(filt);filt.connect(gain);gain.connect(panner);panner.connect(dest||this.master);
+    src.start(now);src.stop(now+dur);
   }
-
-  makeNoiseBuffer(seconds) {
-    const len = this.ctx.sampleRate * seconds;
-    const buffer = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-    return buffer;
+  drum(freq=120,dur=0.12,vol=0.18,pan=0){
+    this.tone(freq,dur,'sine',this.drumBus,vol,{slideTo:45,attack:0.005,release:0.08},pan);
+    this.noise(dur*0.7,this.drumBus,vol*0.45,pan,180,'lowpass');
   }
-
-  tone(freq, duration, type, destination, volume = 0.08, env = {}, pan = 0) {
-    if (!this.enabled || !this.ctx) return;
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const panner = this.makePanner(pan);
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, now);
-    if (env.slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(20, env.slideTo), now + duration);
-    const attack = env.attack ?? 0.01;
-    const release = env.release ?? 0.12;
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(volume, now + attack);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(attack + 0.02, duration - release));
-    osc.connect(gain); gain.connect(panner); panner.connect(destination || this.master);
-    osc.start(now); osc.stop(now + duration + 0.05);
+  birdChirp(pan=0){
+    this.tone(950+Math.random()*300,0.11,'sine',this.ambience,0.028,{slideTo:1500+Math.random()*300,attack:0.005,release:0.06},pan);
+    setTimeout(()=>this.tone(1100+Math.random()*250,0.09,'sine',this.ambience,0.02,{slideTo:850,attack:0.005,release:0.05},pan),95);
   }
-
-  noise(duration, destination, volume = 0.08, pan = 0, filterFreq = 1200, filterType = 'bandpass') {
-    if (!this.enabled || !this.ctx) return;
-    const now = this.ctx.currentTime;
-    const src = this.ctx.createBufferSource();
-    const filter = this.ctx.createBiquadFilter();
-    const gain = this.ctx.createGain();
-    const panner = this.makePanner(pan);
-    src.buffer = this.noiseBuffer;
-    filter.type = filterType;
-    filter.frequency.setValueAtTime(filterFreq, now);
-    gain.gain.setValueAtTime(volume, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-    src.connect(filter); filter.connect(gain); gain.connect(panner); panner.connect(destination || this.master);
-    src.start(now); src.stop(now + duration);
-  }
-
-  drum(freq = 120, duration = 0.12, volume = 0.18, pan = 0) {
-    this.tone(freq, duration, 'sine', this.drumBus, volume, {slideTo:45, attack:0.005, release:0.08}, pan);
-    this.noise(duration * 0.7, this.drumBus, volume * 0.45, pan, 180, 'lowpass');
-  }
-
-  birdChirp(pan = 0) {
-    this.tone(950 + Math.random() * 300, 0.11, 'sine', this.ambience, 0.028, {slideTo:1500 + Math.random() * 300, attack:0.005, release:0.06}, pan);
-    setTimeout(() => this.tone(1100 + Math.random() * 250, 0.09, 'sine', this.ambience, 0.02, {slideTo:850, attack:0.005, release:0.05}, pan), 95);
-  }
-
-  leafRustle(pan = 0) { this.noise(0.38, this.ambience, 0.028, pan, 1800, 'highpass'); }
-  cricket(pan = 0) {
-    for (let i = 0; i < 3; i++) setTimeout(() => this.tone(3600, 0.035, 'square', this.ambience, 0.012, {attack:0.002, release:0.02}, pan), i * 65);
-  }
-
-  play(type, pan = 0) {
-    if (!this.enabled || !this.ctx) return;
-    if (type === 'swap') {
-      this.tone(420, 0.08, 'triangle', this.master, 0.055, {slideTo:620, release:0.04}, pan);
-    } else if (type === 'invalid') {
-      this.tone(180, 0.16, 'sawtooth', this.master, 0.055, {slideTo:120, release:0.08}, pan);
-    } else if (type === 'hunt') {
-      this.noise(0.12, this.master, 0.12, pan, 2600, 'bandpass');
-      this.tone(95, 0.18, 'sawtooth', this.master, 0.08, {slideTo:55, release:0.1}, pan);
-      setTimeout(() => this.noise(0.06, this.master, 0.1, pan, 900, 'highpass'), 90);
-    } else if (type === 'pop') {
-      this.tone(760, 0.08, 'sine', this.master, 0.045, {slideTo:1180, release:0.04}, pan);
-    } else if (type === 'color') {
-      this.roar(pan); this.drum(70, 0.35, 0.28, pan); this.noise(0.7, this.master, 0.14, pan, 3200, 'bandpass'); this.comboIntensity();
-    } else if (type === 'cross') {
-      this.noise(0.38, this.master, 0.12, pan, 2100, 'bandpass'); this.drum(95, 0.2, 0.2, pan); this.comboIntensity();
-    } else if (type === 'blast') {
-      this.drum(55, 0.45, 0.36, pan); this.noise(0.42, this.master, 0.22, pan, 520, 'lowpass'); this.comboIntensity();
-    } else if (type === 'levelStart') {
-      this.drum(85, 0.18, 0.22, -0.35); setTimeout(() => this.drum(95, 0.18, 0.24, 0), 170); setTimeout(() => this.drum(65, 0.32, 0.3, 0.35), 340);
-    } else if (type === 'win') {
-      [392, 493.88, 587.33, 783.99].forEach((n, i) => setTimeout(() => this.tone(n, 0.45, 'triangle', this.master, 0.08, {attack:0.03, release:0.22}, 0), i * 130));
-      setTimeout(() => this.drum(90, 0.28, 0.25, 0), 120);
-    } else if (type === 'fail') {
-      [392, 349.23, 293.66, 246.94].forEach((n, i) => setTimeout(() => this.tone(n, 0.6, 'sine', this.master, 0.055, {attack:0.06, release:0.35}, -0.1), i * 220));
+  leafRustle(pan=0){ this.noise(0.38,this.ambience,0.028,pan,1800,'highpass'); }
+  cricket(pan=0){ for(let i=0;i<3;i++)setTimeout(()=>this.tone(3600,0.035,'square',this.ambience,0.012,{attack:0.002,release:0.02},pan),i*65); }
+  play(type,pan=0){
+    if(!this.enabled||!this.ctx)return;
+    if(type==='swap'){this.tone(420,0.08,'triangle',this.master,0.055,{slideTo:620,release:0.04},pan);}
+    else if(type==='invalid'){this.tone(180,0.16,'sawtooth',this.master,0.055,{slideTo:120,release:0.08},pan);}
+    else if(type==='pop'){
+      this.tone(760,0.08,'sine',this.master,0.045,{slideTo:1180,release:0.04},pan);
+    } else if(type==='bigpop'){
+      this.tone(880,0.12,'sine',this.master,0.065,{slideTo:1400,release:0.06},pan);
+      this.drum(95,0.12,0.14,pan);
+    } else if(type==='drop'){
+      this.tone(280,0.06,'sine',this.master,0.03,{slideTo:180,release:0.04},pan);
+    } else if(type==='levelStart'){
+      this.drum(85,0.18,0.22,-0.35); setTimeout(()=>this.drum(95,0.18,0.24,0),170); setTimeout(()=>this.drum(65,0.32,0.3,0.35),340);
+    } else if(type==='win'){
+      [392,493.88,587.33,783.99].forEach((n,i)=>setTimeout(()=>this.tone(n,0.45,'triangle',this.master,0.08,{attack:0.03,release:0.22},0),i*130));
+      setTimeout(()=>this.drum(90,0.28,0.25,0),120);
+    } else if(type==='fail'){
+      [392,349.23,293.66,246.94].forEach((n,i)=>setTimeout(()=>this.tone(n,0.6,'sine',this.master,0.055,{attack:0.06,release:0.35},-0.1),i*220));
     }
   }
-
-  roar(pan = 0) {
-    this.tone(82, 0.65, 'sawtooth', this.master, 0.12, {slideTo:48, attack:0.03, release:0.35}, pan);
-    this.noise(0.65, this.master, 0.12, pan, 260, 'lowpass');
-    setTimeout(() => this.noise(0.18, this.master, 0.16, pan, 1600, 'bandpass'), 140);
+  roar(pan=0){
+    this.tone(82,0.65,'sawtooth',this.master,0.12,{slideTo:48,attack:0.03,release:0.35},pan);
+    this.noise(0.65,this.master,0.12,pan,260,'lowpass');
+    setTimeout(()=>this.noise(0.18,this.master,0.16,pan,1600,'bandpass'),140);
   }
-
-  comboIntensity() {
-    if (!this.ctx) return;
-    const original = this.drumBus.gain.value;
-    this.drumBus.gain.setTargetAtTime(0.28, this.ctx.currentTime, 0.03);
-    setTimeout(() => {
-      if (this.ctx) this.drumBus.gain.setTargetAtTime(original, this.ctx.currentTime, 0.35);
-    }, 1200);
-    for (let i = 0; i < 4; i++) setTimeout(() => this.drum(95 - i * 8, 0.1, 0.16, i % 2 ? 0.35 : -0.35), i * 120);
+  comboIntensity(){
+    if(!this.ctx)return;
+    const orig=this.drumBus.gain.value;
+    this.drumBus.gain.setTargetAtTime(0.28,this.ctx.currentTime,0.03);
+    setTimeout(()=>{ if(this.ctx)this.drumBus.gain.setTargetAtTime(orig,this.ctx.currentTime,0.35); },1200);
+    for(let i=0;i<4;i++)setTimeout(()=>this.drum(95-i*8,0.1,0.16,i%2?0.35:-0.35),i*120);
   }
 }
-
 const jungleAudio = new JungleAudioEngine();
 jungleAudio.setButton();
 
-// ═══ GLOBAL STATE ═══
+/* ════════════════════════════════════════════════════
+   GLOBAL STATE
+════════════════════════════════════════════════════ */
+const ALL_ANIMALS  = ['🐯','🦌','🐐','🦅','🐍','🐒','🐘','🦚'];
+const ANIMAL_NAMES = ['Tiger','Deer','Goat','Eagle','Snake','Monkey','Elephant','Peacock'];
+const ZONE_ICONS   = { 'I':'🌾','II':'🌴','III':'💧','IV':'⛰️','V':'🌺' };
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 let board=[], score=0, movesLeft=0, level=1, bestScore=0;
 let ROWS=5, COLS=5;
 let isProcessing=false;
@@ -789,604 +902,844 @@ let touchStartX=0, touchStartY=0, touchStartRow=-1, touchStartCol=-1;
 let selectedRow=-1, selectedCol=-1;
 let mouseStartX=0, mouseStartY=0;
 let huntProgress=0;
-let lastSpawnedCells = new Set();
-let lastDroppedCells = new Set();
-let animationsEnabled = true;
 
-// ═══ USER'S EXACT LEVEL FORMULA ═══
-// Grid: 5×5 (L1-20), 6×6 (L21-40), 7×7 (L41-60), 8×8 (L61+)
-// Types: 4 (L1-16), 5 (L17-32), 6 (L33-48), 7 (L49-64), 8 (L65+)
-// Score target: level × 250
-// Moves: max(10, 22 - floor(level/5))
-
+/* ════════════════════════════════════════════════════
+   LEVEL CONFIG (User's exact formula — DO NOT CHANGE)
+════════════════════════════════════════════════════ */
 function getConfig(lvl) {
   let r, c;
-  if (lvl <= 20) { r = 5; c = 5; }
-  else if (lvl <= 40) { r = 6; c = 6; }
-  else if (lvl <= 60) { r = 7; c = 7; }
-  else { r = 8; c = 8; }
+  if      (lvl <= 20) { r=5; c=5; }
+  else if (lvl <= 40) { r=6; c=6; }
+  else if (lvl <= 60) { r=7; c=7; }
+  else                 { r=8; c=8; }
 
   let numTypes;
-  if (lvl <= 16) numTypes = 4;
-  else if (lvl <= 32) numTypes = 5;
-  else if (lvl <= 48) numTypes = 6;
-  else if (lvl <= 64) numTypes = 7;
-  else numTypes = 8;
+  if      (lvl <= 16) numTypes=4;
+  else if (lvl <= 32) numTypes=5;
+  else if (lvl <= 48) numTypes=6;
+  else if (lvl <= 64) numTypes=7;
+  else                 numTypes=8;
 
-  const types = [];
-  for (let i = 0; i < numTypes; i++) types.push(i);
+  const types=[];
+  for (let i=0;i<numTypes;i++) types.push(i);
 
-  const iconSize = r <= 5 ? 46 : r <= 6 ? 42 : r <= 7 ? 38 : 34;
-  const zone = lvl <= 20 ? 'I' : lvl <= 40 ? 'II' : lvl <= 60 ? 'III' : lvl <= 80 ? 'IV' : 'V';
-  const zoneNames = { 'I':'Starter Plains', 'II':'Dense Forest', 'III':'River Delta', 'IV':'Mountain Peak', 'V':'Royal Garden' };
-
+  const iconSize = r<=5?46:r<=6?42:r<=7?38:34;
+  const zone = lvl<=20?'I':lvl<=40?'II':lvl<=60?'III':lvl<=80?'IV':'V';
+  const zoneNames = {'I':'Starter Plains','II':'Dense Forest','III':'River Delta','IV':'Mountain Peak','V':'Royal Garden'};
   return {
-    level: lvl, rows: r, cols: c, iconSize,
-    animalTypes: types,
-    moves: Math.max(10, 22 - Math.floor(lvl / 5)),
+    level:lvl, rows:r, cols:c, iconSize,
+    animalTypes:types,
+    moves: Math.max(10, 22 - Math.floor(lvl/5)),
     target: lvl * 250,
-    objective: 'score',
-    goalText: 'Score ' + (lvl * 250) + ' points',
-    zone, zoneName: zoneNames[zone] || 'Wilderness',
+    objective:'score',
+    goalText:'Score '+(lvl*250)+' points',
+    zone, zoneName: zoneNames[zone]||'Wilderness',
   };
 }
 
-
-function updateAnimationToggleUi() {
-  const btn = document.getElementById('animationBtn');
-  if (!btn) return;
-  const levelOne = level === 1;
-  btn.disabled = !levelOne;
-  btn.textContent = levelOne
-    ? (animationsEnabled ? '✨ Level 1 Animation: ON' : '✨ Level 1 Animation: OFF')
-    : '✨ Animation Toggle (Level 1 only)';
-  btn.classList.toggle('off', !animationsEnabled || !levelOne);
-  document.body.classList.toggle('no-level1-animations', levelOne && !animationsEnabled);
-}
-
-function toggleAnimations() {
-  if (level !== 1) { updateAnimationToggleUi(); return; }
-  animationsEnabled = !animationsEnabled;
-  updateAnimationToggleUi();
-}
-
+/* ════════════════════════════════════════════════════
+   INIT LEVEL
+════════════════════════════════════════════════════ */
 function initLevel() {
   const cfg = getConfig(level);
-  ROWS = cfg.rows; COLS = cfg.cols;
-  score = 0; movesLeft = cfg.moves; huntProgress = 0;
-  isProcessing = false; selectedRow = -1; selectedCol = -1;
-  lastSpawnedCells.clear(); lastDroppedCells.clear();
+  ROWS=cfg.rows; COLS=cfg.cols;
+  score=0; movesLeft=cfg.moves; huntProgress=0;
+  isProcessing=false; selectedRow=-1; selectedCol=-1;
 
   document.getElementById('levelDisplay').textContent = level;
   document.getElementById('score').textContent = 0;
-  document.getElementById('moves').textContent = movesLeft;
+  document.getElementById('moves').textContent  = movesLeft;
   document.getElementById('bestScore').textContent = bestScore;
   document.getElementById('progressFill').style.width = '0%';
-  document.getElementById('zoneBar').textContent = `Zone ${cfg.zone} — ${cfg.zoneName || ''} ${ZONE_ICONS[cfg.zone] || ''}`;
+  document.getElementById('zoneBar').textContent =
+    `Zone ${cfg.zone} — ${cfg.zoneName} ${ZONE_ICONS[cfg.zone]||''}`;
   document.getElementById('message').textContent = `🌿 Level ${level} — ${cfg.goalText}`;
-  document.getElementById('hint').textContent = '👆 Swipe adjacent animals to match 3 or more!';
+  document.getElementById('hint').textContent    = '👆 Swipe adjacent animals to match 3 or more!';
 
-  const objLabel = document.getElementById('objectiveLabel');
-  const objText  = document.getElementById('objectiveText');
-  const huntCtr  = document.getElementById('huntCounter');
-  objLabel.textContent = '🎯 SCORE OBJECTIVE';
-  objText.textContent = cfg.goalText;
-  huntCtr.textContent = '🏆 Score: 0 / ' + cfg.target;
+  document.getElementById('objectiveLabel').textContent = '🎯 SCORE OBJECTIVE';
+  document.getElementById('objectiveText').textContent  = cfg.goalText;
+  document.getElementById('huntCounter').textContent    = '🏆 Score: 0 / '+cfg.target;
 
   const legendEl = document.getElementById('legend');
-  legendEl.innerHTML = cfg.animalTypes.map(i => `<div class="legend-item">${ALL_ANIMALS[i]} ${ANIMAL_NAMES[i]}</div>`).join('');
+  legendEl.innerHTML = cfg.animalTypes
+    .map(i=>`<div class="legend-item">${ALL_ANIMALS[i]} ${ANIMAL_NAMES[i]}</div>`).join('');
+
   const boardEl = document.getElementById('board');
-  boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  boardEl.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
 
   createBoard(cfg.animalTypes);
-  while (findMatches().length > 0) createBoard(cfg.animalTypes);
+  while (findMatches().length>0) createBoard(cfg.animalTypes);
   renderBoard(cfg.iconSize, true);
-  updateAnimationToggleUi();
+  showLevelIntro(`Level ${level} — ${cfg.zoneName}`);
   jungleAudio.play('levelStart');
 }
 
-function createBoard(animalTypes, presetBoard=null) {
-  if (presetBoard) {
-    board = presetBoard.map(row => row.slice());
-    return;
-  }
-  let attempts = 0;
-  while (attempts < 80) {
+/* ════════════════════════════════════════════════════
+   BOARD CREATION
+════════════════════════════════════════════════════ */
+function createBoard(animalTypes) {
+  let attempts=0;
+  while (attempts<80) {
     attempts++;
-    board = [];
-    for (let r = 0; r < ROWS; r++) {
-      board[r] = [];
-      for (let c = 0; c < COLS; c++) board[r][c] = pickSafeAnimal(animalTypes, r, c);
+    board=[];
+    for (let r=0;r<ROWS;r++) {
+      board[r]=[];
+      for (let c=0;c<COLS;c++) board[r][c]=pickSafeAnimal(animalTypes,r,c);
     }
-    if (findMatches().length === 0 && hasAnyValidMove()) return;
+    if (findMatches().length===0 && hasAnyValidMove()) return;
   }
-  throw new Error('Unable to generate a valid no-match opening board.');
+  throw new Error('Unable to create valid board');
 }
 
-function pickSafeAnimal(animalTypes, r, c) {
-  const choices = animalTypes.slice().sort(() => Math.random() - 0.5);
+function pickSafeAnimal(animalTypes,r,c) {
+  const choices = animalTypes.slice().sort(()=>Math.random()-0.5);
   for (const animal of choices) {
-    const makesHorizontal = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
-    const makesVertical = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
-    const makesBox = r >= 1 && c >= 1 && board[r - 1][c] === animal && board[r][c - 1] === animal && board[r - 1][c - 1] === animal;
-    if (!makesHorizontal && !makesVertical && !makesBox) return animal;
+    const mH = c>=2 && board[r][c-1]===animal && board[r][c-2]===animal;
+    const mV = r>=2 && board[r-1][c]===animal && board[r-2][c]===animal;
+    if (!mH && !mV) return animal;
   }
   return choices[0];
 }
 
+/* ════════════════════════════════════════════════════
+   RENDER BOARD (full re-render)
+════════════════════════════════════════════════════ */
 function renderBoard(iconSizeOverride, markSpawned=false) {
   const cfg = getConfig(level);
   const iSize = iconSizeOverride || cfg.iconSize;
   const el = document.getElementById('board');
   el.innerHTML = '';
-  el.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
+  el.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
+
+  for (let r=0;r<ROWS;r++) {
+    for (let c=0;c<COLS;c++) {
       const animalIdx = board[r][c];
-      const d = document.createElement('div');
-      d.className = `candy candy-${Math.min(animalIdx, 5)}${markSpawned ? ' spawned' : ''}`;
-      d.textContent = ALL_ANIMALS[animalIdx] || '🐯';
-      d.title = ANIMAL_NAMES[animalIdx] || 'Animal';
-      d.style.fontSize = iSize + 'px';
-      d.dataset.r = r; d.dataset.c = c;
-      d.addEventListener('touchstart', onTouchStart, {passive:false});
-      d.addEventListener('touchend',   onTouchEnd,   {passive:false});
-      d.addEventListener('mousedown',  onMouseDown);
-      d.addEventListener('mouseup',    onMouseUp);
+      const d = makeTileEl(animalIdx, r, c, iSize);
+      if (markSpawned) {
+        d.classList.add('spawned');
+        // Stagger spawn animation per tile
+        d.style.animationDelay = ((r*COLS+c)*18)+'ms';
+      }
       el.appendChild(d);
     }
   }
-  lastDroppedCells.clear();
-  lastSpawnedCells.clear();
 }
 
+/* ════════════════════════════════════════════════════
+   MAKE TILE ELEMENT (shared factory)
+════════════════════════════════════════════════════ */
+function makeTileEl(animalIdx, r, c, iSize) {
+  const d = document.createElement('div');
+  const typeClass = animalIdx >= 6 ? 'candy-0 type-'+animalIdx : 'candy-'+Math.min(animalIdx,5);
+  d.className = 'candy ' + typeClass;
+  d.textContent = ALL_ANIMALS[animalIdx] || '🐯';
+  d.title = ANIMAL_NAMES[animalIdx] || 'Animal';
+  d.style.fontSize = iSize + 'px';
+  d.style.gridRow    = (r+1) + '';   // explicit CSS Grid placement
+  d.style.gridColumn = (c+1) + '';
+  d.dataset.r = r; d.dataset.c = c;
+  d.addEventListener('touchstart', onTouchStart, {passive:false});
+  d.addEventListener('touchend',   onTouchEnd,   {passive:false});
+  d.addEventListener('mousedown',  onMouseDown);
+  d.addEventListener('mouseup',    onMouseUp);
+  return d;
+}
+
+/* ════════════════════════════════════════════════════
+   GET BOARD CELL HEIGHT (for drop animation offset)
+════════════════════════════════════════════════════ */
+function getBoardCellHeight() {
+  const boardEl = document.getElementById('board');
+  const first = boardEl.querySelector('.candy');
+  if (first) return first.getBoundingClientRect().height;
+  const rect = boardEl.getBoundingClientRect();
+  const gap = 4, pad = 12;
+  return (rect.height - pad - gap*(ROWS-1)) / ROWS;
+}
+
+/* ════════════════════════════════════════════════════
+   INPUT HANDLERS
+════════════════════════════════════════════════════ */
 function onTouchStart(e) {
-  e.preventDefault();
-  jungleAudio.unlock();
-  if (isProcessing || movesLeft <= 0) return;
-  const t = e.touches[0];
-  touchStartX = t.clientX; touchStartY = t.clientY;
-  touchStartRow = +this.dataset.r; touchStartCol = +this.dataset.c;
+  e.preventDefault(); jungleAudio.unlock();
+  if (isProcessing||movesLeft<=0) return;
+  const t=e.touches[0];
+  touchStartX=t.clientX; touchStartY=t.clientY;
+  touchStartRow=+this.dataset.r; touchStartCol=+this.dataset.c;
   setSelected(touchStartRow, touchStartCol);
 }
 function onTouchEnd(e) {
   e.preventDefault();
-  if (isProcessing || movesLeft <= 0) return;
-  const t = e.changedTouches[0];
-  handleSwipe(t.clientX - touchStartX, t.clientY - touchStartY, 12);
+  if (isProcessing||movesLeft<=0) return;
+  const t=e.changedTouches[0];
+  handleSwipe(t.clientX-touchStartX, t.clientY-touchStartY, 12);
 }
 function onMouseDown(e) {
   jungleAudio.unlock();
-  if (isProcessing || movesLeft <= 0) return;
-  mouseStartX = e.clientX; mouseStartY = e.clientY;
-  touchStartRow = +this.dataset.r; touchStartCol = +this.dataset.c;
+  if (isProcessing||movesLeft<=0) return;
+  mouseStartX=e.clientX; mouseStartY=e.clientY;
+  touchStartRow=+this.dataset.r; touchStartCol=+this.dataset.c;
   setSelected(touchStartRow, touchStartCol);
 }
 function onMouseUp(e) {
-  if (isProcessing || movesLeft <= 0) return;
-  const dx = e.clientX - mouseStartX, dy = e.clientY - mouseStartY;
-  if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
-    const r = +this.dataset.r, c = +this.dataset.c;
-    if (selectedRow === r && selectedCol === c) { clearSelected(); return; }
-    if (selectedRow >= 0 && Math.abs(selectedRow - r) + Math.abs(selectedCol - c) === 1) {
-      doSwap(selectedRow, selectedCol, r, c); clearSelected(); return;
+  if (isProcessing||movesLeft<=0) return;
+  const dx=e.clientX-mouseStartX, dy=e.clientY-mouseStartY;
+  if (Math.abs(dx)<5 && Math.abs(dy)<5) {
+    const r=+this.dataset.r, c=+this.dataset.c;
+    if (selectedRow===r&&selectedCol===c) { clearSelected(); return; }
+    if (selectedRow>=0 && Math.abs(selectedRow-r)+Math.abs(selectedCol-c)===1) {
+      doSwap(selectedRow,selectedCol,r,c); clearSelected(); return;
     }
-    setSelected(r, c); return;
+    setSelected(r,c); return;
   }
-  handleSwipe(dx, dy, 5);
+  handleSwipe(dx,dy,5);
 }
-function handleSwipe(dx, dy, threshold) {
-  if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
-  let dr = 0, dc = 0;
-  if (Math.abs(dx) > Math.abs(dy)) dc = dx > 0 ? 1 : -1;
-  else dr = dy > 0 ? 1 : -1;
-  const nr = touchStartRow + dr, nc = touchStartCol + dc;
-  if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) doSwap(touchStartRow, touchStartCol, nr, nc);
+function handleSwipe(dx,dy,threshold) {
+  if (Math.abs(dx)<threshold&&Math.abs(dy)<threshold) return;
+  let dr=0,dc=0;
+  if (Math.abs(dx)>Math.abs(dy)) dc=dx>0?1:-1; else dr=dy>0?1:-1;
+  const nr=touchStartRow+dr, nc=touchStartCol+dc;
+  if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS) doSwap(touchStartRow,touchStartCol,nr,nc);
   clearSelected();
 }
 
-function setSelected(r, c) {
-  clearSelected(); selectedRow = r; selectedCol = c;
-  getEl(r, c)?.classList.add('selected');
+function setSelected(r,c) {
+  clearSelected(); selectedRow=r; selectedCol=c;
+  getEl(r,c)?.classList.add('selected');
 }
 function clearSelected() {
-  if (selectedRow >= 0) getEl(selectedRow, selectedCol)?.classList.remove('selected');
-  selectedRow = -1; selectedCol = -1;
+  if (selectedRow>=0) getEl(selectedRow,selectedCol)?.classList.remove('selected');
+  selectedRow=-1; selectedCol=-1;
 }
-function getEl(r, c) {
-  return document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+function getEl(r,c) {
+  return document.querySelector(`#board .candy[data-r="${r}"][data-c="${c}"]`);
 }
 
-function doSwap(r1, c1, r2, c2) {
-  isProcessing = true; clearSelected();
-  const pan = jungleAudio.panFromCell(Math.round((c1 + c2) / 2));
-  swapCells(r1, c1, r2, c2); renderBoard();
-  markCells([[r1,c1],[r2,c2]], 'swapping');
-  if (findMatches().length > 0) {
-    jungleAudio.play('swap', pan);
+/* ════════════════════════════════════════════════════
+   SWAP
+════════════════════════════════════════════════════ */
+function doSwap(r1,c1,r2,c2) {
+  isProcessing=true; clearSelected();
+  const pan = jungleAudio.panFromCell(Math.round((c1+c2)/2));
+  swapCells(r1,c1,r2,c2);
+  renderBoard();
+  markCells([[r1,c1],[r2,c2]],'swapping');
+
+  if (findMatches().length>0) {
+    jungleAudio.play('swap',pan);
     movesLeft--;
     document.getElementById('moves').textContent = movesLeft;
-    setTimeout(() => processMatches(true), 280);
+    const movesEl = document.getElementById('moves');
+    movesEl.classList.remove('pop');
+    void movesEl.offsetWidth;
+    movesEl.classList.add('pop');
+    setTimeout(()=>processMatches(true), 300);
   } else {
-    jungleAudio.play('invalid', pan);
+    jungleAudio.play('invalid',pan);
     showMsg('❌ No match!');
-    setTimeout(() => {
-      markCells([[r1,c1],[r2,c2]], 'invalid');
-      swapCells(r1, c1, r2, c2); renderBoard();
-      document.getElementById('gameContainer').classList.add('screen-shake');
-      setTimeout(() => document.getElementById('gameContainer').classList.remove('screen-shake'), 300);
-      isProcessing = false;
-    }, 260);
+    setTimeout(()=>{
+      markCells([[r1,c1],[r2,c2]],'invalid');
+      swapCells(r1,c1,r2,c2); renderBoard();
+      shakeBoard();
+      isProcessing=false;
+    },260);
   }
 }
 
-function markCells(cells, className) {
-  cells.forEach(([r, c]) => getEl(r, c)?.classList.add(className));
-}
+function markCells(cells,cls) { cells.forEach(([r,c])=>getEl(r,c)?.classList.add(cls)); }
+function swapCells(r1,c1,r2,c2) { const t=board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=t; }
 
-function swapCells(r1, c1, r2, c2) {
-  const t = board[r1][c1]; board[r1][c1] = board[r2][c2]; board[r2][c2] = t;
-}
-
+/* ════════════════════════════════════════════════════
+   FIND MATCHES (User's exact engine — DO NOT CHANGE)
+════════════════════════════════════════════════════ */
 function findMatches() {
-  const matches = [];
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS - 2; c++) {
-      const v = board[r][c];
-      if (v < 0) continue;
-      if (v === board[r][c+1] && v === board[r][c+2]) {
-        const cells = [{r,c}]; let x = c+1;
-        while (x < COLS && board[r][x] === v) { cells.push({r, c:x}); x++; }
-        matches.push({ type:v, shape: cells.length >= 5 ? 'five' : 'line', cells });
-        c = x - 1;
+  const matches=[];
+  // Horizontal
+  for (let r=0;r<ROWS;r++) {
+    for (let c=0;c<COLS-2;c++) {
+      const v=board[r][c]; if(v<0)continue;
+      if (v===board[r][c+1]&&v===board[r][c+2]) {
+        const cells=[{r,c}]; let x=c+1;
+        while(x<COLS&&board[r][x]===v){cells.push({r,c:x});x++;}
+        matches.push({type:v,shape:cells.length>=5?'five':'line',cells}); c=x-1;
       }
     }
   }
-  for (let c = 0; c < COLS; c++) {
-    for (let r = 0; r < ROWS - 2; r++) {
-      const v = board[r][c];
-      if (v < 0) continue;
-      if (v === board[r+1][c] && v === board[r+2][c]) {
-        const cells = [{r,c}]; let y = r+1;
-        while (y < ROWS && board[y][c] === v) { cells.push({r:y, c}); y++; }
-        matches.push({ type:v, shape: cells.length >= 5 ? 'five' : 'line', cells });
-        r = y - 1;
+  // Vertical
+  for (let c=0;c<COLS;c++) {
+    for (let r=0;r<ROWS-2;r++) {
+      const v=board[r][c]; if(v<0)continue;
+      if (v===board[r+1][c]&&v===board[r+2][c]) {
+        const cells=[{r,c}]; let y=r+1;
+        while(y<ROWS&&board[y][c]===v){cells.push({r:y,c});y++;}
+        matches.push({type:v,shape:cells.length>=5?'five':'line',cells}); r=y-1;
       }
     }
   }
-  // Box matching removed — user's code only has horizontal + vertical
   return mergeIntersections(matches);
 }
 
 function mergeIntersections(matches) {
-  const used = new Array(matches.length).fill(false);
-  const merged = [];
-  for (let i = 0; i < matches.length; i++) {
+  const used=new Array(matches.length).fill(false);
+  const merged=[];
+  for (let i=0;i<matches.length;i++) {
     if (used[i]) continue;
-    let group = [matches[i]];
-    used[i] = true;
-    let changed = true;
+    let group=[matches[i]]; used[i]=true; let changed=true;
     while (changed) {
-      changed = false;
-      const groupKeys = new Set(group.flatMap(m => m.cells.map(cellKey)));
-      for (let j = 0; j < matches.length; j++) {
-        if (used[j] || matches[j].type !== matches[i].type) continue;
-        if (matches[j].cells.some(cell => groupKeys.has(cellKey(cell)))) {
-          group.push(matches[j]); used[j] = true; changed = true;
+      changed=false;
+      const gKeys=new Set(group.flatMap(m=>m.cells.map(cellKey)));
+      for (let j=0;j<matches.length;j++) {
+        if (used[j]||matches[j].type!==matches[i].type) continue;
+        if (matches[j].cells.some(cell=>gKeys.has(cellKey(cell)))) {
+          group.push(matches[j]); used[j]=true; changed=true;
         }
       }
     }
-    const byKey = new Map();
-    group.flatMap(m => m.cells).forEach(cell => byKey.set(cellKey(cell), cell));
-    const shape = group.some(m => m.shape === 'box') ? 'box'
-      : byKey.size >= 5 ? 'five'
-      : group.length > 1 ? 'cross'
-      : group[0].shape;
-    merged.push({ type:matches[i].type, shape, cells:[...byKey.values()] });
+    const byKey=new Map();
+    group.flatMap(m=>m.cells).forEach(cell=>byKey.set(cellKey(cell),cell));
+    const shape=byKey.size>=5?'five':group.length>1?'cross':group[0].shape;
+    merged.push({type:matches[i].type,shape,cells:[...byKey.values()]});
   }
   return merged;
 }
+function cellKey({r,c}){ return `${r},${c}`; }
 
-function cellKey({r, c}) { return `${r},${c}`; }
+/* ════════════════════════════════════════════════════
+   COMPUTE DROP INFO
+   Returns Map: "${newR},${c}" -> dropCount
+   Computed BEFORE drop() is called
+════════════════════════════════════════════════════ */
+function computeDropInfo() {
+  const dropInfo = new Map();
+  for (let c=0;c<COLS;c++) {
+    let emptyBelow = 0;
+    for (let r=ROWS-1;r>=0;r--) {
+      if (board[r][c]===-1) {
+        emptyBelow++;
+      } else if (emptyBelow>0) {
+        // This tile at (r,c) will fall to (r+emptyBelow, c)
+        dropInfo.set(`${r+emptyBelow},${c}`, emptyBelow);
+      }
+    }
+  }
+  return dropInfo;
+}
 
-function processMatches(playerTriggered=false) {
+/* ════════════════════════════════════════════════════
+   COMPUTE NEW CELL POSITIONS (cells that will be filled)
+   Computed AFTER drop(), BEFORE fill()
+════════════════════════════════════════════════════ */
+function computeNewCells() {
+  const newCells = new Set();
+  for (let r=0;r<ROWS;r++)
+    for (let c=0;c<COLS;c++)
+      if (board[r][c]===-1) newCells.add(`${r},${c}`);
+  return newCells;
+}
+
+/* ════════════════════════════════════════════════════
+   ADD SKELETON CELLS (shimmer placeholders)
+════════════════════════════════════════════════════ */
+function addSkeletonCells(cellSet) {
+  const boardEl = document.getElementById('board');
+  cellSet.forEach(key => {
+    const [r,c] = key.split(',').map(Number);
+    // Remove the matched tile's DOM element (it has match-pop class)
+    const existingTile = getEl(r,c);
+    if (existingTile) existingTile.remove();
+    // Add skeleton placeholder
+    const skel = document.createElement('div');
+    skel.className = 'skeleton-tile';
+    skel.style.gridRow    = (r+1)+'';
+    skel.style.gridColumn = (c+1)+'';
+    skel.dataset.skel = key;
+    boardEl.appendChild(skel);
+  });
+}
+
+function removeSkeletonCells() {
+  document.querySelectorAll('.skeleton-tile').forEach(el=>el.remove());
+}
+
+/* ════════════════════════════════════════════════════
+   PROCESS MATCHES — Candy Crush smooth animation flow
+   USER'S EXACT LOGIC: Single resolve, NO cascade
+════════════════════════════════════════════════════ */
+async function processMatches(playerTriggered=false) {
   const cfg = getConfig(level);
   const matches = findMatches();
-  if (!matches.length) { isProcessing = false; ensurePlayableBoard(); checkStatus(); return; }
+  if (!matches.length) { isProcessing=false; ensurePlayableBoard(); checkStatus(); return; }
 
-  // ═══ USER'S EXACT LOGIC: Simple same-type match, +10 per cell ═══
+  /* ── COLLECT MATCHED CELLS ── */
   const cellsToRemove = new Set();
-  matches.forEach(match => {
-    match.cells.forEach(({r,c}) => cellsToRemove.add(r + ',' + c));
-  });
+  matches.forEach(m=>m.cells.forEach(({r,c})=>cellsToRemove.add(`${r},${c}`)));
 
-  // Score: +10 per matched cell (exact user logic)
+  /* ── SCORE ── */
   const pts = cellsToRemove.size * 10;
   score += pts;
   updateScore();
 
-  // Animations
-  const centerCol = matches[0]?.cells?.[0]?.c ?? Math.floor(COLS / 2);
-  jungleAudio.play('pop', jungleAudio.panFromCell(centerCol));
+  const centerCell = matches[0].cells[Math.floor(matches[0].cells.length/2)];
+  const pan = jungleAudio.panFromCell(centerCell.c);
 
-  cellsToRemove.forEach(key => {
-    const [r, c] = key.split(',').map(Number);
-    const el = getEl(r, c);
-    if (el) { el.classList.add('removing'); spawnParticles(el, false); }
+  /* ── STAGE 1: Staggered match-pop animation ── */
+  const matchArr = [...cellsToRemove]
+    .map(k=>{ const [r,c]=k.split(',').map(Number); return{r,c}; })
+    .sort((a,b)=>
+      Math.hypot(a.r-centerCell.r,a.c-centerCell.c) -
+      Math.hypot(b.r-centerCell.r,b.c-centerCell.c)
+    );
+
+  let maxDelay = 0;
+  matchArr.forEach(({r,c},i)=>{
+    const d = i * 55; // 55ms stagger — one by one feel
+    if (d > maxDelay) maxDelay = d;
+    setTimeout(()=>{
+      const el = getEl(r,c);
+      if (!el) return;
+      el.classList.add('match-pop');
+      spawnMatchParticles(el);
+    }, d);
   });
 
-  if (matches.length > 1) showMsg('🔥 COMBO! +' + pts + ' points!', true);
-  else showMsg('✨ +' + pts + ' points!');
+  // Score float at center of match
+  showScoreFloat(centerCell.r, centerCell.c, '+'+pts);
+  drawBlastRing(centerCell.r, centerCell.c);
 
-  setTimeout(() => {
-    cellsToRemove.forEach(key => {
-      const [r, c] = key.split(',').map(Number);
-      board[r][c] = -1;
+  // Audio
+  if (pts >= 50) { jungleAudio.play('bigpop',pan); jungleAudio.comboIntensity(); }
+  else           { jungleAudio.play('pop',pan); }
+
+  // Message
+  if (pts>=80)          showMsg('🔥 MEGA! +'+pts+' points!', true);
+  else if (pts>=40)     showMsg('💥 Combo! +'+pts+' points!', true);
+  else                  showMsg('✨ +'+pts+' points!');
+
+  if (pts>=40) showComboBanner(pts>=80?'🔥 MEGA MATCH!':'💥 COMBO!');
+
+  /* ── Wait for all pops to finish ── */
+  await delay(maxDelay + 380);
+
+  /* ── STAGE 2: Remove matched tiles from board data + show skeletons ── */
+  cellsToRemove.forEach(k=>{
+    const [r,c]=k.split(',').map(Number);
+    board[r][c] = -1;
+  });
+  addSkeletonCells(cellsToRemove);
+
+  /* ── STAGE 3: Compute drop info BEFORE drop() ── */
+  const dropInfo = computeDropInfo();
+
+  /* ── Brief pause so player sees skeletons ── */
+  await delay(80);
+
+  /* ── STAGE 4: Apply gravity to board data ── */
+  drop();
+
+  /* ── STAGE 5: Compute which cells will be filled ── */
+  const newCellPositions = computeNewCells(); // positions still -1
+
+  /* ── STAGE 6: Fill new tiles ── */
+  fill(cfg.animalTypes);
+
+  /* ── STAGE 7: Get cell height for offset calculation ── */
+  const cellH = getBoardCellHeight();
+
+  /* ── STAGE 8: Add dropping tiles to DOM (at new positions, offset upward) ── */
+  const boardEl = document.getElementById('board');
+  const gapPxVal = parseInt(getComputedStyle(boardEl).gap) || 4;
+
+  dropInfo.forEach((dropCount, key)=>{
+    const [r,c] = key.split(',').map(Number);
+    const animalIdx = board[r][c];
+    if (animalIdx < 0) return;
+    // ── CRITICAL: Remove old tile element at OLD position before adding at new ──
+    const oldR = r - dropCount;
+    const oldEl = document.querySelector(`#board .candy[data-r="${oldR}"][data-c="${c}"]:not(.skeleton-tile)`);
+    if (oldEl) oldEl.remove();
+    const iSize = cfg.iconSize;
+    const d = makeTileEl(animalIdx, r, c, iSize);
+    d.classList.add('tile-dropping');
+    d.dataset.dropCount = dropCount;
+    // Initial position: offset upward so tile APPEARS at its old position
+    const offsetPx = -(dropCount * (cellH + gapPxVal));
+    d.style.transform = `translateY(${offsetPx}px)`;
+    d.style.transition = 'none';
+    boardEl.appendChild(d);
+  });
+
+  /* ── STAGE 9: Add new (spawned) tiles to DOM (above the board) ── */
+  const gapPx = gapPxVal;
+  newCellPositions.forEach(key=>{
+    const [r,c] = key.split(',').map(Number);
+    const animalIdx = board[r][c];
+    if (animalIdx < 0) return;
+    const iSize = cfg.iconSize;
+    const d = makeTileEl(animalIdx, r, c, iSize);
+    d.classList.add('tile-spawning');
+    // Offset: tile needs to come from above the board entirely
+    // It's at row r, needs to travel from -(r+1)*cellH to 0
+    const spawnOffset = -((r + 1) * (cellH + gapPx) + 20);
+    d.style.transform = `translateY(${spawnOffset}px)`;
+    d.style.transition = 'none';
+    boardEl.appendChild(d);
+  });
+
+  /* ── STAGE 10: Force reflow, then animate drops + spawns ── */
+  boardEl.offsetHeight; // trigger reflow
+
+  await Promise.all([
+    animateDropTiles(dropInfo, cellH, gapPx),
+    animateSpawnTiles(newCellPositions, cellH, gapPx)
+  ]);
+
+  /* ── STAGE 11: Clean up skeletons ── */
+  removeSkeletonCells();
+
+  /* ── NO CASCADE: single resolve per swap (user's exact logic) ── */
+  isProcessing = false;
+  ensurePlayableBoard();
+  checkStatus();
+}
+
+/* ════════════════════════════════════════════════════
+   ANIMATE DROP TILES — smooth staggered fall
+════════════════════════════════════════════════════ */
+function animateDropTiles(dropInfo, cellH, gapPx) {
+  const dropping = document.querySelectorAll('.tile-dropping');
+  if (!dropping.length) return Promise.resolve();
+
+  return new Promise(resolve=>{
+    let pending = dropping.length;
+    const onDone = ()=>{ if (--pending<=0) resolve(); };
+
+    dropping.forEach(el=>{
+      const dropCount = parseInt(el.dataset.dropCount)||1;
+      const c         = parseInt(el.dataset.c)||0;
+      const r         = parseInt(el.dataset.r)||0;
+      // Duration: longer fall = slightly more time
+      const dur  = 200 + dropCount * 55;
+      // Stagger: bottom tiles drop first (lower row index = wait longer)
+      const colDelay  = c * 18;
+      const rowDelay  = (ROWS - 1 - r) * 12; // closer to bottom = less delay
+      const totalDelay = colDelay + rowDelay;
+
+      setTimeout(()=>{
+        el.style.transition = `transform ${dur}ms cubic-bezier(0.25,0.46,0.45,1.3)`;
+        el.style.transform  = '';
+        el.classList.remove('tile-dropping');
+
+        // Add landing bounce after drop
+        const safeDur = dur;
+        const bounceTimer = setTimeout(()=>{
+          el.classList.add('tile-landing');
+          setTimeout(()=>el.classList.remove('tile-landing'),150);
+          jungleAudio.play('drop', jungleAudio.panFromCell(c));
+          onDone();
+        }, safeDur + 20);
+
+        el.addEventListener('transitionend',()=>{
+          clearTimeout(bounceTimer);
+          el.classList.add('tile-landing');
+          setTimeout(()=>el.classList.remove('tile-landing'),150);
+          jungleAudio.play('drop', jungleAudio.panFromCell(c));
+          onDone();
+        },{once:true});
+      }, totalDelay);
     });
-    drop();
-    setTimeout(() => {
-      fill(cfg.animalTypes);
-      renderBoard(undefined, true);
-      // ═══ NO CASCADE — single resolve per swap (user's exact logic) ═══
-      isProcessing = false;
-      ensurePlayableBoard();
-      checkStatus();
-    }, 300);
-  }, animationsEnabled ? 460 : 120);
+  });
 }
 
-function matchIsSpecial(matches, r, c) {
-  return matches.some(m => m.shape !== 'line' && m.cells.some(cell => cell.r === r && cell.c === c));
+/* ════════════════════════════════════════════════════
+   ANIMATE SPAWN TILES — tiles fall from above board
+════════════════════════════════════════════════════ */
+function animateSpawnTiles(newCellPositions, cellH, gapPx) {
+  const spawning = document.querySelectorAll('.tile-spawning');
+  if (!spawning.length) return Promise.resolve();
+
+  return new Promise(resolve=>{
+    let pending = spawning.length;
+    const onDone = ()=>{ if (--pending<=0) resolve(); };
+
+    spawning.forEach(el=>{
+      const c   = parseInt(el.dataset.c)||0;
+      const r   = parseInt(el.dataset.r)||0;
+      // Tiles at higher rows appear first (they start closer to top)
+      const dur        = 250 + r * 40;
+      const spawnDelay = c * 25 + r * 30 + 120; // stagger columns + rows
+
+      setTimeout(()=>{
+        el.style.transition = `transform ${dur}ms cubic-bezier(0.22,1.2,0.36,1)`;
+        el.style.transform  = '';
+        el.classList.remove('tile-spawning');
+
+        const bounceTimer = setTimeout(()=>{
+          el.classList.add('tile-landing');
+          setTimeout(()=>el.classList.remove('tile-landing'),120);
+          onDone();
+        }, dur + 20);
+
+        el.addEventListener('transitionend',()=>{
+          clearTimeout(bounceTimer);
+          el.classList.add('tile-landing');
+          setTimeout(()=>el.classList.remove('tile-landing'),120);
+          onDone();
+        },{once:true});
+      }, spawnDelay);
+    });
+  });
 }
 
-function drawAttackLine(from, to) {
-  const a = getEl(from[0], from[1]);
-  const b = getEl(to[0], to[1]);
-  if (!a || !b) return;
-  const ar = a.getBoundingClientRect();
-  const br = b.getBoundingClientRect();
-  const x1 = ar.left + ar.width / 2, y1 = ar.top + ar.height / 2;
-  const x2 = br.left + br.width / 2, y2 = br.top + br.height / 2;
-  const dx = x2 - x1, dy = y2 - y1;
-  const line = document.createElement('div');
-  line.className = 'attack-line';
-  line.style.left = `${x1}px`;
-  line.style.top = `${y1}px`;
-  line.style.width = `${Math.hypot(dx, dy)}px`;
-  line.style.rotate = `${Math.atan2(dy, dx)}rad`;
-  document.body.appendChild(line);
-  setTimeout(() => line.remove(), 460);
-}
-
+/* ════════════════════════════════════════════════════
+   DROP & FILL (User's exact engine — DO NOT CHANGE)
+════════════════════════════════════════════════════ */
 function drop() {
-  lastDroppedCells.clear();
-  for (let c = 0; c < COLS; c++) {
-    let e = ROWS - 1;
-    for (let r = ROWS - 1; r >= 0; r--) {
-      if (board[r][c] !== -1) {
-        if (r !== e) { board[e][c] = board[r][c]; board[r][c] = -1; lastDroppedCells.add(`${e},${c}`); }
+  for (let c=0;c<COLS;c++) {
+    let e=ROWS-1;
+    for (let r=ROWS-1;r>=0;r--) {
+      if (board[r][c]!==-1) {
+        if (r!==e) { board[e][c]=board[r][c]; board[r][c]=-1; }
         e--;
       }
     }
   }
 }
+
 function fill(animalTypes) {
-  lastSpawnedCells.clear();
-  const types = animalTypes || getConfig(level).animalTypes;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      if (board[r][c] === -1) board[r][c] = pickSpawnAnimal(types, r, c);
-    }
-  }
+  const types = animalTypes||getConfig(level).animalTypes;
+  for (let r=0;r<ROWS;r++)
+    for (let c=0;c<COLS;c++)
+      if (board[r][c]===-1) board[r][c]=pickSpawnAnimal(types,r,c);
 }
 
-function pickSpawnAnimal(animalTypes, r, c) {
-  const weights = getSpawnWeights(animalTypes);
-  const tried = new Set();
-  while (tried.size < animalTypes.length) {
-    const animal = weightedPick(animalTypes, weights, tried);
-    tried.add(animal);
-    const makesHorizontal = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
-    const makesVertical = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
-    const makesBox = r >= 1 && c >= 1 && board[r - 1][c] === animal && board[r][c - 1] === animal && board[r - 1][c - 1] === animal;
-    if (!makesHorizontal && !makesVertical && !makesBox) return animal;
+function pickSpawnAnimal(animalTypes,r,c) {
+  const weights=getSpawnWeights(animalTypes);
+  const tried=new Set();
+  while (tried.size<animalTypes.length) {
+    const animal=weightedPick(animalTypes,weights,tried); tried.add(animal);
+    const mH=c>=2&&board[r][c-1]===animal&&board[r][c-2]===animal;
+    const mV=r>=2&&board[r-1][c]===animal&&board[r-2][c]===animal;
+    if (!mH&&!mV) return animal;
   }
-  return pickSafeAnimal(animalTypes, r, c);
+  return pickSafeAnimal(animalTypes,r,c);
 }
 
 function getSpawnWeights(animalTypes) {
-  const counts = new Map(animalTypes.map(t => [t, 0]));
-  let filled = 0;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const v = board[r][c];
-      if (v >= 0 && counts.has(v)) {
-        counts.set(v, counts.get(v) + 1);
-        filled++;
-      }
-    }
+  const counts=new Map(animalTypes.map(t=>[t,0]));
+  let filled=0;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) {
+    const v=board[r][c]; if(v>=0&&counts.has(v)){counts.set(v,counts.get(v)+1);filled++;}
   }
-  const avg = filled > 0 ? filled / animalTypes.length : 0;
-  const weights = new Map();
-  for (const type of animalTypes) {
-    const diff = counts.get(type) - avg;
-    const penalty = diff > 0 ? Math.min(diff * 0.22, 0.72) : 0;
-    weights.set(type, Math.max(0.12, 1 - penalty));
+  const avg=filled>0?filled/animalTypes.length:0;
+  const weights=new Map();
+  for(const type of animalTypes){
+    const diff=counts.get(type)-avg;
+    const penalty=diff>0?Math.min(diff*0.22,0.72):0;
+    weights.set(type,Math.max(0.12,1-penalty));
   }
   return weights;
 }
 
-function weightedPick(types, weights, blacklist) {
-  const pool = types.filter(t => !blacklist.has(t));
-  const total = pool.reduce((sum, t) => sum + (weights.get(t) || 1), 0);
-  let roll = Math.random() * total;
-  for (const type of pool) {
-    roll -= (weights.get(type) || 1);
-    if (roll <= 0) return type;
-  }
-  return pool[pool.length - 1];
+function weightedPick(types,weights,blacklist) {
+  const pool=types.filter(t=>!blacklist.has(t));
+  const total=pool.reduce((s,t)=>s+(weights.get(t)||1),0);
+  let roll=Math.random()*total;
+  for (const type of pool){ roll-=(weights.get(type)||1); if(roll<=0)return type; }
+  return pool[pool.length-1];
 }
 
+/* ════════════════════════════════════════════════════
+   SCORE & STATUS
+════════════════════════════════════════════════════ */
 function updateScore() {
-  const cfg = getConfig(level);
-  document.getElementById('score').textContent = score;
-  const pct = Math.min((score / cfg.target) * 100, 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('huntCounter').textContent = '🏆 Score: ' + score + ' / ' + cfg.target;
-  if (score > bestScore) { bestScore = score; document.getElementById('bestScore').textContent = bestScore; }
+  const cfg=getConfig(level);
+  const scoreEl=document.getElementById('score');
+  scoreEl.textContent=score;
+  scoreEl.classList.remove('pop'); void scoreEl.offsetWidth; scoreEl.classList.add('pop');
+  const pct=Math.min((score/cfg.target)*100,100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('huntCounter').textContent='🏆 Score: '+score+' / '+cfg.target;
+  if (score>bestScore){ bestScore=score; document.getElementById('bestScore').textContent=bestScore; }
 }
-function announceTurn(matchCount, special, type, hunted, points) {
-  showMsg('✨ Match! +' + points + ' points!');
-}
+
 function checkStatus() {
-  const cfg = getConfig(level);
-  const won = score >= cfg.target;
-  if (won) setTimeout(showLevelComplete, 420);
-  else if (movesLeft <= 0) setTimeout(showGameOver, 420);
+  const cfg=getConfig(level);
+  if (score>=cfg.target)    setTimeout(showLevelComplete,420);
+  else if (movesLeft<=0)    setTimeout(showGameOver,420);
+  else                      markPossibleMoveHint();
 }
+
+/* ════════════════════════════════════════════════════
+   LEVEL COMPLETE & GAME OVER
+════════════════════════════════════════════════════ */
 function showLevelComplete() {
-  const bonus = movesLeft * 50;
-  score += bonus; updateScore();
-  document.getElementById('completedLevel').textContent = level;
-  document.getElementById('levelScore').textContent = score;
-  document.getElementById('bonusMoves').textContent = movesLeft;
-  document.getElementById('bonusPts').textContent = bonus;
+  const bonus=movesLeft*50; score+=bonus; updateScore();
+  const stars=movesLeft>6?3:movesLeft>2?2:1;
+  document.getElementById('completedLevel').textContent=level;
+  document.getElementById('levelScore').textContent=score;
+  document.getElementById('bonusMoves').textContent=movesLeft;
+  document.getElementById('bonusPts').textContent=bonus;
+  document.getElementById('lvlStars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
   jungleAudio.play('win');
-  showComboBanner('👑 Victory of the Jungle!');
-  window.saveProgressToCloud({ level, score, stars: movesLeft > 6 ? 3 : movesLeft > 2 ? 2 : 1 }).catch(()=>{});
+  showComboBanner('👑 Victory!');
+  window.saveProgressToCloud({level,score,stars}).catch(()=>{});
   document.getElementById('lvlOverlay').classList.add('active');
 }
+
 function showGameOver() {
-  const cfg = getConfig(level);
-  document.getElementById('failedLevel').textContent = level;
-  document.getElementById('finalScore').textContent = score;
-  const failInfo = document.getElementById('failInfo');
-  failInfo.innerHTML = '🏆 Score: <span id="failProgress">' + score + '</span> / <span id="failTarget">' + cfg.target + '</span>';
+  const cfg=getConfig(level);
+  document.getElementById('failedLevel').textContent=level;
+  document.getElementById('finalScore').textContent=score;
+  document.getElementById('failInfo').innerHTML=
+    '🏆 Score: <span id="failProgress">'+score+'</span> / <span id="failTarget">'+cfg.target+'</span>';
   jungleAudio.play('fail');
-  showComboBanner('The Jungle is Ruthless! Try Again.');
   document.getElementById('overOverlay').classList.add('active');
 }
-function nextLevel() { document.getElementById('lvlOverlay').classList.remove('active'); level++; initLevel(); }
-function retryLevel() { document.getElementById('overOverlay').classList.remove('active'); initLevel(); }
-function restartGame() { document.getElementById('lvlOverlay').classList.remove('active'); document.getElementById('overOverlay').classList.remove('active'); level = 1; initLevel(); }
-function showMsg(txt, combo=false) { const el = document.getElementById('message'); el.textContent = txt; if (combo) { el.classList.add('combo'); setTimeout(() => el.classList.remove('combo'), 500); } }
+
+function nextLevel()    { document.getElementById('lvlOverlay').classList.remove('active');  level++; initLevel(); }
+function retryLevel()   { document.getElementById('overOverlay').classList.remove('active'); initLevel(); }
+function restartGame()  {
+  document.getElementById('lvlOverlay').classList.remove('active');
+  document.getElementById('overOverlay').classList.remove('active');
+  level=1; initLevel();
+}
+
+/* ════════════════════════════════════════════════════
+   UI HELPERS
+════════════════════════════════════════════════════ */
+function showMsg(txt, combo=false) {
+  const el=document.getElementById('message');
+  el.textContent=txt;
+  if (combo){ el.classList.remove('msg-combo'); void el.offsetWidth; el.classList.add('msg-combo'); }
+  else       el.classList.remove('msg-combo');
+}
+
+function shakeBoard() {
+  const c=document.getElementById('gameContainer');
+  c.classList.remove('screen-shake'); void c.offsetWidth; c.classList.add('screen-shake');
+  setTimeout(()=>c.classList.remove('screen-shake'),420);
+}
 
 function fxLayer() {
-  let layer = document.querySelector('.fx-layer');
-  if (!layer) { layer = document.createElement('div'); layer.className = 'fx-layer'; document.body.appendChild(layer); }
-  return layer;
-}
-function drawAttackTrail(r1, c1, r2, c2) {
-  const a = getEl(r1,c1), b = getEl(r2,c2); if (!a || !b) return;
-  const ar = a.getBoundingClientRect(), br = b.getBoundingClientRect();
-  const x1 = ar.left + ar.width/2, y1 = ar.top + ar.height/2;
-  const x2 = br.left + br.width/2, y2 = br.top + br.height/2;
-  const dx = x2-x1, dy = y2-y1;
-  const trail = document.createElement('div');
-  trail.className = 'attack-trail';
-  trail.style.left = x1 + 'px'; trail.style.top = y1 + 'px'; trail.style.width = Math.hypot(dx,dy) + 'px';
-  trail.style.transform = `rotate(${Math.atan2(dy,dx)}rad)`;
-  fxLayer().appendChild(trail); setTimeout(() => trail.remove(), 460);
-}
-function drawBlastRing(r, c) {
-  const el = getEl(r,c); if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const ring = document.createElement('div');
-  ring.className = 'blast-ring';
-  ring.style.left = rect.left + rect.width/2 + 'px';
-  ring.style.top = rect.top + rect.height/2 + 'px';
-  fxLayer().appendChild(ring); setTimeout(() => ring.remove(), 650);
-}
-function showComboBanner(text) {
-  const b = document.createElement('div'); b.className = 'combo-banner'; b.textContent = text;
-  document.body.appendChild(b); setTimeout(() => b.remove(), 920);
+  let l=document.querySelector('.fx-layer');
+  if (!l){ l=document.createElement('div'); l.className='fx-layer'; document.body.appendChild(l); }
+  return l;
 }
 
-function spawnParticles(el, hunted=false) {
-  const rect = el.getBoundingClientRect();
-  const icons = hunted ? ['🐾','💥','🌿','✨'] : ['🌿','🍃','✨','🌱'];
-  for (let i = 0; i < (hunted ? 5 : 3); i++) {
-    const p = document.createElement('div');
-    p.className = 'particles';
-    p.textContent = icons[Math.floor(Math.random() * icons.length)];
-    p.style.left = rect.left + rect.width / 2 + 'px';
-    p.style.top  = rect.top + rect.height / 2 + 'px';
-    p.style.transform = `translateX(${(Math.random() - 0.5) * 90}px)`;
+function showScoreFloat(r,c,text) {
+  const el=getEl(r,c); if (!el) return;
+  const rect=el.getBoundingClientRect();
+  const f=document.createElement('div');
+  f.className='score-float'; f.textContent=text;
+  f.style.left=(rect.left+rect.width/2-18)+'px';
+  f.style.top =(rect.top+rect.height/2-8)+'px';
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),900);
+}
+
+function drawBlastRing(r,c) {
+  const el=getEl(r,c); if (!el) return;
+  const rect=el.getBoundingClientRect();
+  const ring=document.createElement('div');
+  ring.className='blast-ring';
+  ring.style.left=(rect.left+rect.width/2)+'px';
+  ring.style.top =(rect.top+rect.height/2)+'px';
+  fxLayer().appendChild(ring);
+  setTimeout(()=>ring.remove(),650);
+}
+
+function showComboBanner(text) {
+  const b=document.createElement('div'); b.className='combo-banner'; b.textContent=text;
+  document.body.appendChild(b); setTimeout(()=>b.remove(),960);
+}
+
+/* ════════════════════════════════════════════════════
+   MATCH PARTICLES — emoji burst on tile pop
+════════════════════════════════════════════════════ */
+function spawnMatchParticles(el) {
+  const rect=el.getBoundingClientRect();
+  const icons=['🌿','🍃','✨','🌱','💫','🌟'];
+  const count = 4 + Math.floor(Math.random()*3);
+  for (let i=0;i<count;i++) {
+    const p=document.createElement('div');
+    p.className='match-particle';
+    p.textContent=icons[Math.floor(Math.random()*icons.length)];
+    const angle=((360/count)*i + Math.random()*30) * Math.PI/180;
+    const dist=35+Math.random()*40;
+    const tx=Math.cos(angle)*dist, ty=Math.sin(angle)*dist-20;
+    const dur=(0.55+Math.random()*0.35)+'s';
+    p.style.setProperty('--tx', tx+'px');
+    p.style.setProperty('--ty', ty+'px');
+    p.style.setProperty('--dur', dur);
+    p.style.left=(rect.left+rect.width/2-10)+'px';
+    p.style.top =(rect.top+rect.height/2-10)+'px';
     document.body.appendChild(p);
-    setTimeout(() => p.remove(), 1000);
+    setTimeout(()=>p.remove(), parseFloat(dur)*1000+100);
   }
 }
 
+/* ════════════════════════════════════════════════════
+   LEVEL INTRO SCREEN
+════════════════════════════════════════════════════ */
+function showLevelIntro(text) {
+  document.querySelector('.level-intro')?.remove();
+  const intro=document.createElement('div');
+  intro.className='level-intro';
+  intro.innerHTML=`<div class="level-intro-text">🌿 ${text}</div>`;
+  document.body.appendChild(intro);
+  setTimeout(()=>intro.remove(),1650);
+}
+
+/* ════════════════════════════════════════════════════
+   HINT SYSTEM
+════════════════════════════════════════════════════ */
+let hintTimer=null;
+function markPossibleMoveHint() {
+  clearHints();
+  if (hintTimer) clearTimeout(hintTimer);
+  hintTimer=setTimeout(()=>{
+    const move=findFirstValidMove();
+    if (move) move.forEach(({r,c})=>getEl(r,c)?.classList.add('hint-pulse'));
+  }, 3000);
+}
+function clearHints() {
+  if (hintTimer){ clearTimeout(hintTimer); hintTimer=null; }
+  document.querySelectorAll('.hint-pulse').forEach(el=>el.classList.remove('hint-pulse'));
+}
+
+/* ════════════════════════════════════════════════════
+   VALID MOVE DETECTION
+════════════════════════════════════════════════════ */
 function hasAnyValidMove() { return Boolean(findFirstValidMove()); }
 function findFirstValidMove() {
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
     for (const [dr,dc] of [[1,0],[0,1]]) {
-      const nr = r + dr, nc = c + dc;
-      if (nr >= ROWS || nc >= COLS) continue;
-      swapCells(r,c,nr,nc);
-      const ok = findMatches().length > 0;
-      swapCells(r,c,nr,nc);
-      if (ok) return [{r,c},{r:nr,c:nc}];
+      const nr=r+dr,nc=c+dc; if(nr>=ROWS||nc>=COLS) continue;
+      swapCells(r,c,nr,nc); const ok=findMatches().length>0; swapCells(r,c,nr,nc);
+      if(ok) return [{r,c},{r:nr,c:nc}];
     }
   }
   return null;
 }
+
 function ensurePlayableBoard() {
   if (hasAnyValidMove()) return;
-  showMsg('🌪️ Jungle reshuffled — no valid moves remained!');
+  showMsg('🌪️ Jungle reshuffled!');
   createBoard(getConfig(level).animalTypes);
-  renderBoard();
-}
-function markPossibleMoveHint() {
-  clearHints();
-  const move = findFirstValidMove();
-  if (!move) return;
-  setTimeout(() => move.forEach(({r,c}) => getEl(r,c)?.classList.add('hint-pulse')), 2600);
-}
-function clearHints() { document.querySelectorAll('.hint-pulse').forEach(el => el.classList.remove('hint-pulse')); }
-
-
-function showLevelIntro(text) {
-  const oldIntro = document.querySelector('.level-intro');
-  if (oldIntro) oldIntro.remove();
-  const intro = document.createElement('div');
-  intro.className = 'level-intro';
-  intro.innerHTML = `<div class="level-intro-text">🌿 ${text}</div>`;
-  document.body.appendChild(intro);
-  setTimeout(() => intro.remove(), 1600);
+  renderBoard(undefined, true);
 }
 
-function shakeBoard() {
-  const container = document.getElementById('gameContainer');
-  container.classList.remove('screen-shake');
-  void container.offsetWidth;
-  container.classList.add('screen-shake');
-  setTimeout(() => container.classList.remove('screen-shake'), 420);
-}
-
-function showScoreFloat(r, c, text) {
-  const el = getEl(r, c);
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const scoreEl = document.createElement('div');
-  scoreEl.className = 'score-float';
-  scoreEl.textContent = text;
-  scoreEl.style.left = rect.left + rect.width / 2 - 18 + 'px';
-  scoreEl.style.top = rect.top + rect.height / 2 - 8 + 'px';
-  document.body.appendChild(scoreEl);
-  setTimeout(() => scoreEl.remove(), 920);
-}
-
-function unlockAudioOnce(event) {
-  if (event?.target?.id === 'audioBtn') return;
-  jungleAudio.unlock();
-}
-
+/* ════════════════════════════════════════════════════
+   EVENT LISTENERS & START
+════════════════════════════════════════════════════ */
 document.getElementById('restartBtn').addEventListener('click', restartGame);
-document.getElementById('audioBtn').addEventListener('click', () => jungleAudio.toggle());
-document.getElementById('animationBtn').addEventListener('click', toggleAnimations);
-document.addEventListener('pointerdown', unlockAudioOnce, { once:true });
-document.addEventListener('keydown', unlockAudioOnce, { once:true });
+document.getElementById('audioBtn').addEventListener('click', ()=>jungleAudio.toggle());
+document.addEventListener('pointerdown', (e)=>{
+  if (e.target.id==='audioBtn') return;
+  jungleAudio.unlock();
+}, {once:true});
+document.addEventListener('keydown', ()=>jungleAudio.unlock(), {once:true});
+
 initLevel();
 </script>
 </body>
