@@ -853,12 +853,12 @@ function toggleAnimations() {
 function initLevel() {
   const cfg = getConfig(level);
   ROWS = cfg.rows; COLS = cfg.cols;
-  score = 0; movesLeft = cfg.moves; huntProgress = 0;
+  score = 250; movesLeft = cfg.moves; huntProgress = 0;
   isProcessing = false; selectedRow = -1; selectedCol = -1;
   lastSpawnedCells.clear(); lastDroppedCells.clear();
 
   document.getElementById('levelDisplay').textContent = level;
-  document.getElementById('score').textContent = 0;
+  document.getElementById('score').textContent = 250;
   document.getElementById('moves').textContent = movesLeft;
   document.getElementById('bestScore').textContent = bestScore;
   document.getElementById('progressFill').style.width = '0%';
