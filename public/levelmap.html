@@ -21,16 +21,58 @@ body{
 .bg-layer{
   position:fixed;inset:0;z-index:0;
   background:url('assets/levelmap_bg.png') center top / cover no-repeat;
-  transform:scale(1.08);
   will-change:transform;
+  transition:opacity .3s;
 }
 .bg-overlay{
   position:fixed;inset:0;z-index:1;
   background:linear-gradient(180deg,
-    rgba(5,15,5,.72) 0%,
-    rgba(5,15,5,.55) 40%,
-    rgba(5,15,5,.72) 100%);
+    rgba(5,15,5,.65) 0%,
+    rgba(5,15,5,.50) 40%,
+    rgba(5,15,5,.65) 100%);
 }
+
+/* ── ZONE SECTION BACKGROUNDS ── */
+.zone-section{
+  position:relative;
+  background-attachment:local;
+}
+.zone-section::before{
+  content:'';
+  position:absolute;inset:0;z-index:0;
+  background-size:cover;
+  background-position:center top;
+  background-repeat:no-repeat;
+  opacity:.85;
+  pointer-events:none;
+}
+/* Zone 1-2: Starter + Savanna → jungle */
+.zone-section[data-zone="1"]::before,
+.zone-section[data-zone="2"]::before{
+  background-image:url('assets/levelmap_bg.png');
+}
+/* Zone 3-4: Forest + River Delta → still jungle */
+.zone-section[data-zone="3"]::before,
+.zone-section[data-zone="4"]::before{
+  background-image:url('assets/levelmap_bg.png');
+  filter:hue-rotate(15deg) brightness(.9);
+}
+/* Zone 5-6: Volcano + Lava → volcano */
+.zone-section[data-zone="5"]::before,
+.zone-section[data-zone="6"]::before{
+  background-image:url('assets/levelmap_bg_volcano.png');
+}
+/* Zone 7-8: Frozen + Desert → frozen */
+.zone-section[data-zone="7"]::before,
+.zone-section[data-zone="8"]::before{
+  background-image:url('assets/levelmap_bg_frozen.png');
+}
+/* Zone 9-10: Cave + Cosmic → cosmic */
+.zone-section[data-zone="9"]::before,
+.zone-section[data-zone="10"]::before{
+  background-image:url('assets/levelmap_bg_cosmic.png');
+}
+.zone-section>*{position:relative;z-index:1;}
 
 /* ── FLOATING PARTICLES ── */
 .particles{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
@@ -491,6 +533,12 @@ function buildMap(){
   cont.innerHTML = '';
 
   ZONES.forEach((zone, zi) => {
+    // ── Zone section wrapper
+    const section = document.createElement('div');
+    section.className = 'zone-section';
+    section.setAttribute('data-zone', zi+1);
+    cont.appendChild(section);
+
     // ── Zone header
     const hdr = document.createElement('div');
     hdr.className = 'zone-header';
@@ -501,7 +549,7 @@ function buildMap(){
         <div class="zone-title">Zone ${zi+1} · ${zone.name}</div>
         <div class="zone-range">Levels ${zone.range[0]} – ${zone.range[1]}</div>
       </div>`;
-    cont.appendChild(hdr);
+    section.appendChild(hdr);
 
     // ── Level nodes
     const track = document.createElement('div');
@@ -552,7 +600,7 @@ function buildMap(){
       row.appendChild(node);
       track.appendChild(row);
     }
-    cont.appendChild(track);
+    section.appendChild(track);
 
     // ── Zone Gate (between zones, not after last zone)
     if(zone.gateIcon){
@@ -601,9 +649,13 @@ function playLevel(lv){
 
 // ── Parallax on scroll
 document.getElementById('mapWrap').addEventListener('scroll', e => {
+  // Parallax: subtle bg switch based on scroll zone
   const scrollY = e.target.scrollTop;
-  document.getElementById('bgLayer').style.transform =
-    `scale(1.08) translateY(${-scrollY * 0.12}px)`;
+  const totalH = mapEl.scrollHeight;
+  const progress = scrollY / totalH;
+  // Fade out fixed bg as user scrolls into zone-specific sections
+  const bgOpacity = progress < 0.15 ? 1 : Math.max(0, 1 - (progress - 0.15) * 3);
+  document.getElementById('bgLayer').style.opacity = bgOpacity;
 }, {passive:true});
 
 // ══════════════════════════════════════════
