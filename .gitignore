@@ -1,11 +1,26 @@
-*.iml
-.gradle
-/local.properties
-/.idea
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Vercel
+.vercel/
+
+# Build
 /build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-*.apk
+/dist
+*.log
+
+# Env
+.env
+.env.local
+.env*.local
