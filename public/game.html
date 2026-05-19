@@ -680,7 +680,137 @@ h1 {
 #lbRefresh:hover { background:rgba(240,192,64,.3); }
 /* ═══════════════════════════════════════════════════════════ */
 
+
+/* ═══ LOGIN SCREEN ══════════════════════════════════════ */
+#loginScreen {
+  position:fixed;inset:0;z-index:9000;
+  background:radial-gradient(ellipse at top,#0d3b1e 0%,#050f08 80%);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+#loginScreen.hidden{display:none;}
+#loginBox {
+  background:linear-gradient(160deg,#0d3b1e,#081a0e);
+  border:2px solid #1a5c28;border-radius:24px;
+  padding:40px 32px;max-width:340px;width:100%;
+  text-align:center;
+  box-shadow:0 0 40px #00000088,inset 0 0 40px #0a2e0f44;
+}
+.login-crown{font-size:56px;margin-bottom:8px;display:block;}
+#loginBox h1{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:1.35rem;margin-bottom:4px;text-shadow:0 0 12px #f0c04066;}
+.login-sub{color:#6dbf67;font-size:0.85rem;margin-bottom:28px;}
+#googleLoginBtn {
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;padding:14px 20px;
+  background:#fff;color:#1a1a1a;border:none;border-radius:12px;
+  font-size:1rem;font-weight:700;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 16px #00000044;margin-bottom:16px;
+}
+#googleLoginBtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px #00000066;}
+#googleLoginBtn:active{transform:scale(0.97);}
+.g-icon{width:22px;height:22px;flex-shrink:0;}
+.or-div{color:#4a7a4a;font-size:0.8rem;margin:4px 0 14px;display:flex;align-items:center;gap:10px;}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:#1a5c28;}
+#guestBtn {
+  width:100%;padding:12px 20px;
+  background:transparent;border:1.5px solid #2d6b35;border-radius:12px;
+  color:#6dbf67;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .15s;
+}
+#guestBtn:hover{background:#0d3b1e;border-color:var(--gold);color:var(--gold);}
+
+/* ═══ USER BAR ══════════════════════════════════════════ */
+#userBar {
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:8px;padding:6px 8px;
+  background:#0d3b1e88;border-radius:12px;border:1px solid #1a5c2844;
+}
+#avatarBtn {
+  display:flex;align-items:center;gap:8px;flex:1;
+  cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .15s;
+  min-width:0;
+}
+#avatarBtn:hover{background:#1a5c2844;}
+.hdr-avatar {
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--gold);background:#0a2e0f;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:var(--gold);
+  flex-shrink:0;overflow:hidden;
+}
+.hdr-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+#headerName{color:#e8f5e9;font-size:0.9rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;}
+#headerLevel{color:var(--gold);font-size:0.72rem;margin-left:auto;background:#0a2e0f;padding:2px 8px;border-radius:20px;border:1px solid #2d6b35;flex-shrink:0;}
+#shareBtn2,#lbBtn{
+  padding:7px 12px;border:1.5px solid #2d6b35;border-radius:8px;
+  background:#0a2e0f;color:#6dbf67;font-size:0.78rem;font-weight:700;
+  cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;
+}
+#shareBtn2:hover,#lbBtn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ═══ PROFILE MODAL ═════════════════════════════════════ */
+#profileModal,#shareModal2 {
+  display:none;position:fixed;inset:0;z-index:6000;
+  background:#00000099;backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:20px;
+}
+#profileModal.open,#shareModal2.open{display:flex;}
+#profileBox,#shareBox2 {
+  background:linear-gradient(160deg,#0d3b1e,#081a0e);
+  border:2px solid #1a5c28;border-radius:20px;
+  padding:28px 24px;max-width:320px;width:100%;
+  position:relative;text-align:center;
+  box-shadow:0 0 40px #00000088;
+}
+.modal-close {
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;color:#4a7a4a;
+  font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;
+}
+.modal-close:hover{color:var(--gold);}
+.p-avatar {
+  width:80px;height:80px;border-radius:50%;
+  border:3px solid var(--gold);background:#0a2e0f;
+  margin:8px auto 12px;display:flex;
+  align-items:center;justify-content:center;
+  font-size:38px;overflow:hidden;
+}
+.p-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+#profileName{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:1.05rem;margin-bottom:4px;}
+#profileEmail{color:#6dbf67;font-size:0.78rem;margin-bottom:18px;}
+.p-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.p-stat{background:#0a2e0f;border:1px solid #1a5c28;border-radius:10px;padding:10px 8px;}
+.p-stat-label{color:#4a7a4a;font-size:0.68rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.p-stat-val{color:var(--gold);font-size:1.05rem;font-weight:700;}
+#logoutBtn2 {
+  width:100%;padding:11px;
+  background:#1a0808;border:1.5px solid #5c1a1a;border-radius:10px;
+  color:#e08080;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all .15s;
+}
+#logoutBtn2:hover{background:#2a0f0f;border-color:#e08080;}
+
+/* ═══ SHARE MODAL ═══════════════════════════════════════ */
+#shareBox2 h2{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:1.05rem;margin-bottom:6px;}
+#shareBox2 p{color:#6dbf67;font-size:0.82rem;margin-bottom:18px;}
+.s-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.s-btn {
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;border:none;border-radius:12px;
+  font-size:0.9rem;font-weight:600;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;text-align:left;
+}
+.s-btn:hover{transform:translateY(-2px);}
+.s-btn:active{transform:scale(0.97);}
+.s-wa{background:#25D366;color:#fff;}
+.s-tw{background:#15202b;color:#1DA1F2;border:1.5px solid #1DA1F2;}
+.s-cp{background:#0a2e0f;color:var(--gold);border:1.5px solid var(--gold);}
+#shareLinkBox {
+  width:100%;padding:9px 12px;
+  background:#0a2e0f;border:1px solid #1a5c28;border-radius:8px;
+  color:#6dbf67;font-size:0.78rem;text-align:center;outline:none;cursor:text;
+}
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div id="gameContainer">
@@ -691,11 +821,13 @@ h1 {
     <div class="subtitle">🌿 Nepal Wild Kingdom 🌿</div>
   </div>
 
-  <div id="profileBar">Guest mode</div>
-
-  <div class="share-row">
-    <input id="shareLink" readonly placeholder="Invite link">
-    <button id="shareBtn">SHARE</button>
+  <div id="userBar">
+    <div id="avatarBtn" onclick="openProfile()">
+      <div class="hdr-avatar" id="hdrAvatarEl">🦁</div>
+      <span id="headerName">Guest</span>
+      <span id="headerLevel">Lv 1</span>
+    </div>
+    <button id="shareBtn2" onclick="openShareModal()">📤 Share</button>
     <button id="lbBtn" onclick="openLeaderboard()">🏆 Board</button>
   </div>
 
@@ -775,129 +907,176 @@ h1 {
 
 <script>
 /* ════════════════════════════════════════════════════
-   SUPABASE CONFIG
+   SUPABASE CONFIG + AUTH
 ════════════════════════════════════════════════════ */
 const SUPA_URL = 'https://ziznivooactegfbcvgiy.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppem5pdm9vYWN0ZWdmYmN2Z2l5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNzg3MTMsImV4cCI6MjA5NDc1NDcxM30.vOQSDMzCtyaK9KifAb7IgJ5Jc2r-FBl_GUXCepTymm0';
-const SUPA_HEADERS = {
-  'apikey': SUPA_KEY,
-  'Authorization': 'Bearer ' + SUPA_KEY,
-  'Content-Type': 'application/json'
-};
+let supaClient = null;
+let currentUser = null;
+let currentSession = null;
 
-/* ════════════════════════════════════════════════════
-   LOCAL PROGRESS + CLOUD SAVE (Supabase)
-════════════════════════════════════════════════════ */
-(function() {
-  const SAVE_KEY = 'koj_progress';
-  function loadProgress() {
-    try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch { return {}; }
+/* ── Init Supabase client (from CDN) ─────────────────────────────────────── */
+function initSupabase() {
+  if (window.supabase && window.supabase.createClient) {
+    supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    return true;
   }
-  function saveProgress(data) {
-    const cur = loadProgress();
-    Object.assign(cur, data);
-    localStorage.setItem(SAVE_KEY, JSON.stringify(cur));
-  }
+  return false;
+}
 
-  const progress   = loadProgress();
-  const playerName = localStorage.getItem('koj_player_name') || 'Guest';
-  document.getElementById('profileBar').textContent = '🦁 ' + playerName;
-
-  // Restore saved level if available
-  if (progress.currentLevel && progress.currentLevel > 1) {
-    window._restoredLevel = progress.currentLevel;
-  }
-
-  // ── Cloud save on level complete ──────────────────────────────────────────
-  window.saveProgressToCloud = async (payload) => {
-    // 1. Local save (always)
-    const newTotal = (loadProgress().totalScore || 0) + (payload.score || 0);
-    saveProgress({
-      currentLevel: payload.level + 1,
-      totalScore:   newTotal,
-      lastPlayed:   new Date().toISOString()
-    });
-
-    // 2. Supabase leaderboard upsert
-    const name = localStorage.getItem('koj_player_name') || 'Guest';
-    try {
-      // Fetch existing row
-      const chkRes = await fetch(
-        `${SUPA_URL}/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(name)}&select=best_score,level_reached`,
-        { headers: SUPA_HEADERS }
-      );
-      const existing = chkRes.ok ? await chkRes.json() : [];
-      const prevBest  = existing[0]?.best_score   || 0;
-      const prevLevel = existing[0]?.level_reached || 1;
-      const newBest   = Math.max(payload.score, prevBest);
-      const newLevel  = Math.max(payload.level, prevLevel);
-
-      if (existing.length > 0) {
-        // Update
-        await fetch(
-          `${SUPA_URL}/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(name)}`,
-          {
-            method: 'PATCH',
-            headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
-            body: JSON.stringify({ best_score: newBest, level_reached: newLevel, updated_at: new Date().toISOString() })
-          }
-        );
-      } else {
-        // Insert new entry
-        await fetch(
-          `${SUPA_URL}/rest/v1/leaderboard`,
-          {
-            method: 'POST',
-            headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
-            body: JSON.stringify({ player_name: name, best_score: newBest, level_reached: newLevel })
-          }
-        );
-      }
-    } catch(e) {
-      console.warn('Supabase sync failed (offline?):', e);
-    }
-
-    // 3. Game save upsert
-    try {
-      const name = localStorage.getItem('koj_player_name') || 'Guest';
-      const saveChk = await fetch(
-        `${SUPA_URL}/rest/v1/game_saves?player_name=eq.${encodeURIComponent(name)}&select=id`,
-        { headers: SUPA_HEADERS }
-      );
-      const saveEx = saveChk.ok ? await saveChk.json() : [];
-      const saveData = { player_name: name, current_level: payload.level + 1, total_score: newTotal, updated_at: new Date().toISOString() };
-      if (saveEx.length > 0) {
-        await fetch(
-          `${SUPA_URL}/rest/v1/game_saves?player_name=eq.${encodeURIComponent(name)}`,
-          { method: 'PATCH', headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' }, body: JSON.stringify(saveData) }
-        );
-      } else {
-        await fetch(
-          `${SUPA_URL}/rest/v1/game_saves`,
-          { method: 'POST', headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' }, body: JSON.stringify(saveData) }
-        );
-      }
-    } catch(e) { console.warn('Game save failed:', e); }
+function getHeaders() {
+  const token = currentSession?.access_token || SUPA_KEY;
+  return {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json'
   };
+}
 
-  const shareLink = document.getElementById('shareLink');
-  if (shareLink) shareLink.value = location.origin + '/index.html';
-})();
+/* ── Google OAuth ─────────────────────────────────────────────────────────── */
+async function loginWithGoogle() {
+  if (!supaClient) { alert('Auth not available. Try again in a moment.'); return; }
+  await supaClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+}
 
-/* ════════════════════════════════════════════════════
-   LEADERBOARD MODAL
-════════════════════════════════════════════════════ */
+async function logoutUser() {
+  if (supaClient) await supaClient.auth.signOut();
+  currentUser = null; currentSession = null;
+  localStorage.removeItem('koj_player_name');
+  localStorage.removeItem('koj_guest_mode');
+  document.getElementById('profileModal').classList.remove('open');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  setHeaderGuest();
+}
+
+function setHeaderGuest() {
+  document.getElementById('headerName').textContent = 'Guest';
+  document.getElementById('hdrAvatarEl').innerHTML = '🦁';
+  document.getElementById('headerLevel').textContent = 'Lv 1';
+}
+
+function setHeaderUser(user) {
+  const meta = user.user_metadata || {};
+  const name = meta.full_name || meta.name || user.email?.split('@')[0] || 'Player';
+  const avatar = meta.avatar_url || meta.picture || '';
+  document.getElementById('headerName').textContent = name;
+  document.getElementById('headerLevel').textContent = 'Lv ' + (window._currentLevel || 1);
+  const el = document.getElementById('hdrAvatarEl');
+  if (avatar) {
+    el.innerHTML = `<img src="${avatar}" alt="${name}">`;
+  } else {
+    el.innerHTML = name.charAt(0).toUpperCase();
+    el.style.fontSize = '16px';
+  }
+  localStorage.setItem('koj_player_name', name);
+}
+
+/* ── Profile Modal ───────────────────────────────────────────────────────── */
+function openProfile() {
+  document.getElementById('profileModal').classList.add('open');
+  if (currentUser) {
+    const meta = currentUser.user_metadata || {};
+    const name = meta.full_name || meta.name || currentUser.email?.split('@')[0] || 'Player';
+    const avatar = meta.avatar_url || meta.picture || '';
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileEmail').textContent = currentUser.email || '';
+    const pa = document.getElementById('pAvatarEl');
+    if (avatar) {
+      pa.innerHTML = `<img src="${avatar}" alt="${name}">`;
+    } else {
+      pa.innerHTML = name.charAt(0).toUpperCase();
+    }
+    document.getElementById('logoutBtn2').textContent = '🚪 Sign Out';
+    document.getElementById('logoutBtn2').onclick = logoutUser;
+    loadProfileStats(name);
+  } else {
+    document.getElementById('profileName').textContent = '🦁 Guest Player';
+    document.getElementById('profileEmail').textContent = 'Not signed in';
+    document.getElementById('pAvatarEl').innerHTML = '🦁';
+    document.getElementById('profileLevel').textContent = window._currentLevel || 1;
+    document.getElementById('profileBest').textContent = (parseInt(localStorage.getItem('koj_best')||'0')).toLocaleString();
+    document.getElementById('profileMatches').textContent = '—';
+    document.getElementById('profileRank').textContent = '#—';
+    document.getElementById('logoutBtn2').textContent = '🔑 Sign in with Google';
+    document.getElementById('logoutBtn2').onclick = () => {
+      document.getElementById('profileModal').classList.remove('open');
+      loginWithGoogle();
+    };
+  }
+}
+
+async function loadProfileStats(playerName) {
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}&select=best_score,level_reached`,
+      { headers: getHeaders() }
+    );
+    const rows = res.ok ? await res.json() : [];
+    document.getElementById('profileLevel').textContent = rows[0]?.level_reached || window._currentLevel || 1;
+    document.getElementById('profileBest').textContent = (rows[0]?.best_score || 0).toLocaleString();
+    // Global rank
+    const rRes = await fetch(
+      `${SUPA_URL}/rest/v1/leaderboard?select=player_name&order=best_score.desc`,
+      { headers: getHeaders() }
+    );
+    const all = rRes.ok ? await rRes.json() : [];
+    const rank = all.findIndex(r => r.player_name === playerName) + 1;
+    document.getElementById('profileRank').textContent = rank > 0 ? '#' + rank : '#—';
+    document.getElementById('profileMatches').textContent = '∞';
+  } catch(e) {
+    document.getElementById('profileLevel').textContent = window._currentLevel || 1;
+    document.getElementById('profileBest').textContent = (parseInt(localStorage.getItem('koj_best')||'0')).toLocaleString();
+  }
+}
+
+/* ── Share Modal ─────────────────────────────────────────────────────────── */
+function openShareModal() {
+  document.getElementById('shareModal2').classList.add('open');
+  const url = window.location.origin + '/game.html';
+  const input = document.getElementById('shareLinkBox');
+  if (input) input.value = url;
+}
+
+function shareWhatsApp() {
+  const name = document.getElementById('headerName').textContent || 'A friend';
+  const lv = window._currentLevel || 1;
+  const url = window.location.origin + '/game.html';
+  const text = `🦁 ${name} is at Level ${lv} in King of Jungle — Nepal Wild Kingdom! 🌿👑\nCan you beat my score? Play here: ${url}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareTwitter() {
+  const name = document.getElementById('headerName').textContent || 'I';
+  const lv = window._currentLevel || 1;
+  const url = window.location.origin + '/game.html';
+  const text = `🦁 ${name} reached Level ${lv} in King of Jungle! 🌿👑 #KingOfJungle #Nepal\nPlay: `;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+}
+
+async function copyShareLink() {
+  const link = document.getElementById('shareLinkBox')?.value || window.location.href;
+  try {
+    await navigator.clipboard.writeText(link);
+    const btn = document.getElementById('copyBtn');
+    if (btn) { btn.innerHTML = '<span>✅</span> Copied!'; setTimeout(() => btn.innerHTML = '<span>📋</span> Copy Invite Link', 2200); }
+  } catch { alert('Link: ' + link); }
+}
+
+/* ── Leaderboard ─────────────────────────────────────────────────────────── */
 async function fetchLeaderboard() {
   const body = document.getElementById('lbBody');
   body.innerHTML = '<li id="lbLoading">⏳ Loading…</li>';
   try {
     const res = await fetch(
       `${SUPA_URL}/rest/v1/leaderboard?select=player_name,best_score,level_reached&order=best_score.desc&limit=20`,
-      { headers: SUPA_HEADERS }
+      { headers: getHeaders() }
     );
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
-    const me   = localStorage.getItem('koj_player_name') || 'Guest';
+    const me   = localStorage.getItem('koj_player_name') || '';
     const medals = ['🥇','🥈','🥉'];
     if (!rows.length) {
       body.innerHTML = '<li style="color:#8bc88b;text-align:center;padding:16px">No scores yet — be the first! 🎮</li>';
@@ -914,7 +1093,6 @@ async function fetchLeaderboard() {
     }).join('');
   } catch(e) {
     body.innerHTML = '<li style="color:#e08080;text-align:center;padding:16px">⚠️ Could not load scores</li>';
-    console.warn(e);
   }
 }
 
@@ -923,21 +1101,121 @@ function openLeaderboard() {
   fetchLeaderboard();
 }
 
-// Close modal on backdrop click
 document.getElementById('lbModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 
-document.getElementById('shareBtn').addEventListener('click', async () => {
-  const link = document.getElementById('shareLink').value;
-  if (!link) return;
-  if (navigator.share) {
-    try { await navigator.share({ title:'King of Jungle', text:'Join me!', url:link }); } catch {}
-  } else {
-    await navigator.clipboard.writeText(link);
-    alert('Link copied!');
+/* ── Cloud Save / Restore ────────────────────────────────────────────────── */
+async function restoreCloudProgress() {
+  const name = localStorage.getItem('koj_player_name') || 'Guest';
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/game_saves?player_name=eq.${encodeURIComponent(name)}&select=current_level,total_score`,
+      { headers: getHeaders() }
+    );
+    const rows = res.ok ? await res.json() : [];
+    if (rows[0] && rows[0].current_level > 1) {
+      window._restoredLevel = rows[0].current_level;
+      window._currentLevel  = rows[0].current_level;
+      localStorage.setItem('koj_current_level', rows[0].current_level);
+      document.getElementById('headerLevel').textContent = 'Lv ' + rows[0].current_level;
+    }
+  } catch(e) { console.warn('Cloud restore failed:', e); }
+}
+
+window.saveProgressToCloud = async (payload) => {
+  const name = localStorage.getItem('koj_player_name') || 'Guest';
+  const prevBest = parseInt(localStorage.getItem('koj_best') || '0');
+  const newBest  = Math.max(payload.score, prevBest);
+  localStorage.setItem('koj_best', newBest);
+  localStorage.setItem('koj_current_level', payload.level + 1);
+  window._currentLevel = payload.level + 1;
+  document.getElementById('headerLevel').textContent = 'Lv ' + (payload.level + 1);
+
+  try {
+    const chk = await fetch(
+      `${SUPA_URL}/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(name)}&select=best_score,level_reached`,
+      { headers: getHeaders() }
+    );
+    const ex = chk.ok ? await chk.json() : [];
+    const cb = Math.max(payload.score, ex[0]?.best_score || 0);
+    const cl = Math.max(payload.level, ex[0]?.level_reached || 1);
+    if (ex.length) {
+      await fetch(`${SUPA_URL}/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(name)}`,
+        { method:'PATCH', headers:{...getHeaders(),'Prefer':'return=minimal'},
+          body: JSON.stringify({ best_score:cb, level_reached:cl, updated_at:new Date().toISOString() }) });
+    } else {
+      await fetch(`${SUPA_URL}/rest/v1/leaderboard`,
+        { method:'POST', headers:{...getHeaders(),'Prefer':'return=minimal'},
+          body: JSON.stringify({ player_name:name, best_score:cb, level_reached:cl }) });
+    }
+  } catch(e) { console.warn('Leaderboard sync failed:', e); }
+
+  try {
+    const sc = await fetch(
+      `${SUPA_URL}/rest/v1/game_saves?player_name=eq.${encodeURIComponent(name)}&select=id`,
+      { headers: getHeaders() }
+    );
+    const se = sc.ok ? await sc.json() : [];
+    const sd = { player_name:name, current_level:payload.level+1, total_score:payload.score, updated_at:new Date().toISOString() };
+    if (se.length) {
+      await fetch(`${SUPA_URL}/rest/v1/game_saves?player_name=eq.${encodeURIComponent(name)}`,
+        { method:'PATCH', headers:{...getHeaders(),'Prefer':'return=minimal'}, body:JSON.stringify(sd) });
+    } else {
+      await fetch(`${SUPA_URL}/rest/v1/game_saves`,
+        { method:'POST', headers:{...getHeaders(),'Prefer':'return=minimal'}, body:JSON.stringify(sd) });
+    }
+  } catch(e) { console.warn('Game save failed:', e); }
+};
+
+/* ── INIT ON LOAD ────────────────────────────────────────────────────────── */
+(async function() {
+  initSupabase();
+  // Update share input
+  const sbox = document.getElementById('shareLinkBox');
+  if (sbox) sbox.value = window.location.origin + '/game.html';
+
+  if (supaClient) {
+    const { data: { session } } = await supaClient.auth.getSession();
+    if (session) {
+      currentSession = session;
+      currentUser    = session.user;
+      setHeaderUser(currentUser);
+      document.getElementById('loginScreen').classList.add('hidden');
+      await restoreCloudProgress();
+      return;
+    }
   }
+
+  // Not logged in via Google — check guest
+  const isGuest = localStorage.getItem('koj_guest_mode') === '1';
+  if (isGuest) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    const n = localStorage.getItem('koj_player_name') || 'Guest';
+    document.getElementById('headerName').textContent = n;
+    const lv = parseInt(localStorage.getItem('koj_current_level') || '1');
+    window._currentLevel = lv;
+    document.getElementById('headerLevel').textContent = 'Lv ' + lv;
+  }
+  // else: login screen stays visible
+})();
+
+document.getElementById('googleLoginBtn').addEventListener('click', loginWithGoogle);
+document.getElementById('guestBtn').addEventListener('click', () => {
+  const num = Math.floor(Math.random() * 9000) + 1000;
+  const gName = 'Guest_' + num;
+  localStorage.setItem('koj_guest_mode', '1');
+  localStorage.setItem('koj_player_name', gName);
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('headerName').textContent = gName;
 });
+document.getElementById('profileModal').addEventListener('click', e => {
+  if (e.target.id === 'profileModal') e.target.classList.remove('open');
+});
+document.getElementById('shareModal2').addEventListener('click', e => {
+  if (e.target.id === 'shareModal2') e.target.classList.remove('open');
+});
+document.getElementById('logoutBtn2').addEventListener('click', logoutUser);
 
 /* ════════════════════════════════════════════════════
    AUDIO ENGINE (procedural, no external files)
@@ -1846,5 +2124,76 @@ document.addEventListener('keydown', ()=>jungleAudio.unlock(), {once:true});
 
 initLevel();
 </script>
+
+<!-- ═══ LOGIN SCREEN ═══════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div id="loginBox">
+    <span class="login-crown">👑</span>
+    <h1>KING OF JUNGLE</h1>
+    <p class="login-sub">🌿 Nepal Wild Kingdom 🌿</p>
+    <button id="googleLoginBtn">
+      <svg class="g-icon" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <div class="or-div">OR</div>
+    <button id="guestBtn">🦁 Continue as Guest</button>
+  </div>
+</div>
+
+<!-- ═══ PROFILE MODAL ══════════════════════════════════════════ -->
+<div id="profileModal">
+  <div id="profileBox">
+    <button class="modal-close" onclick="document.getElementById('profileModal').classList.remove('open')">✕</button>
+    <div class="p-avatar" id="pAvatarEl">🦁</div>
+    <div id="profileName">Guest Player</div>
+    <div id="profileEmail"></div>
+    <div class="p-stats">
+      <div class="p-stat">
+        <div class="p-stat-label">🌿 Level</div>
+        <div class="p-stat-val" id="profileLevel">1</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">🏆 Best Score</div>
+        <div class="p-stat-val" id="profileBest">0</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">🎮 Matches</div>
+        <div class="p-stat-val" id="profileMatches">—</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">🌟 Global Rank</div>
+        <div class="p-stat-val" id="profileRank">#—</div>
+      </div>
+    </div>
+    <button id="logoutBtn2">🚪 Sign Out</button>
+  </div>
+</div>
+
+<!-- ═══ SHARE MODAL ════════════════════════════════════════════ -->
+<div id="shareModal2">
+  <div id="shareBox2">
+    <button class="modal-close" onclick="document.getElementById('shareModal2').classList.remove('open')">✕</button>
+    <h2>🌿 Invite Friends</h2>
+    <p>Bring the jungle to your squad!</p>
+    <div class="s-btns">
+      <button class="s-btn s-wa" onclick="shareWhatsApp()">
+        <span>💬</span> Share on WhatsApp
+      </button>
+      <button class="s-btn s-tw" onclick="shareTwitter()">
+        <span>🐦</span> Share on Twitter / X
+      </button>
+      <button class="s-btn s-cp" id="copyBtn" onclick="copyShareLink()">
+        <span>📋</span> Copy Invite Link
+      </button>
+    </div>
+    <input id="shareLinkBox" readonly value="">
+  </div>
+</div>
+
 </body>
 </html>
