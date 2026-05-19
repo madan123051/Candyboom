@@ -28,13 +28,9 @@ html, body {
   user-select:none;
 }
 
-#bgCanvas {
-  position:fixed; inset:0; z-index:0;
-  pointer-events:none;
-}
+#bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 .leaf {
-  position:fixed; font-size:20px; z-index:1;
-  pointer-events:none; opacity:0;
+  position:fixed; font-size:20px; z-index:1; pointer-events:none; opacity:0;
   animation: leafFall linear infinite;
 }
 @keyframes leafFall {
@@ -58,6 +54,7 @@ html, body {
   border:1px solid var(--border); border-radius:20px;
   padding:6px 14px; transition:all 0.3s;
   display:flex; align-items:center; gap:6px;
+  background:none; cursor:pointer;
 }
 .nav-back:hover { background:rgba(45,138,45,0.15); border-color:var(--green); }
 .nav-title {
@@ -75,40 +72,83 @@ html, body {
   padding:calc(60px + var(--safe-top)) 12px calc(20px + var(--safe-bottom));
 }
 
-/* ── STATS BAR ── */
+/* ── STATS BAR (Pill shape) ── */
 .stats-bar {
   width:100%; max-width:480px;
-  display:flex; gap:8px;
-  margin-bottom:10px;
+  display:flex; gap:6px;
+  margin-bottom:8px;
 }
 .stat-pill {
   flex:1;
   background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:8px 10px;
+  border:1.5px solid var(--border);
+  border-radius:50px;
+  padding:7px 10px;
   text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .stat-label {
-  font-size:10px; color:#3a7a3a;
+  font-size:9px; color:#3a7a3a;
   text-transform:uppercase; letter-spacing:1px;
 }
 .stat-val {
-  font-size:18px; font-weight:700;
+  font-size:16px; font-weight:700;
   color:var(--gold);
   font-family:'Cinzel Decorative', serif;
 }
-.stat-val.lives { color:#ff6b6b; }
+
+/* ── TIGER-GOAT LIVES ── */
+.lives-bar {
+  width:100%; max-width:480px;
+  display:flex; align-items:center; justify-content:center;
+  gap:10px;
+  margin-bottom:8px;
+  background:var(--panel);
+  border:1.5px solid var(--border);
+  border-radius:50px;
+  padding:8px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.tiger-icon {
+  font-size:28px;
+  filter:drop-shadow(0 0 6px rgba(255,140,0,0.6));
+  transition:transform 0.3s;
+}
+.tiger-icon.lunge {
+  animation: tigerLunge 0.5s ease;
+}
+@keyframes tigerLunge {
+  0%   { transform:scale(1) translateX(0); }
+  30%  { transform:scale(1.4) translateX(10px); }
+  60%  { transform:scale(1.2) translateX(5px); }
+  100% { transform:scale(1) translateX(0); }
+}
+.goats-row {
+  display:flex; gap:4px; align-items:center;
+}
+.goat {
+  font-size:22px;
+  transition:all 0.4s;
+  filter:drop-shadow(0 0 4px rgba(255,255,255,0.3));
+}
+.goat.eaten {
+  animation: goatEaten 0.5s ease forwards;
+}
+@keyframes goatEaten {
+  0%   { transform:scale(1); opacity:1; }
+  40%  { transform:scale(1.3) rotate(-15deg); opacity:0.7; }
+  100% { transform:scale(0) rotate(45deg); opacity:0; }
+}
+.lives-label {
+  font-size:10px; color:#3a7a3a;
+  letter-spacing:1px; text-transform:uppercase;
+}
 
 /* ── PROGRESS BAR ── */
-.prog-wrap {
-  width:100%; max-width:480px;
-  margin-bottom:8px;
-}
+.prog-wrap { width:100%; max-width:480px; margin-bottom:8px; }
 .prog-row {
   display:flex; justify-content:space-between;
-  font-size:11px; color:#3a7a3a;
-  margin-bottom:4px;
+  font-size:11px; color:#3a7a3a; margin-bottom:4px;
 }
 .prog-row b { color:var(--gold); }
 .prog-track {
@@ -124,15 +164,14 @@ html, body {
 /* ── BOOSTERS ── */
 .boosters {
   width:100%; max-width:480px;
-  display:flex; gap:8px; justify-content:flex-end;
+  display:flex; gap:6px; justify-content:flex-end;
   margin-bottom:8px;
 }
 .booster-btn {
   background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:8px 12px;
-  font-size:20px;
+  border:1.5px solid var(--border);
+  border-radius:50px;
+  padding:7px 12px;
   cursor:pointer;
   transition:all 0.2s;
   display:flex; align-items:center; gap:4px;
@@ -141,13 +180,10 @@ html, body {
 }
 .booster-btn:hover { border-color:var(--darkgreen); background:rgba(45,138,45,0.15); transform:scale(1.05); }
 .booster-btn.active { border-color:var(--gold); background:rgba(240,192,64,0.15); }
-.booster-icon { font-size:18px; }
+.booster-icon { font-size:16px; }
 
 /* ── GRID ── */
-#gridWrap {
-  width:100%; max-width:480px;
-  position:relative;
-}
+#gridWrap { width:100%; max-width:480px; position:relative; touch-action:none; }
 #grid {
   display:grid;
   gap:4px;
@@ -158,62 +194,69 @@ html, body {
   border-radius:16px;
   box-shadow:0 0 30px rgba(45,138,45,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
 }
+
+/* ── ANIMAL BOOM CELLS ── */
 .cell {
   aspect-ratio:1;
   display:flex; align-items:center; justify-content:center;
-  font-size:clamp(22px, 5vw, 36px);
-  background:rgba(10,30,10,0.7);
-  border:1px solid #0d2a0d;
-  border-radius:10px;
+  font-size:clamp(20px, 4.5vw, 34px);
+  border-radius:12px;
   cursor:pointer;
-  transition:transform 0.1s, background 0.2s, border-color 0.2s;
+  transition:transform 0.1s, filter 0.2s;
   position:relative;
   overflow:hidden;
+  border:2px solid transparent;
+  box-shadow:0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
 }
-.cell:hover { background:rgba(20,50,20,0.8); }
+/* Animal type colors */
+.cell[data-type="0"] { background:linear-gradient(135deg,#ff4d4d,#cc0000); border-color:#ff6666; }
+.cell[data-type="1"] { background:linear-gradient(135deg,#4d79ff,#0033cc); border-color:#6699ff; }
+.cell[data-type="2"] { background:linear-gradient(135deg,#00cc66,#007a3d); border-color:#33ff88; }
+.cell[data-type="3"] { background:linear-gradient(135deg,#ffcc00,#cc8800); border-color:#ffdd44; }
+.cell[data-type="4"] { background:linear-gradient(135deg,#cc44ff,#7700cc); border-color:#dd88ff; }
+.cell[data-type="5"] { background:linear-gradient(135deg,#ff8800,#cc5500); border-color:#ffaa33; }
+.cell[data-type="6"] { background:linear-gradient(135deg,#ff4da6,#cc0066); border-color:#ff80c0; }
+.cell[data-type="7"] { background:linear-gradient(135deg,#00cccc,#006666); border-color:#33ffff; }
+
+.cell::after {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:40%;
+  background:linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+  border-radius:10px 10px 0 0;
+  pointer-events:none;
+}
+.cell:hover { transform:scale(1.06); filter:brightness(1.15); }
 .cell.selected {
-  border-color:var(--gold);
-  background:rgba(240,192,64,0.12);
-  transform:scale(1.08);
-  box-shadow:0 0 12px rgba(240,192,64,0.4);
+  border-color:var(--gold) !important;
+  transform:scale(1.12);
+  box-shadow:0 0 16px rgba(240,192,64,0.6), 0 4px 8px rgba(0,0,0,0.4);
   z-index:2;
+  filter:brightness(1.2);
 }
-.cell.hint {
-  animation: hintPulse 0.6s ease infinite alternate;
-}
+.cell.hint { animation: hintPulse 0.6s ease infinite alternate; }
 @keyframes hintPulse {
-  from { border-color:var(--green); box-shadow:0 0 6px rgba(109,191,103,0.4); }
-  to   { border-color:var(--darkgreen); box-shadow:0 0 12px rgba(45,138,45,0.6); }
+  from { filter:brightness(1); box-shadow:0 0 6px rgba(109,191,103,0.4); }
+  to   { filter:brightness(1.3); box-shadow:0 0 14px rgba(45,138,45,0.7); }
 }
-.cell.match-pop {
-  animation: matchPop 0.35s ease forwards;
-}
+.cell.match-pop { animation: matchPop 0.35s ease forwards; }
 @keyframes matchPop {
-  0%   { transform:scale(1.1); }
+  0%   { transform:scale(1.15); }
   40%  { transform:scale(0.6); opacity:0.6; }
   100% { transform:scale(0); opacity:0; }
 }
-.cell.drop-in {
-  animation: dropIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
-}
+.cell.drop-in { animation: dropIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 @keyframes dropIn {
   from { transform:translateY(-40px) scale(0.8); opacity:0; }
   to   { transform:translateY(0) scale(1); opacity:1; }
 }
-.cell.swap-anim {
-  animation: swapPulse 0.15s ease;
-}
-@keyframes swapPulse {
-  50% { transform:scale(0.9); }
-}
+.cell.swap-anim { animation: swapPulse 0.15s ease; }
+@keyframes swapPulse { 50% { transform:scale(0.88); } }
 
 /* Float score */
 .float-score {
-  position:absolute; pointer-events:none; z-index:50;
+  position:fixed; pointer-events:none; z-index:50;
   font-family:'Cinzel Decorative',serif;
-  color:var(--gold);
-  font-size:18px;
-  font-weight:700;
+  color:var(--gold); font-size:18px; font-weight:700;
   text-shadow:0 0 8px rgba(240,192,64,0.8);
   animation: floatUp 0.9s ease forwards;
 }
@@ -229,140 +272,58 @@ html, body {
   transform:translate(-50%,-50%) scale(0);
   z-index:300;
   background:linear-gradient(135deg,#0a4a0a,#1a8a1a);
-  border:2px solid var(--gold);
-  border-radius:16px;
-  padding:12px 24px;
-  text-align:center;
-  pointer-events:none;
+  border:2px solid var(--gold); border-radius:16px;
+  padding:12px 24px; text-align:center; pointer-events:none;
   transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
   opacity:0;
 }
-#comboBadge.show {
-  transform:translate(-50%,-50%) scale(1);
-  opacity:1;
-}
-#comboBadge .combo-num {
-  font-family:'Cinzel Decorative',serif;
-  color:var(--gold); font-size:32px;
-  text-shadow:0 0 20px #f0c04088;
-}
-#comboBadge .combo-txt {
-  color:var(--green); font-size:13px;
-  letter-spacing:2px; text-transform:uppercase;
-}
+#comboBadge.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
+#comboBadge .combo-num { font-family:'Cinzel Decorative',serif; color:var(--gold); font-size:32px; text-shadow:0 0 20px #f0c04088; }
+#comboBadge .combo-txt { color:var(--green); font-size:13px; letter-spacing:2px; text-transform:uppercase; }
 
 /* ── TOAST / POPUP ── */
-.toast-overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.75); z-index:400;
-  align-items:center; justify-content:center;
-}
+.toast-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:400; align-items:center; justify-content:center; }
 .toast-overlay.show { display:flex; }
 .toast-box {
   width:min(90vw,360px);
   background:linear-gradient(135deg, rgba(7,33,13,0.97), rgba(3,15,5,0.99));
-  border:1px solid var(--darkgreen);
-  border-radius:24px;
-  padding:36px 28px;
-  text-align:center;
+  border:1px solid var(--darkgreen); border-radius:24px;
+  padding:36px 28px; text-align:center;
   box-shadow:0 0 60px rgba(45,138,45,0.3);
   animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
-@keyframes popIn {
-  from { transform:scale(0.7); opacity:0; }
-  to   { transform:scale(1); opacity:1; }
-}
+@keyframes popIn { from { transform:scale(0.7); opacity:0; } to { transform:scale(1); opacity:1; } }
 .toast-icon { font-size:60px; margin-bottom:12px; display:block; }
-.toast-title {
-  font-family:'Cinzel Decorative', serif;
-  color:var(--gold); font-size:clamp(20px,5vw,28px);
-  text-shadow:0 0 20px #f0c04066;
-  margin-bottom:8px;
-}
+.toast-title { font-family:'Cinzel Decorative', serif; color:var(--gold); font-size:clamp(20px,5vw,28px); text-shadow:0 0 20px #f0c04066; margin-bottom:8px; }
 .toast-msg { color:var(--green); font-size:14px; line-height:1.6; margin-bottom:20px; }
 .stars { font-size:32px; margin-bottom:16px; letter-spacing:4px; }
 .toast-btns { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-
-.btn-play {
-  padding:14px 28px;
-  background:linear-gradient(135deg, #1a5c1a, #2d8a2d, #3daa3d);
-  color:var(--gold);
-  border:2px solid #3daa3d;
-  border-radius:50px;
-  font-size:15px;
-  font-family:'Cinzel Decorative',serif;
-  cursor:pointer;
-  transition:all 0.3s;
-}
+.btn-play { padding:14px 28px; background:linear-gradient(135deg, #1a5c1a, #2d8a2d, #3daa3d); color:var(--gold); border:2px solid #3daa3d; border-radius:50px; font-size:15px; font-family:'Cinzel Decorative',serif; cursor:pointer; transition:all 0.3s; }
 .btn-play:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 0 20px rgba(45,138,45,0.5); }
-.btn-outline {
-  padding:14px 28px;
-  background:transparent;
-  color:var(--green);
-  border:2px solid var(--border);
-  border-radius:50px;
-  font-size:15px;
-  cursor:pointer;
-  transition:all 0.3s;
-}
+.btn-outline { padding:14px 28px; background:transparent; color:var(--green); border:2px solid var(--border); border-radius:50px; font-size:15px; cursor:pointer; transition:all 0.3s; }
 .btn-outline:hover { background:rgba(45,138,45,0.15); border-color:var(--green); }
 
 /* ── LEVEL SELECT ── */
-#levelModal {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.85); z-index:300;
-  align-items:flex-start; justify-content:center;
-  overflow-y:auto;
-  padding:80px 16px 30px;
-}
+#levelModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:300; align-items:flex-start; justify-content:center; overflow-y:auto; padding:80px 16px 30px; }
 #levelModal.show { display:flex; }
-.level-grid {
-  display:grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap:8px;
-  max-width:340px; width:100%;
-}
-.lvl-btn {
-  aspect-ratio:1;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:10px;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  cursor:pointer;
-  transition:all 0.2s;
-  color:var(--gold);
-  font-family:'Cinzel Decorative',serif;
-  font-size:14px;
-}
+.level-grid { display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; max-width:340px; width:100%; }
+.lvl-btn { aspect-ratio:1; background:var(--panel); border:1px solid var(--border); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; color:var(--gold); font-family:'Cinzel Decorative',serif; font-size:14px; }
 .lvl-btn.locked { opacity:0.35; cursor:not-allowed; }
 .lvl-btn.cleared { border-color:var(--darkgreen); }
 .lvl-btn:not(.locked):hover { border-color:var(--gold); transform:scale(1.05); }
 .lvl-stars { font-size:8px; letter-spacing:1px; margin-top:2px; }
 
 /* ── AUDIO BTN ── */
-#audioBtn {
-  position:fixed; right:14px; bottom:calc(16px + var(--safe-bottom)); z-index:220;
-  border:1px solid var(--border); border-radius:26px;
-  background:linear-gradient(135deg,#0f3c17,#1e6a2f);
-  color:#8adf80; padding:8px 12px; font-weight:700;
-  cursor:pointer; font-size:12px;
-  box-shadow:0 6px 16px rgba(0,0,0,0.35);
-}
+#audioBtn { position:fixed; right:14px; bottom:calc(16px + var(--safe-bottom)); z-index:220; border:1px solid var(--border); border-radius:26px; background:linear-gradient(135deg,#0f3c17,#1e6a2f); color:#8adf80; padding:8px 12px; font-weight:700; cursor:pointer; font-size:12px; box-shadow:0 6px 16px rgba(0,0,0,0.35); }
 #audioBtn.muted { color:#6f836f; border-color:#486248; background:linear-gradient(135deg,#283229,#334236); }
 
 /* ── NO MOVES HINT ── */
-.no-moves-hint {
-  position:fixed; bottom:calc(60px + var(--safe-bottom)); left:50%;
-  transform:translateX(-50%);
-  background:rgba(7,33,13,0.9);
-  border:1px solid var(--darkgreen);
-  border-radius:20px; padding:8px 20px;
-  color:var(--gold); font-size:13px;
-  z-index:100; pointer-events:none;
-  opacity:0; transition:opacity 0.3s;
-}
+.no-moves-hint { position:fixed; bottom:calc(60px + var(--safe-bottom)); left:50%; transform:translateX(-50%); background:rgba(7,33,13,0.9); border:1px solid var(--darkgreen); border-radius:20px; padding:8px 20px; color:var(--gold); font-size:13px; z-index:100; pointer-events:none; opacity:0; transition:opacity 0.3s; }
 .no-moves-hint.show { opacity:1; }
+
+/* Swipe direction hint */
+.swipe-hint { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); z-index:200; font-size:48px; pointer-events:none; opacity:0; transition:all 0.2s; }
+.swipe-hint.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
 </style>
 </head>
 <body>
@@ -378,13 +339,13 @@ html, body {
 <div class="topnav">
   <a href="index.html" class="nav-back">← Home</a>
   <div class="nav-title">👑 King of Jungle</div>
-  <button class="nav-back" onclick="showLevelModal()" style="cursor:pointer;border:1px solid #1a4a1a;">📋 Levels</button>
+  <button class="nav-back" onclick="showLevelModal()">📋 Levels</button>
 </div>
 
 <!-- GAME WRAPPER -->
 <div id="gameWrap">
 
-  <!-- STATS -->
+  <!-- STATS PILLS -->
   <div class="stats-bar">
     <div class="stat-pill">
       <div class="stat-label">Level</div>
@@ -398,16 +359,26 @@ html, body {
       <div class="stat-label">Moves</div>
       <div class="stat-val" id="statMoves">20</div>
     </div>
-    <div class="stat-pill">
-      <div class="stat-label">Lives</div>
-      <div class="stat-val lives" id="statLives">❤️❤️❤️❤️❤️</div>
+  </div>
+
+  <!-- TIGER-GOAT LIVES BAR -->
+  <div class="lives-bar">
+    <div class="tiger-icon" id="tigerIcon">🐯</div>
+    <span style="color:#3a7a3a;font-size:12px;">VS</span>
+    <div class="goats-row" id="goatsRow">
+      <span class="goat" data-idx="0">🐐</span>
+      <span class="goat" data-idx="1">🐐</span>
+      <span class="goat" data-idx="2">🐐</span>
+      <span class="goat" data-idx="3">🐐</span>
+      <span class="goat" data-idx="4">🐐</span>
     </div>
+    <span class="lives-label" id="livesLabel">5 Lives</span>
   </div>
 
   <!-- PROGRESS -->
   <div class="prog-wrap">
     <div class="prog-row">
-      <span>Score Progress</span>
+      <span>Progress</span>
       <span><b id="progScore">0</b> / <b id="progTarget">500</b></span>
     </div>
     <div class="prog-track">
@@ -417,16 +388,16 @@ html, body {
 
   <!-- BOOSTERS -->
   <div class="boosters">
-    <button class="booster-btn" id="bHammer" onclick="activateBooster('hammer')" title="Hammer – remove 1 tile">
+    <button class="booster-btn" id="bHammer" onclick="activateBooster('hammer')">
       <span class="booster-icon">🔨</span> Hammer
     </button>
-    <button class="booster-btn" id="bBomb" onclick="activateBooster('bomb')" title="Bomb – 3×3 blast">
+    <button class="booster-btn" id="bBomb" onclick="activateBooster('bomb')">
       <span class="booster-icon">💣</span> Bomb
     </button>
-    <button class="booster-btn" id="bLightning" onclick="activateBooster('lightning')" title="Lightning – clear row+col">
+    <button class="booster-btn" id="bLightning" onclick="activateBooster('lightning')">
       <span class="booster-icon">⚡</span> Lightning
     </button>
-    <button class="booster-btn" onclick="shuffleBoard()" title="Shuffle board">
+    <button class="booster-btn" onclick="shuffleBoard()">
       <span class="booster-icon">🔀</span> Shuffle
     </button>
   </div>
@@ -462,8 +433,8 @@ html, body {
 <div class="toast-overlay" id="loseModal">
   <div class="toast-box">
     <span class="toast-icon">🌿</span>
-    <div class="toast-title">Out of Moves!</div>
-    <div class="toast-msg" id="loseMsg">The jungle was too strong this time. Try again!</div>
+    <div class="toast-title" id="loseTitleEl">Out of Moves!</div>
+    <div class="toast-msg" id="loseMsg">The jungle was too strong. Try again!</div>
     <div class="toast-btns">
       <button class="btn-play" onclick="retryLevel()">↺ Try Again</button>
       <button class="btn-outline" onclick="showLevelModal()">📋 Levels</button>
@@ -471,7 +442,7 @@ html, body {
   </div>
 </div>
 
-<!-- LEVEL SELECT MODAL -->
+<!-- LEVEL SELECT -->
 <div id="levelModal">
   <div>
     <p style="font-family:'Cinzel Decorative',serif;color:#f0c040;font-size:18px;text-align:center;margin-bottom:20px;">🏆 Select Level</p>
@@ -483,15 +454,15 @@ html, body {
 </div>
 
 <!-- NO MOVES HINT -->
-<div class="no-moves-hint" id="noMovesHint">No valid moves! Board is shuffling...</div>
+<div class="no-moves-hint" id="noMovesHint">No valid moves! Shuffling...</div>
 
 <!-- AUDIO BTN -->
 <button id="audioBtn" class="muted">🔇 Audio Off</button>
 
 <script>
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  CANVAS BG
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 const canvas = document.getElementById('bgCanvas');
 const ctx2d = canvas.getContext('2d');
 let BW, BH, bgParticles = [];
@@ -515,22 +486,20 @@ function drawBG(){
 }
 drawBG();
 
-// ════════════════════════════════════════
-//  GAME CONFIG
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  ANIMALS
+// ═══════════════════════════════════════
 const ANIMALS = ['🐯','🦏','🐘','🦚','🐒','🦅','🐆','🦁'];
 
 function getLevelConfig(lv) {
-  // Grid size
   let cols, rows;
-  if (lv <= 10)       { cols=5; rows=5; }
-  else if (lv <= 20)  { cols=5; rows=6; }
-  else if (lv <= 35)  { cols=6; rows=6; }
-  else if (lv <= 50)  { cols=6; rows=7; }
-  else if (lv <= 70)  { cols=7; rows=7; }
-  else                { cols=7; rows=8; }
+  if (lv <= 10)      { cols=5; rows=5; }
+  else if (lv <= 20) { cols=5; rows=6; }
+  else if (lv <= 35) { cols=6; rows=6; }
+  else if (lv <= 50) { cols=6; rows=7; }
+  else if (lv <= 70) { cols=7; rows=7; }
+  else               { cols=7; rows=8; }
 
-  // Animal types (4 → 8)
   let types;
   if (lv <= 5)        types = 4;
   else if (lv <= 15)  types = 5;
@@ -538,24 +507,20 @@ function getLevelConfig(lv) {
   else if (lv <= 50)  types = 7;
   else                types = 8;
 
-  // Moves
   const moves = Math.max(15, 30 - Math.floor(lv * 0.12));
-
-  // Score target
   const target = 300 + lv * 120;
-
   return { cols, rows, types, moves, target };
 }
 
-// ════════════════════════════════════════
-//  GAME STATE
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
 const MAX_LEVELS = 100;
 let state = {
   level: 1,
   score: 0,
   moves: 20,
-  lives: 5,
+  lives: 5,        // number of goats alive
   selected: null,
   board: [],
   cfg: null,
@@ -568,9 +533,42 @@ function saveProgress() {
   localStorage.setItem('koj_progress', JSON.stringify(state.progress));
 }
 
-// ════════════════════════════════════════
-//  INIT / START LEVEL
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  LIVES UI: Tiger + Goats
+// ═══════════════════════════════════════
+function renderGoats() {
+  const row = document.getElementById('goatsRow');
+  row.innerHTML = '';
+  for(let i = 0; i < 5; i++){
+    const g = document.createElement('span');
+    g.className = 'goat';
+    g.dataset.idx = i;
+    g.textContent = i < state.lives ? '🐐' : '💀';
+    g.style.opacity = i < state.lives ? '1' : '0.3';
+    row.appendChild(g);
+  }
+  document.getElementById('livesLabel').textContent = `${state.lives} Live${state.lives !== 1 ? 's' : ''}`;
+}
+
+async function tigerEatsGoat() {
+  if(state.lives <= 0) return;
+  // Tiger lunges
+  const tiger = document.getElementById('tigerIcon');
+  tiger.classList.add('lunge');
+  await delay(200);
+  // Goat eaten animation (last alive goat)
+  const aliveGoats = document.querySelectorAll('#goatsRow .goat');
+  const lastAlive = aliveGoats[state.lives - 1]; // last alive one (0-indexed)
+  if(lastAlive) {
+    lastAlive.classList.add('eaten');
+    await delay(500);
+  }
+  tiger.classList.remove('lunge');
+}
+
+// ═══════════════════════════════════════
+//  START LEVEL
+// ═══════════════════════════════════════
 function startLevel(lv) {
   state.level = lv;
   state.cfg = getLevelConfig(lv);
@@ -580,18 +578,17 @@ function startLevel(lv) {
   state.busy = false;
   state.booster = null;
 
-  // Reset booster buttons
   ['bHammer','bBomb','bLightning'].forEach(id => {
     document.getElementById(id).classList.remove('active');
   });
 
-  // Build board
   do {
     state.board = buildBoard(state.cfg.rows, state.cfg.cols, state.cfg.types);
   } while (!hasAnyMatch(state.board) && !hasAnyMove(state.board));
 
   renderBoard();
   updateHUD();
+  renderGoats();
   hideLevelModal();
 }
 
@@ -613,9 +610,9 @@ function buildBoard(rows, cols, types) {
   return board;
 }
 
-// ════════════════════════════════════════
-//  RENDER
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  RENDER BOARD
+// ═══════════════════════════════════════
 function renderBoard() {
   const { rows, cols } = state.cfg;
   const grid = document.getElementById('grid');
@@ -629,13 +626,15 @@ function renderBoard() {
       cell.dataset.r = r;
       cell.dataset.c = c;
       const t = state.board[r][c];
+      cell.dataset.type = t >= 0 ? t : 0;
       cell.textContent = t >= 0 ? ANIMALS[t] : '';
       cell.addEventListener('click', () => onCellClick(r, c));
-      // Touch support
-      cell.addEventListener('touchstart', e => { e.preventDefault(); onCellClick(r, c); }, {passive:false});
       grid.appendChild(cell);
     }
   }
+
+  // Setup swipe on grid
+  setupSwipe();
 }
 
 function getCell(r, c) {
@@ -647,6 +646,7 @@ function updateCellEmoji(r, c) {
   const cell = getCell(r, c);
   if (!cell) return;
   const t = state.board[r][c];
+  cell.dataset.type = t >= 0 ? t : 0;
   cell.textContent = t >= 0 ? ANIMALS[t] : '';
 }
 
@@ -654,8 +654,6 @@ function updateHUD() {
   document.getElementById('statLevel').textContent = state.level;
   document.getElementById('statScore').textContent = state.score;
   document.getElementById('statMoves').textContent = state.moves;
-  document.getElementById('statLives').textContent = '❤️'.repeat(state.lives) + '🖤'.repeat(Math.max(0, 5 - state.lives));
-
   const target = state.cfg.target;
   const pct = Math.min(100, (state.score / target) * 100);
   document.getElementById('progFill').style.width = pct + '%';
@@ -663,81 +661,141 @@ function updateHUD() {
   document.getElementById('progTarget').textContent = target;
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  TOUCH SWIPE SUPPORT
+// ═══════════════════════════════════════
+let touchStartX = 0, touchStartY = 0;
+let touchStartR = -1, touchStartC = -1;
+const SWIPE_THRESHOLD = 20;
+
+function setupSwipe() {
+  const gridEl = document.getElementById('grid');
+  gridEl.addEventListener('touchstart', onTouchStart, { passive:false });
+  gridEl.addEventListener('touchend', onTouchEnd, { passive:false });
+}
+
+function onTouchStart(e) {
+  if(state.busy) return;
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+  // Find which cell was touched
+  const el = document.elementFromPoint(touchStartX, touchStartY);
+  if(el && el.classList.contains('cell')) {
+    touchStartR = parseInt(el.dataset.r);
+    touchStartC = parseInt(el.dataset.c);
+  } else {
+    touchStartR = -1; touchStartC = -1;
+  }
+}
+
+function onTouchEnd(e) {
+  if(state.busy || touchStartR < 0) return;
+  const touch = e.changedTouches[0];
+  const dx = touch.clientX - touchStartX;
+  const dy = touch.clientY - touchStartY;
+  const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+  // Check if it's a swipe or just a tap
+  if(absDx < SWIPE_THRESHOLD && absDy < SWIPE_THRESHOLD) {
+    // Tap — handle as click
+    onCellClick(touchStartR, touchStartC);
+    return;
+  }
+
+  // Determine swipe direction
+  let targetR = touchStartR, targetC = touchStartC;
+  if(absDx > absDy) {
+    // Horizontal swipe
+    targetC = dx > 0 ? touchStartC + 1 : touchStartC - 1;
+  } else {
+    // Vertical swipe
+    targetR = dy > 0 ? touchStartR + 1 : touchStartR - 1;
+  }
+
+  const { rows, cols } = state.cfg;
+  if(targetR < 0 || targetR >= rows || targetC < 0 || targetC >= cols) return;
+
+  // Cancel any selection
+  if(state.selected) {
+    const prev = getCell(state.selected.r, state.selected.c);
+    if(prev) prev.classList.remove('selected');
+    state.selected = null;
+  }
+
+  if(state.booster) {
+    applyBooster(touchStartR, touchStartC);
+    return;
+  }
+
+  trySwap(touchStartR, touchStartC, targetR, targetC);
+  touchStartR = -1; touchStartC = -1;
+}
+
+// ═══════════════════════════════════════
 //  CELL CLICK
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 function onCellClick(r, c) {
   if (state.busy) return;
   audio.tap();
 
-  // Booster mode
   if (state.booster) {
     applyBooster(r, c);
     return;
   }
 
   if (state.selected === null) {
-    // Select
     state.selected = {r, c};
-    getCell(r, c).classList.add('selected');
+    const cell = getCell(r, c);
+    if(cell) cell.classList.add('selected');
     return;
   }
 
   const {r: sr, c: sc} = state.selected;
-  getCell(sr, sc).classList.remove('selected');
+  const prevCell = getCell(sr, sc);
+  if(prevCell) prevCell.classList.remove('selected');
 
   if (sr === r && sc === c) {
-    // Deselect same cell
     state.selected = null;
     return;
   }
 
-  // Check if adjacent
   const dr = Math.abs(r - sr), dc = Math.abs(c - sc);
   if (dr + dc === 1) {
-    // Try swap
     state.selected = null;
     trySwap(sr, sc, r, c);
   } else {
-    // Select new cell
     state.selected = {r, c};
-    getCell(r, c).classList.add('selected');
+    const cell = getCell(r, c);
+    if(cell) cell.classList.add('selected');
   }
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  SWAP
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 async function trySwap(r1, c1, r2, c2) {
   state.busy = true;
-
-  // Swap in board
   swap(state.board, r1, c1, r2, c2);
 
   const matches = findMatches(state.board);
   if (matches.length === 0) {
-    // Invalid swap — swap back
     swap(state.board, r1, c1, r2, c2);
     audio.invalid();
-    // Shake effect
-    getCell(r1, c1).classList.add('swap-anim');
-    getCell(r2, c2).classList.add('swap-anim');
-    setTimeout(() => {
-      getCell(r1, c1).classList.remove('swap-anim');
-      getCell(r2, c2).classList.remove('swap-anim');
-    }, 200);
+    const c1el = getCell(r1, c1), c2el = getCell(r2, c2);
+    if(c1el) { c1el.classList.add('swap-anim'); setTimeout(() => c1el.classList.remove('swap-anim'), 200); }
+    if(c2el) { c2el.classList.add('swap-anim'); setTimeout(() => c2el.classList.remove('swap-anim'), 200); }
     state.busy = false;
     return;
   }
 
-  // Valid swap animation
-  getCell(r1, c1).classList.add('swap-anim');
-  getCell(r2, c2).classList.add('swap-anim');
+  const c1el = getCell(r1, c1), c2el = getCell(r2, c2);
+  if(c1el) c1el.classList.add('swap-anim');
+  if(c2el) c2el.classList.add('swap-anim');
   updateCellEmoji(r1, c1);
   updateCellEmoji(r2, c2);
   await delay(150);
 
-  // Deduct move
   state.moves--;
   updateHUD();
 
@@ -757,14 +815,13 @@ function swap(board, r1, c1, r2, c2) {
   [board[r1][c1], board[r2][c2]] = [board[r2][c2], board[r1][c1]];
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  MATCH LOGIC
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 function findMatches(board) {
   const { rows, cols } = state.cfg;
   const matched = new Set();
 
-  // Horizontal
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols-2;c++){
       const t = board[r][c];
@@ -776,8 +833,6 @@ function findMatches(board) {
       }
     }
   }
-
-  // Vertical
   for(let c=0;c<cols;c++){
     for(let r=0;r<rows-2;r++){
       const t = board[r][c];
@@ -789,25 +844,18 @@ function findMatches(board) {
       }
     }
   }
-
-  return [...matched].map(s => {
-    const [r,c] = s.split(',').map(Number);
-    return {r,c};
-  });
+  return [...matched].map(s => { const [r,c]=s.split(',').map(Number); return {r,c}; });
 }
 
 async function processMatches(cascade = 0) {
   const matches = findMatches(state.board);
   if (matches.length === 0) return;
 
-  // Show combo badge
   if (cascade >= 1) showCombo(cascade + 1);
 
-  // Score
   const pts = matches.length * 10 * (cascade + 1);
   state.score += pts;
 
-  // Pop animation + float scores
   const positions = [];
   matches.forEach(({r,c}) => {
     state.board[r][c] = -1;
@@ -819,7 +867,6 @@ async function processMatches(cascade = 0) {
     }
   });
 
-  // Float score on first match
   if (positions.length > 0) {
     const mid = positions[Math.floor(positions.length/2)];
     showFloatScore(`+${pts}`, mid.x, mid.y);
@@ -828,22 +875,15 @@ async function processMatches(cascade = 0) {
   audio.match(cascade);
   await delay(350);
 
-  // Remove popped cells
   matches.forEach(({r,c}) => {
     const cell = getCell(r,c);
     if(cell) cell.classList.remove('match-pop');
   });
 
-  // Gravity
   await applyGravity();
-
-  // Fill from top
   await fillBoard();
-
   updateHUD();
   await delay(200);
-
-  // Cascade
   await processMatches(cascade + 1);
 }
 
@@ -871,10 +911,12 @@ async function fillBoard() {
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
       if(state.board[r][c] < 0){
-        state.board[r][c] = Math.floor(Math.random() * types);
+        const t = Math.floor(Math.random() * types);
+        state.board[r][c] = t;
         const cell = getCell(r, c);
         if(cell){
-          cell.textContent = ANIMALS[state.board[r][c]];
+          cell.dataset.type = t;
+          cell.textContent = ANIMALS[t];
           cell.classList.add('drop-in');
           setTimeout(() => cell.classList.remove('drop-in'), 350);
         }
@@ -884,12 +926,10 @@ async function fillBoard() {
   await delay(300);
 }
 
-// ════════════════════════════════════════
-//  HAS MOVES CHECK
-// ════════════════════════════════════════
-function hasAnyMatch(board) {
-  return findMatchesOn(board).length > 0;
-}
+// ═══════════════════════════════════════
+//  HAS MOVES
+// ═══════════════════════════════════════
+function hasAnyMatch(board) { return findMatchesOn(board).length > 0; }
 
 function findMatchesOn(board) {
   const rows = board.length, cols = board[0].length;
@@ -913,7 +953,6 @@ function hasAnyMove(board) {
       for(const [dr,dc] of dirs){
         const nr=r+dr, nc=c+dc;
         if(nr>=rows||nc>=cols) continue;
-        // Try swap
         [board[r][c], board[nr][nc]] = [board[nr][nc], board[r][c]];
         const m = findMatchesOn(board).length > 0;
         [board[r][c], board[nr][nc]] = [board[nr][nc], board[r][c]];
@@ -924,9 +963,9 @@ function hasAnyMove(board) {
   return false;
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  BOOSTERS
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 function activateBooster(type) {
   if (state.busy) return;
   const btns = { hammer:'bHammer', bomb:'bBomb', lightning:'bLightning' };
@@ -947,7 +986,7 @@ async function applyBooster(r, c) {
   state.booster = null;
   ['bHammer','bBomb','bLightning'].forEach(id => document.getElementById(id).classList.remove('active'));
 
-  const { rows, cols, types } = state.cfg;
+  const { rows, cols } = state.cfg;
   const toRemove = new Set();
 
   if (type === 'hammer') {
@@ -970,7 +1009,7 @@ async function applyBooster(r, c) {
     const [kr,kc] = key.split(',').map(Number);
     state.board[kr][kc] = -1;
     const cell = getCell(kr,kc);
-    if(cell) { cell.classList.add('match-pop'); }
+    if(cell) cell.classList.add('match-pop');
   });
 
   audio.match(0);
@@ -994,8 +1033,6 @@ async function shuffleBoard(auto = false) {
   if (!auto && state.busy) return;
   state.busy = true;
   const { rows, cols, types } = state.cfg;
-
-  // Shuffle all cells
   const flat = [];
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) flat.push(state.board[r][c]);
   for(let i=flat.length-1;i>0;i--){
@@ -1004,24 +1041,18 @@ async function shuffleBoard(auto = false) {
   }
   let idx=0;
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) state.board[r][c]=flat[idx++];
-
-  // Ensure no existing matches but has moves
   if(!hasAnyMove(state.board)){
-    do {
-      state.board = buildBoard(rows, cols, types);
-    } while(!hasAnyMove(state.board));
+    do { state.board = buildBoard(rows, cols, types); } while(!hasAnyMove(state.board));
   }
-
   renderBoard();
   state.busy = false;
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  END CONDITION
-// ════════════════════════════════════════
-function checkEndCondition() {
+// ═══════════════════════════════════════
+async function checkEndCondition() {
   if (state.score >= state.cfg.target) {
-    // WIN
     const stars = state.moves >= state.cfg.moves * 0.6 ? 3 : state.moves >= state.cfg.moves * 0.3 ? 2 : 1;
     const prev = state.progress[state.level] || 0;
     if (stars > prev) {
@@ -1030,7 +1061,10 @@ function checkEndCondition() {
     }
     showWin(stars);
   } else if (state.moves <= 0) {
+    // Tiger eats a goat!
+    await tigerEatsGoat();
     state.lives = Math.max(0, state.lives - 1);
+    renderGoats();
     showLose();
   }
 }
@@ -1044,19 +1078,21 @@ function showWin(stars) {
 }
 
 function showLose() {
-  document.getElementById('loseMsg').textContent =
-    state.lives <= 0 ? 'No lives left! Regenerating...' : `${state.lives} lives remaining. Face the jungle again!`;
+  if (state.lives <= 0) {
+    document.getElementById('loseTitleEl').textContent = '💀 All Goats Eaten!';
+    document.getElementById('loseMsg').textContent = 'The tiger devoured all 5 goats! Start over!';
+    state.lives = 5; // reset after game over
+  } else {
+    document.getElementById('loseTitleEl').textContent = '🐐 Goat Eaten!';
+    document.getElementById('loseMsg').textContent = `Tiger ate a goat! ${state.lives} goat${state.lives !== 1 ? 's' : ''} remain. Try again!`;
+  }
   document.getElementById('loseModal').classList.add('show');
   audio.lose();
 }
 
 function nextLevel() {
   document.getElementById('winModal').classList.remove('show');
-  if (state.level >= MAX_LEVELS) {
-    // Completed all levels!
-    startLevel(1);
-    return;
-  }
+  if (state.level >= MAX_LEVELS) { startLevel(1); return; }
   startLevel(state.level + 1);
 }
 
@@ -1066,9 +1102,9 @@ function retryLevel() {
   startLevel(state.level);
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  LEVEL MODAL
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 function showLevelModal() {
   const grid = document.getElementById('levelGrid');
   grid.innerHTML = '';
@@ -1089,6 +1125,8 @@ function showLevelModal() {
 function hideLevelModal() {
   document.getElementById('levelModal').classList.remove('show');
 }
+
+// Globals
 window.showLevelModal = showLevelModal;
 window.hideLevelModal = hideLevelModal;
 window.nextLevel = nextLevel;
@@ -1096,16 +1134,15 @@ window.retryLevel = retryLevel;
 window.activateBooster = activateBooster;
 window.shuffleBoard = () => shuffleBoard(false);
 
-// ════════════════════════════════════════
-//  FLOAT SCORE
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  FLOAT SCORE + COMBO
+// ═══════════════════════════════════════
 function showFloatScore(text, x, y) {
   const el = document.createElement('div');
   el.className = 'float-score';
   el.textContent = text;
   el.style.left = x + 'px';
   el.style.top = y + 'px';
-  el.style.position = 'fixed';
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 900);
 }
@@ -1123,14 +1160,11 @@ function showNoMovesHint() {
   setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-// ════════════════════════════════════════
-//  DELAY HELPER
-// ════════════════════════════════════════
 function delay(ms) { return new Promise(res => setTimeout(res, ms)); }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  AUDIO
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 const AUDIO_KEY = 'koj_game_audio';
 const audio = {
   ctx: null, master: null, bus: null, enabled: localStorage.getItem(AUDIO_KEY) === '1',
@@ -1151,7 +1185,7 @@ const audio = {
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     osc.connect(g); g.connect(this.bus); osc.start(t); osc.stop(t+dur+0.05);
   },
-  tap() { this.tone(600,'sine',0.08,0.1); },
+  tap()     { this.tone(600,'sine',0.08,0.1); },
   invalid() { this.tone(150,'sawtooth',0.2,0.15); },
   match(cascade) {
     const freqs = [440,550,660,770,880];
@@ -1159,7 +1193,7 @@ const audio = {
     this.tone(f,'triangle',0.25,0.2);
     if(cascade>0) this.tone(f*1.5,'triangle',0.2,0.15,0.1);
   },
-  win() { [523,659,784,1047].forEach((f,i)=>this.tone(f,'triangle',0.4,0.25,i*0.12)); },
+  win()  { [523,659,784,1047].forEach((f,i)=>this.tone(f,'triangle',0.4,0.25,i*0.12)); },
   lose() { [440,392,349].forEach((f,i)=>this.tone(f,'sawtooth',0.3,0.15,i*0.15)); },
   toggle() {
     this.enabled = !this.enabled;
@@ -1179,13 +1213,13 @@ document.getElementById('audioBtn').addEventListener('click', () => audio.toggle
 document.addEventListener('pointerdown', () => audio.unlock(), { once:true });
 updateAudioBtn();
 
-// ════════════════════════════════════════
-//  FIREBASE (optional – save scores)
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
+//  FIREBASE
+// ═══════════════════════════════════════
 (async () => {
   try {
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js');
-    const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js');
+    const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js');
     const { getFirestore, doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js');
 
     const app = initializeApp({
@@ -1200,14 +1234,13 @@ updateAudioBtn();
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Override nextLevel to also save progress to Firebase
     const _origNext = window.nextLevel;
     window.nextLevel = async () => {
       const user = auth.currentUser;
       if(user) {
         try {
           await updateDoc(doc(db,'users',user.uid), {
-            level: Math.max(state.level+1, 1),
+            level: state.level + 1,
             totalScore: state.score,
             lastPlayed: serverTimestamp()
           });
@@ -1215,14 +1248,12 @@ updateAudioBtn();
       }
       _origNext();
     };
-
-  } catch(e) { /* Firebase unavailable, game still works */ }
+  } catch(e) {}
 })();
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════════
 //  START
-// ════════════════════════════════════════
-// Check URL for level param
+// ═══════════════════════════════════════
 const urlParams = new URLSearchParams(location.search);
 const startLv = parseInt(urlParams.get('level')) || 1;
 startLevel(Math.min(Math.max(1, startLv), MAX_LEVELS));
