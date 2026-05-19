@@ -231,70 +231,72 @@ h1 {
 ═══════════════════════════════════════════ */
 .candy {
   aspect-ratio:1;
-  border-radius:20%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:1px; padding:3px;
-  line-height:1; overflow:hidden;
+  border-radius:22%;
+  display:flex; align-items:center; justify-content:center;
+  line-height:1; overflow:visible;
   cursor:pointer;
   -webkit-user-select:none; user-select:none;
   min-width:0; min-height:0;
   width:100%; height:100%;
   position:relative; isolation:isolate;
-  border:2px solid rgba(255,255,255,0.18);
+  /* 3D raised bottom shadow - like candy crush */
+  box-shadow:
+    0 5px 0 rgba(0,0,0,0.35),
+    0 7px 10px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    inset 0 -3px 0 rgba(0,0,0,0.2);
+  border:2px solid rgba(255,255,255,0.15);
   will-change:transform,opacity,filter;
-  /* Explicit grid placement set via JS (gridRow, gridColumn) */
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+/* Press down effect */
+.candy:active {
+  transform:translateY(3px) !important;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,0.35),
+    0 3px 6px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.2) !important;
 }
 
-/* Gloss top-shine overlay */
+/* Convex bulge highlight - top 40% bright oval */
 .candy::before {
   content:'';
-  position:absolute; inset:0; border-radius:inherit;
-  background:radial-gradient(circle at 35% 22%, rgba(255,255,255,0.35) 0%, transparent 45%);
-  pointer-events:none; z-index:1;
+  position:absolute;
+  top:4%; left:10%; width:80%; height:42%;
+  border-radius:50%;
+  background:radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 50%, transparent 70%);
+  pointer-events:none; z-index:3;
 }
-/* Bottom shadow inner */
+/* Bottom dark vignette for depth */
 .candy::after {
   content:'';
   position:absolute; inset:0; border-radius:inherit;
-  background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,0.28) 100%);
+  background:radial-gradient(ellipse at 50% 85%, rgba(0,0,0,0.35) 0%, transparent 65%);
   pointer-events:none; z-index:1;
 }
 /* ═══════════════════════════════════════════
-   TILE INNER STRUCTURE: CARTOON EYES + FACE
+   TILE FACE (emoji only - centered)
 ═══════════════════════════════════════════ */
-.t-eye-row {
-  display:flex; justify-content:center; align-items:center;
-  gap:0.17em; flex-shrink:0;
-  position:relative; z-index:2;
-}
-.t-eye {
-  width:0.40em; height:0.40em;
-  background:radial-gradient(circle at 38% 32%, #fff 60%, #e8e8e8);
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 1px 3px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(0,0,0,0.15);
-  flex-shrink:0;
-}
-.t-pupil {
-  width:0.22em; height:0.22em;
-  background:radial-gradient(circle at 35% 30%, #4a3a00, #0a0600);
-  border-radius:50%;
-}
 .t-face {
-  font-size:0.88em; line-height:1;
+  font-size:1.1em; line-height:1;
   position:relative; z-index:2;
   flex-shrink:0;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,0.5));
 }
 
 
 /* ── SELECTED ── */
 .candy.selected {
-  transform:scale(1.16);
-  box-shadow:0 0 0 3px var(--gold), 0 0 22px var(--gold-glow), 0 8px 20px rgba(0,0,0,0.6);
+  transform:scale(1.16) translateY(-3px);
+  box-shadow:
+    0 8px 0 rgba(0,0,0,0.35),
+    0 0 0 3px var(--gold),
+    0 0 22px var(--gold-glow),
+    0 12px 20px rgba(0,0,0,0.5);
   z-index:20; position:relative;
   border-color:rgba(255,215,0,0.8);
 }
-.candy.selected .t-eye { background:radial-gradient(circle at 38% 32%, #ffe066 60%, #e8c800); }
 
 /* ── HINT PULSE ── */
 .candy.hint-pulse { animation:hintPulse 1.4s ease-in-out infinite; }
@@ -307,45 +309,45 @@ h1 {
    TILE COLOR VARIANTS (0–7)
 ═══════════════════════════════════════════ */
 .candy-0 { /* Tiger – fiery orange */
-  background:radial-gradient(ellipse at 40% 30%, #ff7830, #c84010 50%, #7a2800);
-  box-shadow:0 6px 16px rgba(200,64,16,0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+  background:radial-gradient(ellipse at 45% 35%, #ff9050 0%, #e05020 40%, #8a2800 100%);
+  box-shadow:0 5px 0 #5a1400, 0 7px 14px rgba(200,64,16,0.6), inset 0 1px 0 rgba(255,180,100,0.5);
   border-color:rgba(255,150,80,0.4);
 }
 .candy-1 { /* Deer – warm tan */
-  background:radial-gradient(ellipse at 40% 30%, #e09040, #a8681e 50%, #6b3e10);
-  box-shadow:0 6px 16px rgba(168,104,30,0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+  background:radial-gradient(ellipse at 45% 35%, #f0aa50 0%, #b87828 40%, #6b3e10 100%);
+  box-shadow:0 5px 0 #3d2208, 0 7px 14px rgba(168,104,30,0.6), inset 0 1px 0 rgba(255,200,100,0.5);
   border-color:rgba(220,160,60,0.4);
 }
 .candy-2 { /* Goat – steel blue */
-  background:radial-gradient(ellipse at 40% 30%, #8090b0, #5a6070 50%, #3a3d48);
-  box-shadow:0 6px 16px rgba(90,96,112,0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
-  border-color:rgba(160,170,190,0.4);
+  background:radial-gradient(ellipse at 45% 35%, #a0b4d0 0%, #6070a0 40%, #3a3d55 100%);
+  box-shadow:0 5px 0 #202240, 0 7px 14px rgba(90,96,140,0.6), inset 0 1px 0 rgba(180,200,255,0.5);
+  border-color:rgba(160,170,210,0.4);
 }
 .candy-3 { /* Eagle – deep purple-navy */
-  background:radial-gradient(ellipse at 40% 30%, #5060c8, #2838a0 50%, #101660);
-  box-shadow:0 6px 16px rgba(48,64,168,0.65), inset 0 -4px 8px rgba(0,0,0,0.3);
-  border-color:rgba(100,130,220,0.45);
+  background:radial-gradient(ellipse at 45% 35%, #7080e0 0%, #3048b8 40%, #100e50 100%);
+  box-shadow:0 5px 0 #080630, 0 7px 14px rgba(48,64,168,0.65), inset 0 1px 0 rgba(150,170,255,0.5);
+  border-color:rgba(100,130,220,0.5);
 }
 .candy-4 { /* Snake – vivid jungle green */
-  background:radial-gradient(ellipse at 40% 30%, #40c840, #189018 50%, #084808);
-  box-shadow:0 6px 16px rgba(40,168,40,0.65), inset 0 -4px 8px rgba(0,0,0,0.3);
-  border-color:rgba(80,220,80,0.45);
+  background:radial-gradient(ellipse at 45% 35%, #60e060 0%, #20a020 40%, #044004 100%);
+  box-shadow:0 5px 0 #022002, 0 7px 14px rgba(40,168,40,0.65), inset 0 1px 0 rgba(150,255,150,0.5);
+  border-color:rgba(80,220,80,0.5);
 }
 .candy-5 { /* Monkey – warm amber */
-  background:radial-gradient(ellipse at 40% 30%, #b87030, #7a4018 50%, #3c1e08);
-  box-shadow:0 6px 16px rgba(106,58,18,0.65), inset 0 -4px 8px rgba(0,0,0,0.3);
-  border-color:rgba(200,140,70,0.45);
+  background:radial-gradient(ellipse at 45% 35%, #d08040 0%, #904820 40%, #3c1e08 100%);
+  box-shadow:0 5px 0 #200c00, 0 7px 14px rgba(106,58,18,0.65), inset 0 1px 0 rgba(255,180,100,0.5);
+  border-color:rgba(200,140,70,0.5);
 }
 /* Reuse for index 6, 7 with slight hue difference */
 .candy-0.type-6 { /* Elephant – vivid purple */
-  background:radial-gradient(ellipse at 40% 30%, #c060e0, #8030b0 50%, #4a1060);
-  box-shadow:0 6px 16px rgba(170,64,192,0.65), inset 0 -4px 8px rgba(0,0,0,0.3);
-  border-color:rgba(220,140,255,0.5);
+  background:radial-gradient(ellipse at 45% 35%, #e080f8 0%, #9030c0 40%, #4a0860 100%);
+  box-shadow:0 5px 0 #280440, 0 7px 14px rgba(170,64,192,0.65), inset 0 1px 0 rgba(230,160,255,0.5);
+  border-color:rgba(220,140,255,0.55);
 }
 .candy-0.type-7 { /* Peacock – vivid cyan */
-  background:radial-gradient(ellipse at 40% 30%, #30b8e8, #1070c0 50%, #0a3060);
-  box-shadow:0 6px 16px rgba(32,144,208,0.65), inset 0 -4px 8px rgba(0,0,0,0.3);
-  border-color:rgba(80,200,255,0.5);
+  background:radial-gradient(ellipse at 45% 35%, #60d8f8 0%, #1880d0 40%, #063060 100%);
+  box-shadow:0 5px 0 #041840, 0 7px 14px rgba(32,144,208,0.65), inset 0 1px 0 rgba(150,220,255,0.5);
+  border-color:rgba(80,200,255,0.55);
 }
 
 /* ═══════════════════════════════════════════
@@ -1654,11 +1656,7 @@ function makeTileEl(animalIdx, r, c, iSize) {
   const d = document.createElement('div');
   const typeClass = animalIdx >= 6 ? 'candy-0 type-'+animalIdx : 'candy-'+Math.min(animalIdx,5);
   d.className = 'candy ' + typeClass;
-  d.innerHTML = '<span class="t-eye-row">'
-    + '<span class="t-eye"><span class="t-pupil"></span></span>'
-    + '<span class="t-eye"><span class="t-pupil"></span></span>'
-    + '</span>'
-    + '<span class="t-face">' + (ALL_ANIMALS[animalIdx] || '🐯') + '</span>';
+  d.innerHTML = '<span class="t-face">' + (ALL_ANIMALS[animalIdx] || '🐯') + '</span>';
   d.title = ANIMAL_NAMES[animalIdx] || 'Animal';
   d.style.fontSize = iSize + 'px';
   d.style.gridRow    = (r+1) + '';   // explicit CSS Grid placement
