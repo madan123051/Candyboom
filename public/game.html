@@ -796,7 +796,7 @@ let animationsEnabled = true;
 // ═══ USER'S EXACT LEVEL FORMULA ═══
 // Grid: 5×5 (L1-20), 6×6 (L21-40), 7×7 (L41-60), 8×8 (L61+)
 // Types: 4 (L1-16), 5 (L17-32), 6 (L33-48), 7 (L49-64), 8 (L65+)
-// Score target: level × 80
+// Score target: level × 250
 // Moves: max(10, 22 - floor(level/5))
 
 function getConfig(lvl) {
@@ -824,9 +824,9 @@ function getConfig(lvl) {
     level: lvl, rows: r, cols: c, iconSize,
     animalTypes: types,
     moves: Math.max(10, 22 - Math.floor(lvl / 5)),
-    target: lvl * 80,
+    target: lvl * 250,
     objective: 'score',
-    goalText: 'Score ' + (lvl * 80) + ' points',
+    goalText: 'Score ' + (lvl * 250) + ' points',
     zone, zoneName: zoneNames[zone] || 'Wilderness',
   };
 }
@@ -853,12 +853,12 @@ function toggleAnimations() {
 function initLevel() {
   const cfg = getConfig(level);
   ROWS = cfg.rows; COLS = cfg.cols;
-  score = 250; movesLeft = cfg.moves; huntProgress = 0;
+  score = 0; movesLeft = cfg.moves; huntProgress = 0;
   isProcessing = false; selectedRow = -1; selectedCol = -1;
   lastSpawnedCells.clear(); lastDroppedCells.clear();
 
   document.getElementById('levelDisplay').textContent = level;
-  document.getElementById('score').textContent = 250;
+  document.getElementById('score').textContent = 0;
   document.getElementById('moves').textContent = movesLeft;
   document.getElementById('bestScore').textContent = bestScore;
   document.getElementById('progressFill').style.width = '0%';
