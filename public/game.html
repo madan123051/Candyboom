@@ -979,6 +979,7 @@ h1 {
   </div>
 </div>
 
+<script src="levels/levels_config.js"></script>
 <script>
 /* ════════════════════════════════════════════════════
    SUPABASE CONFIG + AUTH
@@ -1478,18 +1479,23 @@ let huntProgress=0;
    LEVEL CONFIG (User's exact formula — DO NOT CHANGE)
 ════════════════════════════════════════════════════ */
 function getConfig(lvl) {
+  // ── Load from levels_config.js if available (edit public/levels/level_XX.json style) ──
+  const ext = window.LEVEL_CONFIGS && window.LEVEL_CONFIGS[lvl];
+
   let r, c;
-  if      (lvl <= 20) { r=5; c=5; }
+  if (ext && ext.grid_size) { r = ext.grid_size; c = ext.grid_size; }
+  else if (lvl <= 20) { r=5; c=5; }
   else if (lvl <= 40) { r=6; c=6; }
   else if (lvl <= 60) { r=7; c=7; }
-  else                 { r=8; c=8; }
+  else                { r=8; c=8; }
 
   let numTypes;
-  if      (lvl <= 16) numTypes=4;
+  if (ext && ext.tile_types) { numTypes = ext.tile_types; }
+  else if (lvl <= 16) numTypes=4;
   else if (lvl <= 32) numTypes=5;
   else if (lvl <= 48) numTypes=6;
   else if (lvl <= 64) numTypes=7;
-  else                 numTypes=8;
+  else                numTypes=8;
 
   const types=[];
   for (let i=0;i<numTypes;i++) types.push(i);
@@ -1497,14 +1503,22 @@ function getConfig(lvl) {
   const iconSize = r<=5?46:r<=6?42:r<=7?38:34;
   const zone = lvl<=20?'I':lvl<=40?'II':lvl<=60?'III':lvl<=80?'IV':'V';
   const zoneNames = {'I':'Starter Plains','II':'Dense Forest','III':'River Delta','IV':'Mountain Peak','V':'Royal Garden'};
+
+  const moves = ext && ext.moves ? ext.moves : Math.max(10, 22 - Math.floor(lvl/5));
+  const target = ext && ext.target_score ? ext.target_score : lvl * 250;
+
   return {
     level:lvl, rows:r, cols:c, iconSize,
     animalTypes:types,
-    moves: Math.max(10, 22 - Math.floor(lvl/5)),
-    target: lvl * 250,
+    moves,
+    target,
     objective:'score',
-    goalText:'Score '+(lvl*250)+' points',
+    goalText:'Score '+target+' points',
     zone, zoneName: zoneNames[zone]||'Wilderness',
+    theme: ext ? ext.theme : 'jungle',
+    bgColor: ext ? ext.bg_color : '#1a3a1a',
+    specialTiles: ext ? ext.special_tiles : [],
+    obstacles: ext ? ext.obstacles : [],
   };
 }
 
