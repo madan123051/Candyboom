@@ -130,7 +130,7 @@ h1 {
 
 .candy {
   aspect-ratio:1;
-  border-radius:8px;
+  border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   line-height:1;
   overflow:hidden;
@@ -1719,7 +1719,7 @@ function applyDropAnimations() {
     const [r, c] = key.split(',').map(Number);
     const el = getEl(r, c);
     if (el) {
-      const stagger = c * 40 + Math.random() * 30;
+      const stagger = (ROWS - 1 - r) * 55 + c * 20 + Math.random() * 15;
       setTimeout(() => {
         // Force reflow to ensure animation plays
         el.classList.remove('cascade-drop', 'drop-in', 'new-spawn', 'removing');
