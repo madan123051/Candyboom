@@ -5,188 +5,301 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>King of Jungle — Level Map</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  :root{
-    --gold:#f0c040; --dark:#0a1a0a; --green:#1a4a1a; --btn-green:#2d8a2d;
-  }
-  body{background:#0a1a0a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --gold:#f0c040;--dark:#0a1a0a;--green:#1a4a1a;--btn-green:#2d8a2d;
+}
 
-  /* ── HEADER ── */
-  .hdr{
-    position:fixed;top:0;left:0;right:0;z-index:200;
-    background:linear-gradient(180deg,rgba(0,0,0,.95) 0%,rgba(10,26,10,.9) 100%);
-    backdrop-filter:blur(10px);
-    display:flex;align-items:center;justify-content:space-between;
-    padding:10px 16px;border-bottom:1px solid rgba(240,192,64,.25);
-  }
-  .hdr-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:var(--gold);}
-  .hdr-logo span{font-size:22px;}
-  .hdr-right{display:flex;align-items:center;gap:10px;}
-  .hdr-avatar{
-    width:38px;height:38px;border-radius:50%;
-    border:2px solid var(--gold);
-    background:linear-gradient(135deg,#2d8a2d,#1a4a1a);
-    display:flex;align-items:center;justify-content:center;
-    font-size:18px;cursor:pointer;overflow:hidden;
-    box-shadow:0 0 10px rgba(240,192,64,.4);
-  }
-  .hdr-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-  .hdr-name{font-size:13px;color:#ccc;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .hdr-level-badge{
-    background:var(--gold);color:#000;border-radius:20px;
-    padding:3px 10px;font-size:12px;font-weight:700;
-  }
+/* ── BODY & BG ── */
+body{
+  background:#0a1a0a;color:#fff;
+  font-family:'Segoe UI',sans-serif;
+  overflow-x:hidden;min-height:100vh;
+}
 
-  /* ── SCROLL CONTAINER ── */
-  .map-wrap{
-    padding-top:70px;padding-bottom:40px;
-    overflow-y:auto;height:100vh;
-    scroll-behavior:smooth;
-  }
+/* Fixed parallax background */
+.bg-layer{
+  position:fixed;inset:0;z-index:0;
+  background:url('assets/levelmap_bg.png') center top / cover no-repeat;
+  transform:scale(1.08);
+  will-change:transform;
+}
+.bg-overlay{
+  position:fixed;inset:0;z-index:1;
+  background:linear-gradient(180deg,
+    rgba(5,15,5,.72) 0%,
+    rgba(5,15,5,.55) 40%,
+    rgba(5,15,5,.72) 100%);
+}
 
-  /* ── ZONE BANNER ── */
-  .zone-banner{
-    position:relative;text-align:center;padding:28px 16px 18px;
-    margin:0 0 8px;
-  }
-  .zone-bg{
-    position:absolute;inset:0;opacity:.18;background-size:cover;background-position:center;
-  }
-  .zone-name{font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;position:relative;}
-  .zone-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;position:relative;}
-  .zone-emoji{font-size:36px;display:block;margin-bottom:6px;position:relative;}
+/* ── FLOATING PARTICLES ── */
+.particles{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.leaf{
+  position:absolute;font-size:16px;
+  animation:leaffall linear infinite;
+  opacity:.7;
+}
+@keyframes leaffall{
+  0%  {transform:translateY(-30px) rotate(0deg) translateX(0);opacity:.8;}
+  50% {transform:translateY(50vh) rotate(180deg) translateX(30px);opacity:.6;}
+  100%{transform:translateY(110vh) rotate(360deg) translateX(-20px);opacity:0;}
+}
+.firefly{
+  position:absolute;width:4px;height:4px;border-radius:50%;
+  background:#ffe066;box-shadow:0 0 6px 2px #ffe066;
+  animation:fireflyFloat ease-in-out infinite;
+}
+@keyframes fireflyFloat{
+  0%,100%{transform:translate(0,0);opacity:.3;}
+  25%{transform:translate(20px,-25px);opacity:1;}
+  50%{transform:translate(-15px,-50px);opacity:.6;}
+  75%{transform:translate(25px,-30px);opacity:.9;}
+}
+.bird{
+  position:absolute;font-size:20px;
+  animation:birdfly linear infinite;
+}
+@keyframes birdfly{
+  0%  {transform:translateX(-60px);opacity:0;}
+  10% {opacity:1;}
+  90% {opacity:1;}
+  100%{transform:translateX(110vw);opacity:0;}
+}
 
-  /* ── PATH TRACK ── */
-  .zone-track{
-    position:relative;padding:0 24px 10px;
-    display:flex;flex-direction:column;align-items:center;gap:0;
-  }
+/* ── HEADER ── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(5,15,5,.85) 100%);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  border-bottom:1px solid rgba(240,192,64,.25);
+  box-shadow:0 2px 20px rgba(0,0,0,.5);
+}
+.hdr-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:var(--gold);letter-spacing:.5px;}
+.hdr-logo span{font-size:24px;filter:drop-shadow(0 0 6px rgba(240,192,64,.8));}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.hdr-avatar{
+  width:40px;height:40px;border-radius:50%;
+  border:2px solid var(--gold);
+  background:linear-gradient(135deg,#2d8a2d,#1a4a1a);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;cursor:pointer;overflow:hidden;
+  box-shadow:0 0 12px rgba(240,192,64,.5);
+  transition:transform .15s;
+}
+.hdr-avatar:active{transform:scale(.9);}
+.hdr-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.hdr-name{font-size:13px;color:#ccc;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hdr-level-badge{
+  background:var(--gold);color:#000;border-radius:20px;
+  padding:3px 10px;font-size:12px;font-weight:800;
+  box-shadow:0 0 8px rgba(240,192,64,.5);
+}
 
-  /* ── LEVEL ROW (zigzag) ── */
-  .level-row{
-    display:flex;width:100%;justify-content:center;
-    align-items:center;position:relative;
-    height:88px;
-  }
-  .level-row.left  .lvl-node{margin-left:10px;align-self:center;}
-  .level-row.right .lvl-node{margin-right:10px;align-self:center;}
+/* ── SCROLL CONTAINER ── */
+.map-wrap{
+  position:relative;z-index:10;
+  padding-top:68px;padding-bottom:60px;
+  overflow-y:auto;height:100vh;
+  scroll-behavior:smooth;
+}
 
-  /* path SVG connector */
-  .path-line{position:absolute;width:100%;height:88px;top:0;left:0;pointer-events:none;z-index:0;}
+/* ══════════════════════════════
+   ZONE GATE — between every 10 levels
+   ══════════════════════════════ */
+.zone-gate{
+  position:relative;
+  margin:10px 0;
+  display:flex;align-items:center;justify-content:center;
+  height:110px;overflow:hidden;
+}
+.zone-gate-inner{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.gate-arch{
+  width:180px;height:70px;
+  border:4px solid var(--gate-color,#888);
+  border-bottom:none;
+  border-radius:90px 90px 0 0;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  padding-bottom:8px;
+  box-shadow:0 0 20px var(--gate-glow,rgba(255,255,255,.3)),
+             inset 0 0 20px rgba(0,0,0,.4);
+  background:var(--gate-bg,rgba(0,0,0,.5));
+}
+.gate-arch::before,.gate-arch::after{
+  content:'';position:absolute;bottom:-4px;
+  width:14px;height:28px;
+  background:var(--gate-color,#888);
+  border-radius:0 0 4px 4px;
+  box-shadow:0 0 8px var(--gate-glow,rgba(255,255,255,.3));
+}
+.gate-arch::before{left:-7px;}
+.gate-arch::after{right:-7px;}
+.gate-icon{font-size:32px;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));animation:gateFloat 3s ease-in-out infinite;}
+@keyframes gateFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.gate-line{
+  position:absolute;left:0;right:0;bottom:30px;
+  border-top:2px dashed rgba(255,255,255,.15);
+}
+.gate-label{
+  font-size:12px;font-weight:700;letter-spacing:1px;
+  color:var(--gate-color,#aaa);
+  text-shadow:0 0 10px var(--gate-glow,rgba(255,255,255,.3));
+  text-transform:uppercase;
+}
+.gate-stars-total{font-size:11px;color:rgba(255,255,255,.5);}
 
-  /* ── LEVEL NODE ── */
-  .lvl-node{
-    position:relative;z-index:2;
-    width:68px;height:68px;border-radius:50%;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    cursor:pointer;transition:transform .15s,box-shadow .15s;
-    flex-shrink:0;
-  }
-  .lvl-node:active{transform:scale(.92);}
+/* gate sparkles */
+.gate-spark{
+  position:absolute;font-size:14px;
+  animation:sparkFloat ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes sparkFloat{0%,100%{transform:translateY(0) scale(1);opacity:.6;}50%{transform:translateY(-10px) scale(1.2);opacity:1;}}
 
-  /* states */
-  .lvl-node.locked{
-    background:radial-gradient(circle,#2a2a2a 60%,#1a1a1a);
-    border:3px solid #444;
-    box-shadow:0 4px 12px rgba(0,0,0,.6);
-    cursor:default;
-  }
-  .lvl-node.completed{
-    background:radial-gradient(circle,#2d7a2d 60%,#1a4a1a);
-    border:3px solid #4caf50;
-    box-shadow:0 4px 18px rgba(76,175,80,.5);
-  }
-  .lvl-node.current{
-    background:radial-gradient(circle,#c0860a 60%,#8a5c00);
-    border:3px solid var(--gold);
-    box-shadow:0 0 0 4px rgba(240,192,64,.35),0 4px 20px rgba(240,192,64,.6);
-    animation:pulse-node 1.8s ease-in-out infinite;
-  }
-  .lvl-node.playable{
-    background:radial-gradient(circle,#1e6b1e 60%,#0f3f0f);
-    border:3px solid #6abf6a;
-    box-shadow:0 4px 16px rgba(106,191,106,.4);
-  }
-  @keyframes pulse-node{
-    0%,100%{box-shadow:0 0 0 4px rgba(240,192,64,.35),0 4px 20px rgba(240,192,64,.6);}
-    50%{box-shadow:0 0 0 8px rgba(240,192,64,.2),0 4px 28px rgba(240,192,64,.8);}
-  }
+/* ── ZONE HEADER (inside zone) ── */
+.zone-header{
+  text-align:center;
+  padding:20px 16px 12px;
+  position:relative;
+}
+.zone-header-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--zone-top,rgba(0,50,0,.5)) 0%,transparent 100%);
+}
+.zone-header-content{position:relative;z-index:1;}
+.zone-big-emoji{font-size:42px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));animation:zoneEmojiPulse 4s ease-in-out infinite;}
+@keyframes zoneEmojiPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.zone-title{font-size:18px;font-weight:800;color:#fff;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 8px rgba(0,0,0,.8);}
+.zone-range{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;}
 
-  .lvl-num{font-size:18px;font-weight:800;line-height:1;}
-  .lvl-emoji{font-size:22px;line-height:1;}
-  .lvl-lock{font-size:22px;opacity:.5;}
-  .lvl-stars{display:flex;gap:2px;margin-top:2px;}
-  .star{font-size:11px;opacity:.3;}.star.lit{opacity:1;}
+/* ── PATH TRACK ── */
+.zone-track{
+  position:relative;padding:0 20px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
 
-  /* current label */
-  .current-label{
-    position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
-    background:var(--gold);color:#000;border-radius:10px;
-    padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap;
-  }
+/* ── LEVEL ROW ── */
+.level-row{
+  display:flex;width:100%;justify-content:center;
+  align-items:center;position:relative;
+  height:96px;
+}
+.level-row.left  .lvl-node{margin-left:auto;margin-right:30px;}
+.level-row.right .lvl-node{margin-right:auto;margin-left:30px;}
 
-  /* ── ZONE COLORS ── */
-  .zone-0{--zc:#2d8a2d;--zb:linear-gradient(135deg,#0a2a0a,#1a4a1a);}
-  .zone-1{--zc:#5a8a2d;--zb:linear-gradient(135deg,#1a2a0a,#3a5a1a);}
-  .zone-2{--zc:#3a6a3a;--zb:linear-gradient(135deg,#0a1a10,#1a3a2a);}
-  .zone-3{--zc:#2d6a8a;--zb:linear-gradient(135deg,#0a1a2a,#1a3a4a);}
-  .zone-4{--zc:#8a4a2d;--zb:linear-gradient(135deg,#2a1a0a,#4a2a1a);}
-  .zone-5{--zc:#c0400a;--zb:linear-gradient(135deg,#2a0a0a,#4a1a0a);}
-  .zone-6{--zc:#4a8aaa;--zb:linear-gradient(135deg,#0a1a2a,#1a3a4a);}
-  .zone-7{--zc:#8a5a2d;--zb:linear-gradient(135deg,#1a1000,#3a2a0a);}
-  .zone-8{--zc:#5a2d8a;--zb:linear-gradient(135deg,#1a0a2a,#2a1a4a);}
-  .zone-9{--zc:#2d4a8a;--zb:linear-gradient(135deg,#00000a,#0a0a2a);}
+/* path SVG */
+.path-line{position:absolute;width:100%;height:96px;top:0;left:0;pointer-events:none;z-index:0;}
 
-  /* path colors per zone */
-  .path-line path{stroke:rgba(255,255,255,.12);stroke-width:8;fill:none;stroke-linecap:round;stroke-dasharray:12 8;}
-  .path-line path.done{stroke:rgba(76,175,80,.5);stroke-dasharray:none;}
+/* ── LEVEL NODE ── */
+.lvl-node{
+  position:relative;z-index:2;
+  width:72px;height:72px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  flex-shrink:0;
+}
+.lvl-node:active{transform:scale(.9)!important;}
 
-  /* ── PROFILE MODAL ── */
-  .modal-bg{
-    position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;
-    display:none;align-items:flex-end;justify-content:center;
-  }
-  .modal-bg.show{display:flex;}
-  .modal-box{
-    background:linear-gradient(180deg,#1a3a1a,#0a1a0a);
-    border:1px solid rgba(240,192,64,.3);border-radius:24px 24px 0 0;
-    width:100%;max-width:420px;padding:28px 24px 36px;
-  }
-  .modal-handle{width:40px;height:4px;background:#444;border-radius:2px;margin:0 auto 20px;}
-  .modal-avatar{
-    width:80px;height:80px;border-radius:50%;margin:0 auto 12px;
-    border:3px solid var(--gold);overflow:hidden;
-    background:linear-gradient(135deg,#2d8a2d,#1a4a1a);
-    display:flex;align-items:center;justify-content:center;font-size:40px;
-  }
-  .modal-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-  .modal-name{text-align:center;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px;}
-  .modal-email{text-align:center;font-size:12px;color:#888;margin-bottom:20px;}
-  .modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-  .stat-box{background:rgba(255,255,255,.06);border-radius:12px;padding:14px;text-align:center;}
-  .stat-val{font-size:22px;font-weight:800;color:var(--gold);}
-  .stat-lbl{font-size:11px;color:#888;margin-top:2px;}
-  .modal-btns{display:flex;flex-direction:column;gap:10px;}
-  .btn-logout{
-    background:transparent;border:1px solid #444;color:#aaa;
-    border-radius:14px;padding:12px;font-size:14px;cursor:pointer;
-  }
-  .btn-close-modal{
-    background:var(--btn-green);border:none;color:#fff;
-    border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;
-  }
+.lvl-node.locked{
+  background:radial-gradient(circle,#252525 60%,#151515);
+  border:3px solid #3a3a3a;
+  box-shadow:0 4px 12px rgba(0,0,0,.7);
+  cursor:default;
+}
+.lvl-node.completed{
+  background:radial-gradient(circle,#1e6b1e 60%,#0f3a0f);
+  border:3px solid #5ab55a;
+  box-shadow:0 4px 18px rgba(76,175,80,.6);
+}
+.lvl-node.current{
+  background:radial-gradient(circle,#c8900a 60%,#8a5c00);
+  border:3px solid var(--gold);
+  box-shadow:0 0 0 5px rgba(240,192,64,.3),0 4px 24px rgba(240,192,64,.7);
+  animation:pulseNode 1.8s ease-in-out infinite;
+}
+.lvl-node.playable{
+  background:radial-gradient(circle,#1e5c1e 60%,#0f330f);
+  border:3px solid #70c070;
+  box-shadow:0 4px 16px rgba(112,192,112,.4);
+}
+@keyframes pulseNode{
+  0%,100%{box-shadow:0 0 0 5px rgba(240,192,64,.3),0 4px 24px rgba(240,192,64,.7);}
+  50%{box-shadow:0 0 0 10px rgba(240,192,64,.15),0 4px 30px rgba(240,192,64,.9);}
+}
 
-  /* ── TOAST ── */
-  .toast{
-    position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
-    background:rgba(0,0,0,.85);color:#fff;border-radius:20px;
-    padding:10px 20px;font-size:14px;z-index:999;
-    opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;
-  }
-  .toast.show{opacity:1;}
+.lvl-num{font-size:17px;font-weight:800;line-height:1;}
+.lvl-emoji{font-size:24px;line-height:1;}
+.lvl-lock{font-size:22px;opacity:.45;}
+.lvl-stars{display:flex;gap:1px;margin-top:2px;}
+.star{font-size:10px;opacity:.2;}.star.lit{opacity:1;}
+
+.current-label{
+  position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:#000;border-radius:12px;
+  padding:2px 10px;font-size:10px;font-weight:800;white-space:nowrap;
+  animation:labelBounce 1s ease-in-out infinite;
+}
+@keyframes labelBounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-3px);}}
+
+/* ── PATH STYLES ── */
+.path-line path{stroke:rgba(255,255,255,.15);stroke-width:9;fill:none;stroke-linecap:round;stroke-dasharray:14 9;}
+.path-line path.done{stroke:rgba(80,200,80,.45);stroke-dasharray:none;}
+
+/* ── PROFILE MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;
+  display:none;align-items:flex-end;justify-content:center;
+}
+.modal-bg.show{display:flex;animation:slideUp .3s ease;}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-box{
+  background:linear-gradient(180deg,#1a3a1a,#0a1a0a);
+  border:1px solid rgba(240,192,64,.3);border-radius:24px 24px 0 0;
+  width:100%;max-width:420px;padding:28px 24px 40px;
+}
+.modal-handle{width:40px;height:4px;background:#444;border-radius:2px;margin:0 auto 20px;}
+.modal-avatar{
+  width:84px;height:84px;border-radius:50%;margin:0 auto 12px;
+  border:3px solid var(--gold);overflow:hidden;
+  background:linear-gradient(135deg,#2d8a2d,#1a4a1a);
+  display:flex;align-items:center;justify-content:center;font-size:42px;
+  box-shadow:0 0 20px rgba(240,192,64,.4);
+}
+.modal-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.modal-name{text-align:center;font-size:20px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.modal-email{text-align:center;font-size:12px;color:#777;margin-bottom:20px;}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.stat-box{background:rgba(255,255,255,.06);border-radius:12px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,.06);}
+.stat-val{font-size:24px;font-weight:800;color:var(--gold);}
+.stat-lbl{font-size:11px;color:#888;margin-top:2px;}
+.modal-btns{display:flex;flex-direction:column;gap:10px;}
+.btn-logout{background:transparent;border:1px solid #444;color:#aaa;border-radius:14px;padding:12px;font-size:14px;cursor:pointer;}
+.btn-close-modal{background:var(--btn-green);border:none;color:#fff;border-radius:14px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(45,138,45,.5);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.88);color:#fff;border-radius:20px;
+  padding:10px 22px;font-size:14px;z-index:999;
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;
+  border:1px solid rgba(255,255,255,.1);
+}
+.toast.show{opacity:1;}
 </style>
 </head>
 <body>
+
+<!-- BACKGROUND LAYERS -->
+<div class="bg-layer" id="bgLayer"></div>
+<div class="bg-overlay"></div>
+
+<!-- ANIMATED PARTICLES -->
+<div class="particles" id="particles"></div>
 
 <!-- HEADER -->
 <div class="hdr">
@@ -223,41 +336,152 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ══════════════════════════════════════════
-// DATA
+// ZONE DATA — 10 zones, each 10 levels
 // ══════════════════════════════════════════
 const ZONES = [
-  {name:'Starter Plains', emoji:'🌿', levels:[1,10]},
-  {name:'Deep Forest',    emoji:'🌲', levels:[11,20]},
-  {name:'Mountain Pass',  emoji:'⛰️', levels:[21,30]},
-  {name:'River Delta',    emoji:'🌊', levels:[31,40]},
-  {name:'Volcano Edge',   emoji:'🌋', levels:[41,50]},
-  {name:'Frozen Peaks',   emoji:'❄️', levels:[51,60]},
-  {name:'Desert Ruins',   emoji:'🏜️', levels:[61,70]},
-  {name:'Shadow Jungle',  emoji:'🌙', levels:[71,80]},
-  {name:'Celestial Canyon',emoji:'✨',levels:[81,90]},
-  {name:'Cosmic Realm',   emoji:'🌌', levels:[91,100]},
+  {
+    name:'Starter Plains', range:[1,10],
+    bigEmoji:'🌿', animal:'🐯',
+    gateIcon:'🌴', gateLabel:'Jungle Gate',
+    gateColor:'#5aaa5a', gateGlow:'rgba(90,170,90,.6)',
+    gateBg:'rgba(10,40,10,.7)',
+    topColor:'rgba(0,40,0,.55)',
+    sparks:['🍃','🦋','✨']
+  },
+  {
+    name:'Deep Forest', range:[11,20],
+    bigEmoji:'🌲', animal:'🦌',
+    gateIcon:'⛰️', gateLabel:'Mountain Pass',
+    gateColor:'#9abaaa', gateGlow:'rgba(150,186,160,.6)',
+    gateBg:'rgba(20,35,25,.7)',
+    topColor:'rgba(5,30,20,.55)',
+    sparks:['🌿','🐦','💧']
+  },
+  {
+    name:'Mountain Pass', range:[21,30],
+    bigEmoji:'⛰️', animal:'🐐',
+    gateIcon:'🌊', gateLabel:'River Crossing',
+    gateColor:'#4a9abf', gateGlow:'rgba(74,154,191,.6)',
+    gateBg:'rgba(5,20,35,.7)',
+    topColor:'rgba(5,20,40,.55)',
+    sparks:['❄️','🦅','💨']
+  },
+  {
+    name:'River Delta', range:[31,40],
+    bigEmoji:'🌊', animal:'🦅',
+    gateIcon:'🌋', gateLabel:'Volcano Edge',
+    gateColor:'#e05020', gateGlow:'rgba(224,80,32,.6)',
+    gateBg:'rgba(40,10,5,.7)',
+    topColor:'rgba(40,10,0,.55)',
+    sparks:['🔥','💧','🐊']
+  },
+  {
+    name:'Volcano Edge', range:[41,50],
+    bigEmoji:'🌋', animal:'🐍',
+    gateIcon:'❄️', gateLabel:'Frozen Pass',
+    gateColor:'#80d0f0', gateGlow:'rgba(128,208,240,.6)',
+    gateBg:'rgba(5,20,35,.7)',
+    topColor:'rgba(30,5,5,.55)',
+    sparks:['🌋','🔥','💎']
+  },
+  {
+    name:'Frozen Peaks', range:[51,60],
+    bigEmoji:'❄️', animal:'🐒',
+    gateIcon:'🏜️', gateLabel:'Desert Gate',
+    gateColor:'#d4a020', gateGlow:'rgba(212,160,32,.6)',
+    gateBg:'rgba(30,25,5,.7)',
+    topColor:'rgba(5,25,40,.55)',
+    sparks:['❄️','🌨️','⛄']
+  },
+  {
+    name:'Desert Ruins', range:[61,70],
+    bigEmoji:'🏜️', animal:'🐘',
+    gateIcon:'🌙', gateLabel:'Shadow Cave',
+    gateColor:'#9050c0', gateGlow:'rgba(144,80,192,.6)',
+    gateBg:'rgba(20,5,35,.7)',
+    topColor:'rgba(35,25,5,.55)',
+    sparks:['☀️','🦂','🏺']
+  },
+  {
+    name:'Shadow Jungle', range:[71,80],
+    bigEmoji:'🌙', animal:'🦚',
+    gateIcon:'✨', gateLabel:'Celestial Gate',
+    gateColor:'#f0d060', gateGlow:'rgba(240,208,96,.6)',
+    gateBg:'rgba(10,5,25,.7)',
+    topColor:'rgba(10,5,30,.55)',
+    sparks:['🌙','🦇','👁️']
+  },
+  {
+    name:'Celestial Canyon', range:[81,90],
+    bigEmoji:'✨', animal:'🦁',
+    gateIcon:'🌌', gateLabel:'Cosmic Portal',
+    gateColor:'#a080ff', gateGlow:'rgba(160,128,255,.7)',
+    gateBg:'rgba(5,5,20,.7)',
+    topColor:'rgba(5,5,30,.55)',
+    sparks:['⭐','🌈','🔮']
+  },
+  {
+    name:'Cosmic Realm', range:[91,100],
+    bigEmoji:'🌌', animal:'🐆',
+    gateIcon:null, gateLabel:null, // last zone — no gate after
+    gateColor:'#ff80c0', gateGlow:'rgba(255,128,192,.6)',
+    gateBg:'rgba(10,0,20,.7)',
+    topColor:'rgba(0,0,20,.55)',
+    sparks:['🌟','💫','🎆']
+  }
 ];
-
-// Animal emoji per level (cycles through unlocked animals)
-const ANIMALS = ['🐯','🦌','🐐','🦅','🐍','🐒','🐘','🦚','🦁','🐆'];
-
-function getLevelEmoji(lv){
-  const idx = Math.floor((lv-1)/10);
-  return ANIMALS[idx % ANIMALS.length];
-}
 
 // ── STATE ──
 let currentLevel = parseInt(localStorage.getItem('koj_current_level')||'1');
 if(currentLevel < 1) currentLevel = 1;
 if(currentLevel > 100) currentLevel = 100;
-
-// Stars per level: stored as "koj_stars_X" = 0-3
 function getStars(lv){ return parseInt(localStorage.getItem('koj_stars_'+lv)||'0'); }
+
+// ══════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════
+function spawnParticles(){
+  const p = document.getElementById('particles');
+  const leaves = ['🍃','🍂','🌿','🍀'];
+  // Leaves
+  for(let i=0;i<12;i++){
+    const el = document.createElement('div');
+    el.className = 'leaf';
+    el.textContent = leaves[Math.floor(Math.random()*leaves.length)];
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.animationDuration = (8+Math.random()*12)+'s';
+    el.style.animationDelay = (-Math.random()*14)+'s';
+    el.style.fontSize = (12+Math.random()*10)+'px';
+    p.appendChild(el);
+  }
+  // Fireflies
+  for(let i=0;i<18;i++){
+    const el = document.createElement('div');
+    el.className = 'firefly';
+    el.style.left = Math.random()*100+'vw';
+    el.style.top = (10+Math.random()*80)+'vh';
+    el.style.animationDuration = (3+Math.random()*5)+'s';
+    el.style.animationDelay = (-Math.random()*6)+'s';
+    const hue = 50+Math.random()*40;
+    el.style.background = `hsl(${hue},100%,75%)`;
+    el.style.boxShadow = `0 0 6px 2px hsl(${hue},100%,75%)`;
+    p.appendChild(el);
+  }
+  // Birds (rare)
+  for(let i=0;i<3;i++){
+    const el = document.createElement('div');
+    el.className = 'bird';
+    el.textContent = ['🦜','🦅','🦋'][i];
+    el.style.top = (10+Math.random()*35)+'vh';
+    el.style.animationDuration = (18+Math.random()*20)+'s';
+    el.style.animationDelay = (-Math.random()*25)+'s';
+    p.appendChild(el);
+  }
+}
 
 // ══════════════════════════════════════════
 // BUILD MAP
@@ -267,85 +491,106 @@ function buildMap(){
   cont.innerHTML = '';
 
   ZONES.forEach((zone, zi) => {
-    // Zone banner
-    const banner = document.createElement('div');
-    banner.className = `zone-banner zone-${zi}`;
-    banner.style.background = getComputedStyle(document.documentElement)
-      .getPropertyValue(`--zb`) || `linear-gradient(135deg,#0a2a0a,#1a4a1a)`;
-    banner.innerHTML = `
-      <span class="zone-emoji">${zone.emoji}</span>
-      <div class="zone-name">Zone ${zi+1} — ${zone.name}</div>
-      <div class="zone-sub">Levels ${zone.levels[0]} – ${zone.levels[1]}</div>
-    `;
-    // Color banner per zone
-    const colors = [
-      '#0f2f0f','#1a2f0a','#0a1f10','#0a1520','#201008',
-      '#200808','#081520','#180f00','#100820','#02020f'
-    ];
-    banner.style.background = colors[zi];
-    cont.appendChild(banner);
+    // ── Zone header
+    const hdr = document.createElement('div');
+    hdr.className = 'zone-header';
+    hdr.innerHTML = `
+      <div class="zone-header-bg" style="background:linear-gradient(180deg,${zone.topColor} 0%,transparent 100%)"></div>
+      <div class="zone-header-content">
+        <div class="zone-big-emoji">${zone.bigEmoji}</div>
+        <div class="zone-title">Zone ${zi+1} · ${zone.name}</div>
+        <div class="zone-range">Levels ${zone.range[0]} – ${zone.range[1]}</div>
+      </div>`;
+    cont.appendChild(hdr);
 
-    // Track
+    // ── Level nodes
     const track = document.createElement('div');
-    track.className = `zone-track zone-${zi}`;
+    track.className = 'zone-track';
 
-    const levelNums = [];
-    for(let l = zone.levels[0]; l <= zone.levels[1]; l++) levelNums.push(l);
-
-    levelNums.forEach((lv, i) => {
+    for(let lv = zone.range[0]; lv <= zone.range[1]; lv++){
+      const i = lv - zone.range[0];
       const isLeft  = (i % 2 === 0);
       const stars   = getStars(lv);
       const isDone  = lv < currentLevel || stars > 0;
       const isCur   = lv === currentLevel;
-      const isPlay  = lv === currentLevel; // only current is "play now"
       const isLocked= lv > currentLevel;
 
       const row = document.createElement('div');
       row.className = 'level-row ' + (isLeft ? 'left' : 'right');
 
-      // Path SVG
-      if(i < levelNums.length - 1){
-        const pathDone = isDone && (lv+1 < currentLevel);
-        // Create simple curved path
-        const svgPath = `
-          <svg class="path-line" viewBox="0 0 320 88" preserveAspectRatio="none">
-            <path class="${pathDone?'done':''}" d="
-              ${isLeft
-                ? 'M 160 10 Q 240 44 160 78'
-                : 'M 160 10 Q 80 44 160 78'}
-            "/>
+      // Path connector (not after last in zone)
+      if(i < 9){
+        const pathDone = isDone && lv+1 <= currentLevel;
+        row.innerHTML = `
+          <svg class="path-line" viewBox="0 0 320 96" preserveAspectRatio="none">
+            <path class="${pathDone?'done':''}" d="${isLeft
+              ? 'M 200 8 C 260 20, 260 76, 200 88'
+              : 'M 120 8 C 60 20, 60 76, 120 88'}"/>
           </svg>`;
-        row.innerHTML = svgPath;
       }
 
       // Node
       const node = document.createElement('div');
-      node.className = 'lvl-node ' + (isCur?'current': isDone?'completed': isLocked?'locked':'playable');
+      node.className = 'lvl-node '+(isCur?'current':isDone?'completed':isLocked?'locked':'playable');
       node.id = 'lvl-'+lv;
-      node.style.marginLeft = isLeft ? 'auto' : '0';
-      node.style.marginRight = isLeft ? '0' : 'auto';
 
       if(isLocked){
         node.innerHTML = `
           <div class="lvl-lock">🔒</div>
-          <div style="font-size:11px;color:#555;margin-top:2px">${lv}</div>`;
+          <div style="font-size:10px;color:#444;margin-top:2px">${lv}</div>`;
       } else {
         const starsHtml = [1,2,3].map(s=>`<span class="star ${stars>=s?'lit':''}">⭐</span>`).join('');
         node.innerHTML = `
-          <div class="lvl-emoji">${getLevelEmoji(lv)}</div>
-          <div class="lvl-num" style="color:${isCur?'#fff':isDone?'#a0ffa0':'#fff'}">${lv}</div>
+          <div class="lvl-emoji">${zone.animal}</div>
+          <div class="lvl-num" style="color:${isCur?'#fff':isDone?'#90ef90':'#ddd'}">${lv}</div>
           <div class="lvl-stars">${starsHtml}</div>
-          ${isCur ? '<div class="current-label">PLAY!</div>' : ''}
-        `;
+          ${isCur?'<div class="current-label">PLAY!</div>':''}`;
         node.addEventListener('click', ()=>playLevel(lv));
-        node.addEventListener('touchend', (e)=>{e.preventDefault();playLevel(lv);});
+        node.addEventListener('touchend', e=>{e.preventDefault();playLevel(lv);});
       }
 
       row.appendChild(node);
       track.appendChild(row);
-    });
-
+    }
     cont.appendChild(track);
+
+    // ── Zone Gate (between zones, not after last zone)
+    if(zone.gateIcon){
+      const gate = document.createElement('div');
+      gate.className = 'zone-gate';
+
+      // Zone stars count
+      let zStars = 0;
+      for(let lv=zone.range[0];lv<=zone.range[1];lv++) zStars += getStars(lv);
+      const maxStars = 30;
+      const unlocked = currentLevel > zone.range[1];
+
+      gate.innerHTML = `
+        <div class="gate-line"></div>
+        <div class="zone-gate-inner">
+          <div class="gate-arch" style="
+            --gate-color:${unlocked ? zone.gateColor : '#555'};
+            --gate-glow:${unlocked ? zone.gateGlow : 'rgba(100,100,100,.3)'};
+            --gate-bg:${unlocked ? zone.gateBg : 'rgba(10,10,10,.6)'};
+          ">
+            <div class="gate-icon" style="filter:${unlocked?'none':'grayscale(1) opacity(.4)'}">
+              ${unlocked ? zone.gateIcon : '🔒'}
+            </div>
+          </div>
+          <div class="gate-label" style="color:${unlocked?zone.gateColor:'#555'}">
+            ${unlocked ? zone.gateLabel : 'Complete Zone to Unlock'}
+          </div>
+          ${unlocked ? `<div class="gate-stars-total">⭐ ${zStars}/${maxStars} stars collected</div>` : ''}
+        </div>
+        ${unlocked ? zone.sparks.map((s,si)=>`
+          <div class="gate-spark" style="
+            left:${15+si*28}%;top:${20+si*10}%;
+            animation-duration:${2+si*.7}s;
+            animation-delay:${-si*.5}s;
+          ">${s}</div>`).join('') : ''}
+      `;
+      cont.appendChild(gate);
+    }
   });
 }
 
@@ -354,43 +599,34 @@ function playLevel(lv){
   location.href = 'game.html?level='+lv;
 }
 
-// ══════════════════════════════════════════
-// SCROLL TO CURRENT LEVEL
-// ══════════════════════════════════════════
-function scrollToCurrent(){
-  setTimeout(()=>{
-    const el = document.getElementById('lvl-'+currentLevel);
-    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
-  }, 400);
-}
+// ── Parallax on scroll
+document.getElementById('mapWrap').addEventListener('scroll', e => {
+  const scrollY = e.target.scrollTop;
+  document.getElementById('bgLayer').style.transform =
+    `scale(1.08) translateY(${-scrollY * 0.12}px)`;
+}, {passive:true});
 
 // ══════════════════════════════════════════
-// HEADER
+// HEADER + PROFILE
 // ══════════════════════════════════════════
 function updateHeader(){
   const name = localStorage.getItem('koj_player_name') || 'Guest';
   const photo = localStorage.getItem('koj_photo_url');
   document.getElementById('hdrName').textContent = name.split(' ')[0];
   document.getElementById('hdrBadge').textContent = 'Lv ' + currentLevel;
-  if(photo){
-    document.getElementById('hdrAvatar').innerHTML = `<img src="${photo}" alt="">`;
-  }
+  if(photo) document.getElementById('hdrAvatar').innerHTML = `<img src="${photo}" alt="">`;
 }
 
-// ══════════════════════════════════════════
-// PROFILE MODAL
-// ══════════════════════════════════════════
 function openProfile(){
   const name = localStorage.getItem('koj_player_name') || 'Guest';
   const email = localStorage.getItem('koj_email') || '';
   const photo = localStorage.getItem('koj_photo_url');
   const best = parseInt(localStorage.getItem('koj_best')||'0');
-  // count completed
   let done=0, totalStars=0;
   for(let i=1;i<=100;i++){
     const s = getStars(i);
     if(s>0){done++;totalStars+=s;}
-    else if(i < currentLevel){done++;}
+    else if(i < currentLevel) done++;
   }
   document.getElementById('mName').textContent = name;
   document.getElementById('mEmail').textContent = email;
@@ -398,22 +634,15 @@ function openProfile(){
   document.getElementById('mBest').textContent = best.toLocaleString();
   document.getElementById('mDone').textContent = done;
   document.getElementById('mStars').textContent = totalStars;
-  if(photo){
-    document.getElementById('mAvatar').innerHTML = `<img src="${photo}" alt="">`;
-  }
+  if(photo) document.getElementById('mAvatar').innerHTML = `<img src="${photo}" alt="">`;
   document.getElementById('profileModal').classList.add('show');
 }
-function closeProfile(){
-  document.getElementById('profileModal').classList.remove('show');
-}
+function closeProfile(){ document.getElementById('profileModal').classList.remove('show'); }
 function doLogout(){
   ['koj_player_name','koj_guest_mode','koj_photo_url','koj_email'].forEach(k=>localStorage.removeItem(k));
-  location.href = 'game.html'; // back to login
+  location.href = 'game.html';
 }
 
-// ══════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -421,9 +650,15 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
+function scrollToCurrent(){
+  setTimeout(()=>{
+    const el = document.getElementById('lvl-'+currentLevel);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 500);
+}
+
+// ── INIT
+spawnParticles();
 buildMap();
 updateHeader();
 scrollToCurrent();
