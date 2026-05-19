@@ -430,14 +430,6 @@ h1 {
   0%{transform:scaleY(1.06) scaleX(0.95)}
   100%{transform:scaleY(1) scaleX(1)}
 }
-/* Surviving tiles quick fade-in after board innerHTML clear */
-.tile-survive {
-  animation:tileReveal 0.07s ease-out both;
-}
-@keyframes tileReveal{
-  from{opacity:0;}
-  to{opacity:1;}
-}
 
 /* ═══════════════════════════════════════════
    TILE ANIMATION 6: SPAWN FROM ABOVE (new tiles)
@@ -797,12 +789,11 @@ h1 {
 .hdr-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 #headerName{color:#e8f5e9;font-size:0.9rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;}
 #headerLevel{color:var(--gold);font-size:0.72rem;margin-left:auto;background:#0a2e0f;padding:2px 8px;border-radius:20px;border:1px solid #2d6b35;flex-shrink:0;}
-#homeBtn,#shareBtn2,#lbBtn{
+#shareBtn2,#lbBtn{
   padding:7px 12px;border:1.5px solid #2d6b35;border-radius:8px;
   background:#0a2e0f;color:#6dbf67;font-size:0.78rem;font-weight:700;
   cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;
 }
-#homeBtn:hover{border-color:#8adf80;color:#8adf80;}
 #shareBtn2:hover,#lbBtn:hover{border-color:var(--gold);color:var(--gold);}
 
 /* ═══ PROFILE MODAL ═════════════════════════════════════ */
@@ -867,73 +858,6 @@ h1 {
   color:#6dbf67;font-size:0.78rem;text-align:center;outline:none;cursor:text;
 }
 
-
-/* ══ Power Animal Tiles ══ */
-.power-tile {
-  border-radius:22%!important;
-  display:flex!important; flex-direction:column;
-  align-items:center; justify-content:center;
-  overflow:visible!important; contain:none!important;
-  animation:pwGlow 1.8s ease-in-out infinite;
-  cursor:pointer; z-index:4; position:relative;
-}
-/* Glow only — no scale in idle state */
-@keyframes pwGlow{
-  0%,100%{box-shadow:0 0 8px 3px var(--pw-color,#FFD700),0 5px 0 #0007;}
-  50%    {box-shadow:0 0 22px 10px var(--pw-color,#FFD700),0 5px 0 #0007;}
-}
-/* Spawn burst: tile pops in from nothing → briefly big → settles normal */
-@keyframes pwSpawn{
-  0%  {transform:scale(0);   opacity:0;}
-  50% {transform:scale(1.55);opacity:1;}
-  75% {transform:scale(0.92);}
-  100%{transform:scale(1);   opacity:1;}
-}
-/* Activate: tile swells big just before blast */
-@keyframes pwActivate{
-  0%  {transform:scale(1);}
-  60% {transform:scale(1.7) rotate(12deg);}
-  100%{transform:scale(0)   rotate(25deg); opacity:0;}
-}
-.pw-spawning { animation: pwSpawn 0.55s cubic-bezier(.2,1.4,.4,1) both !important; }
-.pw-activating { animation: pwActivate 0.28s ease-in forwards !important; }
-.pw-emoji{font-size:1.25em;line-height:1;filter:drop-shadow(0 0 8px var(--pw-color,#FFD700));display:block;width:100%;text-align:center;}
-.pw-label{
-  font-size:0.38em;font-weight:900;letter-spacing:-0.5px;
-  background:var(--pw-color,#FFD700);color:#111;
-  border-radius:3px;padding:1px 3px;margin-top:1px;line-height:1.3;display:block;opacity:0.95;
-}
-/* Spinning star ring */
-.power-tile::before{
-  content:'✦ ✦ ✦';
-  position:absolute;inset:-4px;border-radius:22%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.42em;color:var(--pw-color,#FFD700);opacity:0.8;
-  animation:pwSpin 2s linear infinite;pointer-events:none;
-  text-shadow:0 0 4px var(--pw-color,#FFD700);
-}
-@keyframes pwSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-/* Type backgrounds */
-.power-lion    {--pw-color:#FFD700;background:radial-gradient(circle at 30% 25%,#fff8a0,#FFD700 45%,#c85000);}
-.power-giraffe {--pw-color:#00EFFF;background:radial-gradient(circle at 30% 25%,#d0fbff,#00EFFF 45%,#003399);}
-.power-rhino   {--pw-color:#A8C8E8;background:radial-gradient(circle at 30% 25%,#eaf2ff,#A8C8E8 45%,#334455);}
-.power-leopard {--pw-color:#E070E0;background:radial-gradient(circle at 30% 25%,#ffd0ff,#E070E0 45%,#5a005a);}
-/* Double Power Combo banner */
-.combo-banner.double-power {
-  background: linear-gradient(135deg, #FFD700 0%, #FF6600 50%, #FF00FF 100%);
-  font-size: 1.25em;
-  animation: comboPop 1.8s ease-out forwards;
-  box-shadow: 0 0 30px #FFD70088, 0 0 60px #FF660066;
-  letter-spacing: 1px;
-}
-/* Power activation blast ring */
-.power-blast{
-  position:fixed;border-radius:50%;
-  width:50px;height:50px;margin:-25px;
-  pointer-events:none;z-index:9999;
-  animation:pwBlast 0.65s ease-out forwards;
-}
-@keyframes pwBlast{0%{opacity:0.95;transform:scale(1);}100%{opacity:0;transform:scale(4);}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -952,7 +876,6 @@ h1 {
       <span id="headerName">Guest</span>
       <span id="headerLevel">Lv 1</span>
     </div>
-    <button id="homeBtn" onclick="window.location.href='index.html'">🏠 Home</button>
     <button id="shareBtn2" onclick="openShareModal()">📤 Share</button>
     <button id="lbBtn" onclick="openLeaderboard()">🏆 Board</button>
   </div>
@@ -1458,9 +1381,10 @@ const AUDIO_PREF_KEY = 'koj_audio_enabled';
 class JungleAudioEngine {
   constructor() {
     this.ctx=null; this.master=null; this.bgm=null;
-    this.ambience=null; this.drumBus=null;
+    this.melody=null; this.ambience=null; this.drumBus=null; this.bassBus=null;
     this.enabled = localStorage.getItem(AUDIO_PREF_KEY)==='1';
     this.started=false; this.loops=[]; this.noiseBuffer=null;
+    this.reverb=null; this.reverbGain=null;
   }
   unlock() {
     if (!this.ctx) this.buildGraph();
@@ -1479,42 +1403,207 @@ class JungleAudioEngine {
     const AC = window.AudioContext||window.webkitAudioContext;
     if (!AC) return;
     this.ctx=new AC();
-    this.master=this.ctx.createGain(); this.master.gain.value=0.42;
+    this.master=this.ctx.createGain(); this.master.gain.value=0.88;
     this.master.connect(this.ctx.destination);
-    this.bgm=this.ctx.createGain(); this.bgm.gain.value=0.28;
-    this.ambience=this.ctx.createGain(); this.ambience.gain.value=0.18;
-    this.drumBus=this.ctx.createGain(); this.drumBus.gain.value=0.14;
-    this.bgm.connect(this.master); this.ambience.connect(this.master); this.drumBus.connect(this.master);
-    this.noiseBuffer=this.makeNoiseBuffer(2);
+    // Reverb for jungle depth
+    this.reverb=this.makeReverb(2.2);
+    this.reverbGain=this.ctx.createGain(); this.reverbGain.gain.value=0.24;
+    this.reverb.connect(this.reverbGain); this.reverbGain.connect(this.ctx.destination);
+    // Buses
+    this.bgm=this.ctx.createGain(); this.bgm.gain.value=0.62;
+    this.melody=this.ctx.createGain(); this.melody.gain.value=0.58;
+    this.ambience=this.ctx.createGain(); this.ambience.gain.value=0.55;
+    this.drumBus=this.ctx.createGain(); this.drumBus.gain.value=0.52;
+    this.bassBus=this.ctx.createGain(); this.bassBus.gain.value=0.58;
+    this.bgm.connect(this.master); this.bgm.connect(this.reverb);
+    this.melody.connect(this.master); this.melody.connect(this.reverb);
+    this.ambience.connect(this.master); this.ambience.connect(this.reverb);
+    this.drumBus.connect(this.master);
+    this.bassBus.connect(this.master);
+    this.noiseBuffer=this.makeNoiseBuffer(4);
+  }
+  makeReverb(duration=2.0) {
+    const len=this.ctx.sampleRate*duration;
+    const buf=this.ctx.createBuffer(2,len,this.ctx.sampleRate);
+    for(let ch=0;ch<2;ch++){
+      const d=buf.getChannelData(ch);
+      for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-(i/len),2.2);
+    }
+    const conv=this.ctx.createConvolver(); conv.buffer=buf; return conv;
   }
   setButton() {
     const btn=document.getElementById('audioBtn'); if (!btn) return;
     btn.textContent=this.enabled?'🔊 Jungle Audio: ON':'🔇 Jungle Audio: OFF';
     btn.classList.toggle('muted',!this.enabled);
-    if (this.master&&this.enabled) this.master.gain.setTargetAtTime(0.42,this.ctx.currentTime,0.08);
+    if (this.master&&this.enabled) this.master.gain.setTargetAtTime(0.88,this.ctx.currentTime,0.08);
   }
   startAmbientBgm() {
     if (!this.ctx) return; this.started=true;
     this.master.gain.value=0.0001;
-    this.master.gain.setTargetAtTime(0.42,this.ctx.currentTime+0.05,0.7);
-    this.scheduleFluteLoop(); this.scheduleTablaLoop(); this.scheduleJungleAmbience();
+    this.master.gain.setTargetAtTime(0.88,this.ctx.currentTime+0.1,1.5);
+    this.startBassDrone();
+    this.startFluteLoop();
+    this.startTribalDrums();
+    this.startWindLayer();
+    this.startBirdChorus();
+    this.startInsectLayer();
+    this.startMonkeyLayer();
   }
-  scheduleFluteLoop() {
-    const notes=[392,440,523.25,493.88,440,392,329.63,392]; let step=0;
-    const lp=setInterval(()=>{ if(!this.enabled||!this.ctx)return; this.tone(notes[step++%notes.length],0.55,'sine',this.bgm,0.045,{attack:0.08,release:0.45}); },860);
+  startBassDrone() {
+    const play=()=>{
+      if(!this.enabled||!this.ctx)return;
+      const now=this.ctx.currentTime;
+      const osc1=this.ctx.createOscillator(),osc2=this.ctx.createOscillator();
+      const gain=this.ctx.createGain(),filt=this.ctx.createBiquadFilter();
+      osc1.type='sawtooth'; osc1.frequency.value=55;
+      osc2.type='sawtooth'; osc2.frequency.value=55.7;
+      filt.type='lowpass'; filt.frequency.value=260; filt.Q.value=0.7;
+      gain.gain.setValueAtTime(0.0001,now);
+      gain.gain.linearRampToValueAtTime(0.2,now+2.2);
+      gain.gain.setValueAtTime(0.2,now+5.5);
+      gain.gain.linearRampToValueAtTime(0.0001,now+7.8);
+      osc1.connect(filt); osc2.connect(filt); filt.connect(gain); gain.connect(this.bassBus);
+      osc1.start(now); osc1.stop(now+8.2);
+      osc2.start(now); osc2.stop(now+8.2);
+    };
+    play();
+    const lp=setInterval(()=>{if(this.enabled)play();},7900); this.loops.push(lp);
+  }
+  startFluteLoop() {
+    // Amazon tribal pentatonic — G minor penta: G Bb C D F G
+    const notes=[196,233.08,261.63,293.66,349.23,392,466.16,523.25,392,349.23,293.66,261.63,233.08,196,220,293.66];
+    const durs= [0.75,0.4, 0.5,  0.85, 0.45, 0.7, 0.4,  0.5,  0.65,0.45, 0.6,  0.38, 1.1, 0.4, 0.68,1.4];
+    let step=0, nextTime=0;
+    const sched=()=>{
+      if(!this.enabled||!this.ctx)return;
+      const now=this.ctx.currentTime;
+      if(nextTime<now) nextTime=now+0.05;
+      const n=step%notes.length;
+      const freq=notes[n], dur=durs[n]*(0.88+Math.random()*0.24);
+      const osc=this.ctx.createOscillator();
+      const lfo=this.ctx.createOscillator();
+      const lfoG=this.ctx.createGain();
+      const gain=this.ctx.createGain();
+      const panner=this.makePanner(Math.random()*0.5-0.25);
+      osc.type='sine'; osc.frequency.value=freq;
+      lfo.type='sine'; lfo.frequency.value=5.2+Math.random()*1.5;
+      lfoG.gain.value=freq*0.016;
+      gain.gain.setValueAtTime(0.0001,nextTime);
+      gain.gain.linearRampToValueAtTime(0.095,nextTime+0.09);
+      gain.gain.setValueAtTime(0.095,nextTime+dur*0.65);
+      gain.gain.exponentialRampToValueAtTime(0.0001,nextTime+dur);
+      lfo.connect(lfoG); lfoG.connect(osc.frequency);
+      osc.connect(gain); gain.connect(panner); panner.connect(this.melody);
+      osc.start(nextTime); osc.stop(nextTime+dur+0.1);
+      lfo.start(nextTime); lfo.stop(nextTime+dur+0.1);
+      nextTime+=durs[n]*0.82;
+      step++;
+    };
+    const lp=setInterval(()=>{if(this.enabled&&this.ctx){sched();sched();sched();}},320);
     this.loops.push(lp);
   }
-  scheduleTablaLoop() {
+  startTribalDrums() {
+    // 16-step African/Amazon tribal pattern
+    const kick= [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,1,0,0];
+    const mid=  [0,0,1,0, 0,0,0,1, 0,0,1,0, 0,0,0,1];
+    const shake=[0,1,0,1, 1,0,1,0, 0,1,0,1, 1,0,1,0];
     let step=0;
-    const lp=setInterval(()=>{ if(!this.enabled||!this.ctx)return; if(step%4===0)this.drum(120,0.08,0.13,-0.15); if(step%4===2)this.drum(210,0.05,0.08,0.18); step++; },430);
-    this.loops.push(lp);
-  }
-  scheduleJungleAmbience() {
     const lp=setInterval(()=>{
       if(!this.enabled||!this.ctx)return;
-      const pan=Math.random()*1.6-0.8, pick=Math.random();
-      if(pick<0.45)this.birdChirp(pan); else if(pick<0.75)this.leafRustle(pan); else this.cricket(pan);
-    },650); this.loops.push(lp);
+      const n=step%16;
+      if(kick[n])  this.djembe(85+Math.random()*18,0.16,0.28,-0.15+Math.random()*0.08);
+      if(mid[n])   this.djembe(148+Math.random()*22,0.11,0.2,0.12+Math.random()*0.18);
+      if(shake[n]) this.shaker(Math.random()*1.0-0.5);
+      step++;
+    },128); this.loops.push(lp);
+  }
+  djembe(freq,dur,vol,pan=0){
+    if(!this.ctx)return;
+    this.tone(freq,dur,'sine',this.drumBus,vol,{slideTo:freq*0.25,attack:0.003,release:dur*0.55},pan);
+    this.noise(dur*0.55,this.drumBus,vol*0.38,pan,220+freq,'bandpass');
+  }
+  shaker(pan=0){
+    if(!this.ctx)return;
+    this.noise(0.058,this.drumBus,0.062,pan,6800,'highpass');
+  }
+  startWindLayer() {
+    if(!this.ctx)return;
+    const now=this.ctx.currentTime;
+    const src=this.ctx.createBufferSource();
+    src.buffer=this.noiseBuffer; src.loop=true;
+    const filt=this.ctx.createBiquadFilter();
+    filt.type='bandpass'; filt.frequency.value=520; filt.Q.value=0.35;
+    const gain=this.ctx.createGain();
+    const lfo=this.ctx.createOscillator();
+    const lfoG=this.ctx.createGain();
+    lfo.type='sine'; lfo.frequency.value=0.06;
+    lfoG.gain.value=0.055; gain.gain.value=0.06;
+    lfo.connect(lfoG); lfoG.connect(gain.gain);
+    src.connect(filt); filt.connect(gain); gain.connect(this.ambience);
+    lfo.start(now); src.start(now);
+  }
+  startBirdChorus() {
+    const birds=[
+      (pan)=>{ // High tropical
+        this.tone(2350+Math.random()*450,0.075,'sine',this.ambience,0.036,{slideTo:2900+Math.random()*350,attack:0.006,release:0.042},pan);
+        setTimeout(()=>this.tone(2100+Math.random()*380,0.095,'sine',this.ambience,0.028,{slideTo:1700,attack:0.005,release:0.055},pan),95);
+      },
+      (pan)=>{ // Mid warble
+        const base=820+Math.random()*200;
+        for(let i=0;i<4;i++) setTimeout(()=>this.tone(base+i*85,0.065,'sine',this.ambience,0.025,{attack:0.004,release:0.032},pan),i*72);
+      },
+      (pan)=>{ // Low coo — jungle dove
+        this.tone(395+Math.random()*65,0.5,'sine',this.ambience,0.032,{attack:0.09,release:0.22,slideTo:330},pan);
+        setTimeout(()=>this.tone(350,0.38,'sine',this.ambience,0.026,{attack:0.07,release:0.2},pan),550);
+      },
+      (pan)=>{ // Rapid tapping
+        for(let i=0;i<7;i++) setTimeout(()=>this.tone(1450+Math.random()*220,0.032,'square',this.ambience,0.02,{attack:0.002,release:0.022},pan),i*42);
+      },
+      (pan)=>{ // Melodic whistle
+        const ws=[1200,1440,1200,960,1200];
+        ws.forEach((f,i)=>setTimeout(()=>this.tone(f,0.15,'sine',this.ambience,0.03,{attack:0.012,release:0.08},pan),i*160));
+      }
+    ];
+    const lp=setInterval(()=>{
+      if(!this.enabled||!this.ctx)return;
+      const pan=Math.random()*2-1;
+      birds[Math.floor(Math.random()*birds.length)](pan);
+      if(Math.random()<0.4) birds[Math.floor(Math.random()*birds.length)](Math.random()*2-1);
+    },400); this.loops.push(lp);
+  }
+  startInsectLayer() {
+    const lp=setInterval(()=>{
+      if(!this.enabled||!this.ctx)return;
+      const pan=Math.random()*2-1;
+      if(Math.random()<0.55){
+        for(let i=0;i<5;i++) setTimeout(()=>this.tone(3900+Math.random()*420,0.025,'square',this.ambience,0.015,{attack:0.002,release:0.014},pan),i*36);
+      } else {
+        for(let i=0;i<3;i++) setTimeout(()=>this.tone(4300+Math.random()*320,0.02,'square',this.ambience,0.013,{attack:0.002,release:0.012},pan),i*52);
+      }
+    },265); this.loops.push(lp);
+  }
+  startMonkeyLayer() {
+    const lp=setInterval(()=>{
+      if(!this.enabled||!this.ctx||Math.random()>0.12)return;
+      const pan=Math.random()*1.8-0.9;
+      const now=this.ctx.currentTime;
+      const osc=this.ctx.createOscillator();
+      const gain=this.ctx.createGain();
+      const panner=this.makePanner(pan);
+      osc.type='sine';
+      osc.frequency.setValueAtTime(270,now);
+      osc.frequency.exponentialRampToValueAtTime(840,now+0.32);
+      osc.frequency.exponentialRampToValueAtTime(450,now+0.72);
+      gain.gain.setValueAtTime(0.0001,now);
+      gain.gain.linearRampToValueAtTime(0.08,now+0.1);
+      gain.gain.exponentialRampToValueAtTime(0.0001,now+0.78);
+      osc.connect(gain); gain.connect(panner); panner.connect(this.ambience);
+      osc.start(now); osc.stop(now+0.85);
+      setTimeout(()=>{
+        if(!this.ctx||!this.enabled)return;
+        this.tone(580+Math.random()*90,0.42,'sine',this.ambience,0.028,{slideTo:370,attack:0.045,release:0.22},pan);
+      },360);
+    },3800); this.loops.push(lp);
   }
   panFromCell(c){ return COLS<=1?0:Math.max(-1,Math.min(1,(c/(COLS-1))*2-1)); }
   makePanner(pan=0){ const p=this.ctx.createStereoPanner(); p.pan.value=Math.max(-1,Math.min(1,pan)); return p; }
@@ -1539,47 +1628,59 @@ class JungleAudioEngine {
     src.connect(filt);filt.connect(gain);gain.connect(panner);panner.connect(dest||this.master);
     src.start(now);src.stop(now+dur);
   }
-  drum(freq=120,dur=0.12,vol=0.18,pan=0){
-    this.tone(freq,dur,'sine',this.drumBus,vol,{slideTo:45,attack:0.005,release:0.08},pan);
-    this.noise(dur*0.7,this.drumBus,vol*0.45,pan,180,'lowpass');
-  }
-  birdChirp(pan=0){
-    this.tone(950+Math.random()*300,0.11,'sine',this.ambience,0.028,{slideTo:1500+Math.random()*300,attack:0.005,release:0.06},pan);
-    setTimeout(()=>this.tone(1100+Math.random()*250,0.09,'sine',this.ambience,0.02,{slideTo:850,attack:0.005,release:0.05},pan),95);
-  }
-  leafRustle(pan=0){ this.noise(0.38,this.ambience,0.028,pan,1800,'highpass'); }
-  cricket(pan=0){ for(let i=0;i<3;i++)setTimeout(()=>this.tone(3600,0.035,'square',this.ambience,0.012,{attack:0.002,release:0.02},pan),i*65); }
   play(type,pan=0){
     if(!this.enabled||!this.ctx)return;
-    if(type==='swap'){this.tone(420,0.08,'triangle',this.master,0.055,{slideTo:620,release:0.04},pan);}
-    else if(type==='invalid'){this.tone(180,0.16,'sawtooth',this.master,0.055,{slideTo:120,release:0.08},pan);}
-    else if(type==='pop'){
-      this.tone(760,0.08,'sine',this.master,0.045,{slideTo:1180,release:0.04},pan);
+    if(type==='swap'){
+      this.tone(520,0.1,'triangle',this.master,0.085,{slideTo:720,release:0.05},pan);
+    } else if(type==='invalid'){
+      this.tone(175,0.22,'sawtooth',this.master,0.088,{slideTo:105,release:0.1},pan);
+    } else if(type==='pop'){
+      this.tone(920,0.14,'sine',this.master,0.085,{slideTo:1380,release:0.07},pan);
+      this.noise(0.09,this.master,0.048,pan,2600,'bandpass');
     } else if(type==='bigpop'){
-      this.tone(880,0.12,'sine',this.master,0.065,{slideTo:1400,release:0.06},pan);
-      this.drum(95,0.12,0.14,pan);
+      this.tone(1100,0.18,'sine',this.master,0.11,{slideTo:1900,release:0.09},pan);
+      this.noise(0.14,this.master,0.075,pan,3000,'bandpass');
+      this.djembe(88,0.2,0.28,pan);
     } else if(type==='drop'){
-      this.tone(280,0.06,'sine',this.master,0.03,{slideTo:180,release:0.04},pan);
+      this.tone(330,0.09,'sine',this.master,0.06,{slideTo:175,release:0.055},pan);
     } else if(type==='levelStart'){
-      this.drum(85,0.18,0.22,-0.35); setTimeout(()=>this.drum(95,0.18,0.24,0),170); setTimeout(()=>this.drum(65,0.32,0.3,0.35),340);
+      this.djembe(78,0.25,0.38,-0.42);
+      setTimeout(()=>this.djembe(98,0.22,0.32,0.22),165);
+      setTimeout(()=>this.djembe(62,0.38,0.42,0),330);
+      setTimeout(()=>this.tone(392,0.55,'triangle',this.master,0.14,{attack:0.04,release:0.32},0),285);
+      setTimeout(()=>this.tone(523.25,0.5,'triangle',this.master,0.12,{attack:0.04,release:0.3},0.22),460);
     } else if(type==='win'){
-      [392,493.88,587.33,783.99].forEach((n,i)=>setTimeout(()=>this.tone(n,0.45,'triangle',this.master,0.08,{attack:0.03,release:0.22},0),i*130));
-      setTimeout(()=>this.drum(90,0.28,0.25,0),120);
+      [392,523.25,659.25,783.99,1046.5].forEach((n,i)=>setTimeout(()=>{
+        this.tone(n,0.6,'triangle',this.master,0.12,{attack:0.03,release:0.3},0);
+        if(i%2===0) this.djembe(82+i*10,0.2,0.26,i%2?0.32:-0.32);
+      },i*135));
+      setTimeout(()=>{
+        if(!this.ctx||!this.enabled)return;
+        const now=this.ctx.currentTime;
+        const osc=this.ctx.createOscillator(),gain=this.ctx.createGain(),panner=this.makePanner(0);
+        osc.type='sine'; osc.frequency.setValueAtTime(270,now);
+        osc.frequency.exponentialRampToValueAtTime(840,now+0.32);
+        gain.gain.setValueAtTime(0.0001,now); gain.gain.linearRampToValueAtTime(0.09,now+0.1); gain.gain.exponentialRampToValueAtTime(0.0001,now+0.75);
+        osc.connect(gain); gain.connect(panner); panner.connect(this.ambience);
+        osc.start(now); osc.stop(now+0.8);
+      },720);
     } else if(type==='fail'){
-      [392,349.23,293.66,246.94].forEach((n,i)=>setTimeout(()=>this.tone(n,0.6,'sine',this.master,0.055,{attack:0.06,release:0.35},-0.1),i*220));
+      [392,349.23,293.66,246.94,196].forEach((n,i)=>setTimeout(()=>this.tone(n,0.72,'sine',this.master,0.095,{attack:0.07,release:0.42},-0.12),i*210));
     }
   }
   roar(pan=0){
-    this.tone(82,0.65,'sawtooth',this.master,0.12,{slideTo:48,attack:0.03,release:0.35},pan);
-    this.noise(0.65,this.master,0.12,pan,260,'lowpass');
-    setTimeout(()=>this.noise(0.18,this.master,0.16,pan,1600,'bandpass'),140);
+    if(!this.ctx||!this.enabled)return;
+    this.tone(72,0.8,'sawtooth',this.master,0.22,{slideTo:40,attack:0.04,release:0.42},pan);
+    this.noise(0.8,this.master,0.2,pan,240,'lowpass');
+    setTimeout(()=>this.noise(0.25,this.master,0.25,pan,1500,'bandpass'),170);
+    setTimeout(()=>this.tone(105,0.45,'sawtooth',this.master,0.14,{slideTo:62,attack:0.02,release:0.28},pan),220);
   }
   comboIntensity(){
     if(!this.ctx)return;
     const orig=this.drumBus.gain.value;
-    this.drumBus.gain.setTargetAtTime(0.28,this.ctx.currentTime,0.03);
-    setTimeout(()=>{ if(this.ctx)this.drumBus.gain.setTargetAtTime(orig,this.ctx.currentTime,0.35); },1200);
-    for(let i=0;i<4;i++)setTimeout(()=>this.drum(95-i*8,0.1,0.16,i%2?0.35:-0.35),i*120);
+    this.drumBus.gain.setTargetAtTime(0.62,this.ctx.currentTime,0.03);
+    setTimeout(()=>{ if(this.ctx)this.drumBus.gain.setTargetAtTime(orig,this.ctx.currentTime,0.45); },1600);
+    for(let i=0;i<7;i++) setTimeout(()=>this.djembe(92-i*7,0.11,0.24,i%2?0.42:-0.42),i*105);
   }
 }
 const jungleAudio = new JungleAudioEngine();
@@ -1589,16 +1690,6 @@ jungleAudio.setButton();
    GLOBAL STATE
 ════════════════════════════════════════════════════ */
 const ALL_ANIMALS  = ['🐯','🦌','🐐','🦅','🐍','🐒','🐘','🦚'];
-// ── Power Animal Tiles (board values 100+) ──
-const POWER_LION     = 100;
-const POWER_GIRAFFE_H= 101;
-const POWER_GIRAFFE_V= 102;
-const POWER_RHINO    = 103;
-const POWER_LEOPARD  = 104;
-const POWER_EMOJI  = {100:'🦁',101:'🦒',102:'🦒',103:'🦏',104:'🐆'};
-const POWER_NAMES  = {100:'Lion',101:'Giraffe',102:'Giraffe',103:'Rhino',104:'Leopard'};
-const POWER_COLOR  = {100:'#FFD700',101:'#00EFFF',102:'#00EFFF',103:'#A8C8E8',104:'#E070E0'};
-const POWER_LABEL  = {100:'×5',101:'ROW',102:'COL',103:'CROSS',104:'SQ+'};
 const ANIMAL_NAMES = ['Tiger','Deer','Goat','Eagle','Snake','Monkey','Elephant','Peacock'];
 const ZONE_ICONS   = { 'I':'🌾','II':'🌴','III':'💧','IV':'⛰️','V':'🌺' };
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -1755,22 +1846,7 @@ function renderBoard(iconSizeOverride, markSpawned=false) {
 /* ════════════════════════════════════════════════════
    MAKE TILE ELEMENT (shared factory)
 ════════════════════════════════════════════════════ */
-function makeTileEl(animalIdx, r, c, iSize, skipPwSpawn=false) {
-  // ── Power tile ──
-  if (animalIdx >= 100) {
-    const kn = {100:'lion',101:'giraffe',102:'giraffe',103:'rhino',104:'leopard'}[animalIdx]||'lion';
-    const d = document.createElement('div');
-    d.className = 'candy power-tile power-'+kn;
-    d.dataset.r = r; d.dataset.c = c;
-    d.style.gridRow    = (r+1)+'';
-    d.style.gridColumn = (c+1)+'';
-    d.style.setProperty('--pw-color', POWER_COLOR[animalIdx]||'#FFD700');
-    d.style.fontSize = iSize + 'px';
-    d.innerHTML = '<span class="pw-emoji">'+POWER_EMOJI[animalIdx]+'</span>'
-                + '<span class="pw-label">'+POWER_LABEL[animalIdx]+'</span>';
-    if (!skipPwSpawn) d.classList.add('pw-spawning');
-    return d;
-  }
+function makeTileEl(animalIdx, r, c, iSize) {
   const d = document.createElement('div');
   const typeClass = animalIdx >= 6 ? 'candy-0 type-'+animalIdx : 'candy-'+Math.min(animalIdx,5);
   d.className = 'candy ' + typeClass;
@@ -1860,52 +1936,9 @@ function getEl(r,c) {
 /* ════════════════════════════════════════════════════
    SWAP
 ════════════════════════════════════════════════════ */
-async function doSwap(r1,c1,r2,c2) {
+function doSwap(r1,c1,r2,c2) {
   isProcessing=true; clearSelected();
   const pan = jungleAudio.panFromCell(Math.round((c1+c2)/2));
-
-  // ── Power tile activation ──
-  const isPow1 = board[r1][c1]>=100, isPow2 = board[r2][c2]>=100;
-  if (isPow1 || isPow2) {
-    movesLeft--;
-    const mEl=document.getElementById('moves');
-    mEl.textContent=movesLeft; mEl.classList.remove('pop'); void mEl.offsetWidth; mEl.classList.add('pop');
-    jungleAudio.play('bigpop',pan);
-    const isDoubleCombo = isPow1 && isPow2;
-    // Save second power kind before first activation (first blast may clear r2,c2)
-    const _pow2Kind = isPow2 ? board[r2][c2] : -1;
-    if (isDoubleCombo) {
-      // ⚡ DOUBLE POWER COMBO — flash banner + twin blast rings
-      showComboBanner('⚡ DOUBLE POWER COMBO! ⚡');
-      showPowerBlast(r1,c1,board[r1][c1]);
-      showPowerBlast(r2,c2,board[r2][c2]);
-      drawBlastRing(r1,c1); drawBlastRing(r2,c2);
-      jungleAudio.play('bigpop',jungleAudio.panFromCell(c1));
-      await delay(300);
-    }
-    if (isPow1) await activatePowerTile(r1,c1,r2,c2);
-    if (isPow2) {
-      // Restore kind if first blast already cleared this cell
-      if (board[r2][c2] < 100) board[r2][c2] = _pow2Kind;
-      await activatePowerTile(r2,c2,r1,c1);
-    }
-    if (isDoubleCombo) {
-      // Double score bonus: +50% of current score added
-      const bonusPts = Math.floor(score * 0.5);
-      score += bonusPts;
-      updateScore();
-      showScoreFloat(Math.floor((r1+r2)/2), Math.floor((c1+c2)/2), '🔥 ×2 COMBO +'+bonusPts);
-      showMsg('🔥 DOUBLE POWER! Score ×1.5!', true);
-    }
-    // Drop and fill gaps from power blast
-    const _pwCfg = getConfig(level);
-    drop(); fill(_pwCfg.animalTypes);
-    renderBoard(undefined, true);
-    await delay(500);
-    await processMatches(false);
-    return;
-  }
-
   swapCells(r1,c1,r2,c2);
   renderBoard();
   markCells([[r1,c1],[r2,c2]],'swapping');
@@ -1942,37 +1975,22 @@ function findMatches() {
   // Horizontal
   for (let r=0;r<ROWS;r++) {
     for (let c=0;c<COLS-2;c++) {
-      const v=board[r][c]; if(v<0||v>=100)continue;
+      const v=board[r][c]; if(v<0)continue;
       if (v===board[r][c+1]&&v===board[r][c+2]) {
         const cells=[{r,c}]; let x=c+1;
         while(x<COLS&&board[r][x]===v){cells.push({r,c:x});x++;}
-        matches.push({type:v,shape:cells.length>=5?'five':cells.length===4?'four_h':'three',cells}); c=x-1;
+        matches.push({type:v,shape:cells.length>=5?'five':'line',cells}); c=x-1;
       }
     }
   }
   // Vertical
   for (let c=0;c<COLS;c++) {
     for (let r=0;r<ROWS-2;r++) {
-      const v=board[r][c]; if(v<0||v>=100)continue;
+      const v=board[r][c]; if(v<0)continue;
       if (v===board[r+1][c]&&v===board[r+2][c]) {
         const cells=[{r,c}]; let y=r+1;
         while(y<ROWS&&board[y][c]===v){cells.push({r:y,c});y++;}
-        matches.push({type:v,shape:cells.length>=5?'five':cells.length===4?'four_v':'three',cells}); r=y-1;
-      }
-    }
-  }
-  // 2×2 Square detection (Leopard power)
-  const _sqSeen = new Set();
-  for (let rs=0;rs<ROWS-1;rs++) {
-    for (let cs=0;cs<COLS-1;cs++) {
-      const vs=board[rs][cs]; if(vs<0||vs>=100) continue;
-      if(board[rs][cs+1]===vs&&board[rs+1][cs]===vs&&board[rs+1][cs+1]===vs) {
-        const sqK=rs+','+cs;
-        if(!_sqSeen.has(sqK)){
-          _sqSeen.add(sqK);
-          matches.push({type:vs,shape:'square',pivot:{r:rs,c:cs},
-            cells:[{r:rs,c:cs},{r:rs,c:cs+1},{r:rs+1,c:cs},{r:rs+1,c:cs+1}]});
-        }
+        matches.push({type:v,shape:cells.length>=5?'five':'line',cells}); r=y-1;
       }
     }
   }
@@ -1997,20 +2015,8 @@ function mergeIntersections(matches) {
     }
     const byKey=new Map();
     group.flatMap(m=>m.cells).forEach(cell=>byKey.set(cellKey(cell),cell));
-    const _hasSq  = group.some(m=>m.shape==='square');
-    const _has5   = !_hasSq && (group.some(m=>m.shape==='five') || (byKey.size>=5 && group.every(m=>['four_h','four_v','five','three'].includes(m.shape))));
-    const _has4h  = !_hasSq && !_has5 && group.length===1 && group[0].shape==='four_h';
-    const _has4v  = !_hasSq && !_has5 && group.length===1 && group[0].shape==='four_v';
-    const _hasLT  = !_hasSq && !_has5 && !_has4h && !_has4v && group.length>1;
-    const shape = _hasSq?'square':_has5?'five':_has4h?'four_h':_has4v?'four_v':_hasLT?'lt':group[0].shape;
-    // Determine pivot cell
-    let pivot = group[0].pivot;
-    if(!pivot && group.length>1) {
-      const g0k=new Set(group[0].cells.map(cellKey));
-      pivot=group[1].cells.find(cl=>g0k.has(cellKey(cl)))||group[0].cells[Math.floor(group[0].cells.length/2)];
-    }
-    if(!pivot) pivot=group[0].cells[Math.floor(group[0].cells.length/2)];
-    merged.push({type:matches[i].type,shape,cells:[...byKey.values()],pivot});
+    const shape=byKey.size>=5?'five':group.length>1?'cross':group[0].shape;
+    merged.push({type:matches[i].type,shape,cells:[...byKey.values()]});
   }
   return merged;
 }
@@ -2072,85 +2078,6 @@ function removeSkeletonCells() {
 }
 
 /* ════════════════════════════════════════════════════
-   POWER TILE ACTIVATION
-════════════════════════════════════════════════════ */
-function showPowerBlast(r,c,kind) {
-  const el=getEl(r,c); if(!el) return;
-  const rect=el.getBoundingClientRect();
-  const b=document.createElement('div');
-  b.className='power-blast';
-  b.style.cssText='left:'+(rect.left+rect.width/2)+'px;top:'+(rect.top+rect.height/2)+'px;'
-    +'background:'+POWER_COLOR[kind]+';box-shadow:0 0 30px 12px '+POWER_COLOR[kind]+';';
-  document.body.appendChild(b);
-  setTimeout(()=>b.remove(),700);
-}
-
-async function activatePowerTile(pr,pc,tr,tc) {
-  const kind=board[pr][pc]; if(kind<100) return;
-  /* ── Activate animation: tile swells big then vanishes ── */
-  const tileEl = getEl(pr,pc);
-  if (tileEl) {
-    tileEl.classList.remove('pw-spawning');
-    tileEl.classList.add('pw-activating');
-    await new Promise(res => setTimeout(res, 180));
-  }
-  showPowerBlast(pr,pc,kind);
-  showComboBanner(POWER_EMOJI[kind]+' '+POWER_NAMES[kind].toUpperCase()+' POWER!');
-
-  const blast=new Set();
-  blast.add(pr+','+pc);
-
-  if (kind===POWER_LION) {
-    const tgt=board[tr][tc];
-    const clearType = (tgt>=0&&tgt<100) ? tgt : (() => {
-      const cnt=Array(8).fill(0);
-      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]>=0&&board[r][c]<8) cnt[board[r][c]]++;
-      return cnt.indexOf(Math.max(...cnt));
-    })();
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]===clearType) blast.add(r+','+c);
-    showMsg('🦁 LION HUNT! All '+(ALL_ANIMALS[clearType]||'?')+' cleared!',true);
-
-  } else if (kind===POWER_GIRAFFE_H) {
-    for(let c=0;c<COLS;c++) blast.add(pr+','+c);
-    showMsg('🦒 GIRAFFE! Full row swept!',true);
-
-  } else if (kind===POWER_GIRAFFE_V) {
-    for(let r=0;r<ROWS;r++) blast.add(r+','+pc);
-    showMsg('🦒 GIRAFFE! Full column swept!',true);
-
-  } else if (kind===POWER_RHINO) {
-    for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
-      for(let i=1;i<=3;i++) {
-        const nr=pr+dr*i,nc=pc+dc*i;
-        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS) blast.add(nr+','+nc);
-      }
-    }
-    showMsg('🦏 RHINO CHARGE! Cross cleared!',true);
-
-  } else if (kind===POWER_LEOPARD) {
-    for(let c=0;c<COLS;c++) blast.add(pr+','+c);
-    for(let r=0;r<ROWS;r++) blast.add(r+','+pc);
-    showMsg('🐆 LEOPARD POUNCE! Row+Col cleared!',true);
-  }
-
-  // Animate blasted tiles
-  const blastArr=[...blast].map(k=>{const[r,c]=k.split(',').map(Number);return{r,c};});
-  blastArr.forEach(({r,c},i)=>setTimeout(()=>{
-    const el=getEl(r,c);
-    if(el){el.classList.add('match-pop');spawnMatchParticles(el);}
-  },i*22));
-
-  const pts=blastArr.length*12;
-  score+=pts; updateScore();
-  showScoreFloat(pr,pc,'+'+pts);
-  drawBlastRing(pr,pc);
-  await delay(blastArr.length*22+480);
-
-  // Clear blasted cells on board
-  blast.forEach(k=>{const[r,c]=k.split(',').map(Number); board[r][c]=-1;});
-}
-
-/* ════════════════════════════════════════════════════
    PROCESS MATCHES
    Candy Crush cascade: after each resolve, re-check for new matches
    Pop → clear DOM → rebuild with drop/spawn animations → repeat
@@ -2165,24 +2092,9 @@ async function processMatches(playerTriggered=false) {
 
     const cfg = getConfig(level);
 
-    /* ── Collect matched cells + power tile creation ── */
+    /* ── Collect matched cells ── */
     const cellsToRemove = new Set();
-    const _newPowers = [];
-    matches.forEach(m => {
-      let powerKind = null;
-      if      (m.shape==='five')   powerKind = POWER_LION;
-      else if (m.shape==='four_h') powerKind = POWER_GIRAFFE_H;
-      else if (m.shape==='four_v') powerKind = POWER_GIRAFFE_V;
-      else if (m.shape==='lt')     powerKind = POWER_RHINO;
-      else if (m.shape==='square') powerKind = POWER_LEOPARD;
-      if (powerKind !== null) {
-        const piv = m.pivot || m.cells[Math.floor(m.cells.length/2)];
-        _newPowers.push({r:piv.r, c:piv.c, kind:powerKind});
-        m.cells.forEach(({r,c})=>{ if(r!==piv.r||c!==piv.c) cellsToRemove.add(r+','+c); });
-      } else {
-        m.cells.forEach(({r,c}) => cellsToRemove.add(r+','+c));
-      }
-    });
+    matches.forEach(m => m.cells.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`)));
 
     /* ── Score ── */
     const cascadeBonus = cascadeCount > 0 ? 1 + cascadeCount * 0.25 : 1;
@@ -2228,11 +2140,6 @@ async function processMatches(playerTriggered=false) {
       const [r,c] = k.split(',').map(Number);
       board[r][c] = -1;
     });
-    /* ── Place new power tiles ── */
-    _newPowers.forEach(pt => {
-      board[pt.r][pt.c] = pt.kind;
-      setTimeout(()=>showComboBanner('⚡ '+POWER_EMOJI[pt.kind]+' '+POWER_NAMES[pt.kind]+' Power!'), 200);
-    });
 
     /* ── STEP 4: Compute which tiles will drop (BEFORE drop()) ── */
     const dropInfo = computeDropInfo();
@@ -2253,8 +2160,8 @@ async function processMatches(playerTriggered=false) {
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const animalIdx = board[r][c];
+        const d = makeTileEl(animalIdx, r, c, cfg.iconSize);
         const key = `${r},${c}`;
-        const d = makeTileEl(animalIdx, r, c, cfg.iconSize, !newCells.has(key));
 
         if (newCells.has(key)) {
           /* New tile: spawn from above board */
@@ -2272,9 +2179,6 @@ async function processMatches(playerTriggered=false) {
           d.style.transition = 'none';
           d.dataset.dropCount = dropCount;
           d.classList.add('tile-dropping');
-        } else {
-          /* Surviving tile: quick fade-in so no flash after innerHTML clear */
-          d.classList.add('tile-survive');
         }
 
         boardEl.appendChild(d);
@@ -2290,13 +2194,11 @@ async function processMatches(playerTriggered=false) {
       const r        = parseInt(el.dataset.r);
       const c        = parseInt(el.dataset.c);
       const dropCount = parseInt(el.dataset.dropCount) || r + 1;
-      /* Candy Crush feel: fast drop (gravity), spawn slightly staggered by column */
-      const dur      = isSpawn ? 220 + r * 38 : 150 + dropCount * 50;
-      /* Drop: columns stagger l→r by 20ms; within col bottom lands first (no extra stagger)
-         Spawn: columns stagger, rows stagger so they fall like rain */
+      const dur      = isSpawn ? 260 + r * 45 : 180 + dropCount * 60;
+      /* Stagger: bottom tiles land first, columns stagger slightly */
       const stagger  = isSpawn
-        ? c * 32 + r * 22 + 60
-        : c * 20;
+        ? c * 28 + r * 30 + 100
+        : c * 15 + (ROWS - 1 - r) * 10;
       const totalEnd = stagger + dur;
       if (totalEnd > maxAnimEnd) maxAnimEnd = totalEnd;
 
@@ -2556,15 +2458,6 @@ function clearHints() {
 ════════════════════════════════════════════════════ */
 function hasAnyValidMove() { return Boolean(findFirstValidMove()); }
 function findFirstValidMove() {
-  // Power tiles: any adjacent swap is valid
-  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
-    if (board[r][c]>=100) {
-      for (const [dr,dc] of [[1,0],[0,1],[-1,0],[0,-1]]) {
-        const nr=r+dr,nc=c+dc;
-        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]>=0) return [{r,c},{r:nr,c:nc}];
-      }
-    }
-  }
   for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
     for (const [dr,dc] of [[1,0],[0,1]]) {
       const nr=r+dr,nc=c+dc; if(nr>=ROWS||nc>=COLS) continue;
