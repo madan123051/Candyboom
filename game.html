@@ -841,8 +841,9 @@ let huntProgress=0;
 let lastSpawnedCells = new Set();
 let lastDroppedCells = new Set();
 let animationsEnabled = true;
-const MAX_AUTO_CASCADES = 2;
-const CASCADE_PAUSE_MS = 500;
+const MAX_AUTO_CASCADES = 1;
+const CASCADE_PAUSE_MS = 300;
+let processingTimeoutId = null;
 
 function getConfig(lvl) {
   const i = Math.min(lvl - 1, LEVELS.length - 1);
@@ -1025,6 +1026,16 @@ function getEl(r, c) {
 
 function doSwap(r1, c1, r2, c2) {
   isProcessing = true; clearSelected();
+  // Safety timeout: reset isProcessing if processing takes too long
+  clearTimeout(processingTimeoutId);
+  processingTimeoutId = setTimeout(() => {
+    if (isProcessing) {
+      console.warn('Processing timeout - resetting isProcessing');
+      isProcessing = false;
+      showMsg('⚠️ Game recovered from processing error. Try again!');
+    }
+  }, 8000); // 8 second safety timeout
+  
   const pan = jungleAudio.panFromCell(Math.round((c1 + c2) / 2));
   swapCells(r1, c1, r2, c2); renderBoard();
   markCells([[r1,c1],[r2,c2]], 'swapping');
@@ -1032,7 +1043,16 @@ function doSwap(r1, c1, r2, c2) {
     jungleAudio.play('swap', pan);
     movesLeft--;
     document.getElementById('moves').textContent = movesLeft;
-    setTimeout(() => processMatches(true), 280);
+    setTimeout(() => {
+      try {
+        processMatches(true);
+      } catch (e) {
+        console.error('Error in processMatches:', e);
+        clearTimeout(processingTimeoutId);
+        isProcessing = false;
+        showMsg('🌿 Game error recovered. Try again!');
+      }
+    }, 280);
   } else {
     jungleAudio.play('invalid', pan);
     showMsg('🌿 No hunt path there — try another swipe.');
@@ -1042,6 +1062,7 @@ function doSwap(r1, c1, r2, c2) {
       document.getElementById('gameContainer').classList.add('screen-shake');
       setTimeout(() => document.getElementById('gameContainer').classList.remove('screen-shake'), 300);
       isProcessing = false;
+      clearTimeout(processingTimeoutId);
     }, 260);
   }
 }
@@ -1126,7 +1147,7 @@ function cellKey({r, c}) { return `${r},${c}`; }
 function processMatches(playerTriggered=false, cascadeDepth=0) {
   const cfg = getConfig(level);
   const matches = findMatches();
-  if (!matches.length) { isProcessing = false; ensurePlayableBoard(); checkStatus(); return; }
+  if (!matches.length) { isProcessing = false; clearTimeout(processingTimeoutId); ensurePlayableBoard(); checkStatus(); return; }
 
   let totalCnt = 0;
   const firstType = matches[0].type;
@@ -1226,30 +1247,59 @@ function processMatches(playerTriggered=false, cascadeDepth=0) {
   else showMsg(msgs[firstType] || `✨ Match! +${pts}`);
 
   setTimeout(() => {
-    cellsToRemove.forEach(key => {
-      const [r, c] = key.split(',').map(Number);
-      board[r][c] = -1;
-    });
-    drop();
-    setTimeout(() => {
-      fill(cfg.animalTypes);
-      renderBoard(undefined, true);
-      const nextMatches = findMatches();
-      if (!nextMatches.length) {
-        isProcessing = false;
-        checkStatus();
-        return;
-      }
-      const nextDepth = playerTriggered ? 1 : cascadeDepth + 1;
-      if (nextDepth > MAX_AUTO_CASCADES) {
-        isProcessing = false;
-        showMsg('🌿 Cascade stabilized — your turn!');
-        ensurePlayableBoard();
-        checkStatus();
-        return;
-      }
-      setTimeout(() => processMatches(false, nextDepth), CASCADE_PAUSE_MS);
-    }, 300);
+    try {
+      cellsToRemove.forEach(key => {
+        const [r, c] = key.split(',').map(Number);
+        board[r][c] = -1;
+      });
+      drop();
+      setTimeout(() => {
+        try {
+          fill(cfg.animalTypes);
+          renderBoard(undefined, true);
+          const nextMatches = findMatches();
+          if (!nextMatches.length) {
+            isProcessing = false;
+            clearTimeout(processingTimeoutId);
+            checkStatus();
+            return;
+          }
+          const nextDepth = playerTriggered ? 1 : cascadeDepth + 1;
+          if (nextDepth > MAX_AUTO_CASCADES) {
+            isProcessing = false;
+            clearTimeout(processingTimeoutId);
+            showMsg('🌿 Cascade stabilized — your turn!');
+            ensurePlayableBoard();
+            checkStatus();
+            return;
+          }
+          setTimeout(() => {
+            try {
+              processMatches(false, nextDepth);
+            } catch (e) {
+              console.error('Cascade error:', e);
+              isProcessing = false;
+              clearTimeout(processingTimeoutId);
+              showMsg('🌿 Game recovered. Your turn!');
+              ensurePlayableBoard();
+              checkStatus();
+            }
+          }, CASCADE_PAUSE_MS);
+        } catch (e) {
+          console.error('Fill/render error:', e);
+          isProcessing = false;
+          clearTimeout(processingTimeoutId);
+          showMsg('🌿 Game error. Try your next move!');
+          checkStatus();
+        }
+      }, 300);
+    } catch (e) {
+      console.error('Drop error:', e);
+      isProcessing = false;
+      clearTimeout(processingTimeoutId);
+      showMsg('🌿 Game error. Try your next move!');
+      checkStatus();
+    }
   }, animationsEnabled ? 460 : 120);
 }
 
@@ -1304,10 +1354,13 @@ function pickSpawnAnimal(animalTypes, r, c) {
   while (tried.size < animalTypes.length) {
     const animal = weightedPick(animalTypes, weights, tried);
     tried.add(animal);
-    const makesHorizontal = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
-    const makesVertical = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
+    // Check all directions to prevent matches
+    const makesHorizontalLeft = c >= 2 && board[r][c - 1] === animal && board[r][c - 2] === animal;
+    const makesHorizontalRight = c <= COLS - 3 && board[r][c + 1] === animal && board[r][c + 2] === animal;
+    const makesVerticalUp = r >= 2 && board[r - 1][c] === animal && board[r - 2][c] === animal;
+    const makesVerticalDown = r <= ROWS - 3 && board[r + 1][c] === animal && board[r + 2][c] === animal;
     const makesBox = r >= 1 && c >= 1 && board[r - 1][c] === animal && board[r][c - 1] === animal && board[r - 1][c - 1] === animal;
-    if (!makesHorizontal && !makesVertical && !makesBox) return animal;
+    if (!makesHorizontalLeft && !makesHorizontalRight && !makesVerticalUp && !makesVerticalDown && !makesBox) return animal;
   }
   return pickSafeAnimal(animalTypes, r, c);
 }
