@@ -430,6 +430,14 @@ h1 {
   0%{transform:scaleY(1.06) scaleX(0.95)}
   100%{transform:scaleY(1) scaleX(1)}
 }
+/* Surviving tiles quick fade-in after board innerHTML clear */
+.tile-survive {
+  animation:tileReveal 0.07s ease-out both;
+}
+@keyframes tileReveal{
+  from{opacity:0;}
+  to{opacity:1;}
+}
 
 /* ═══════════════════════════════════════════
    TILE ANIMATION 6: SPAWN FROM ABOVE (new tiles)
@@ -858,6 +866,73 @@ h1 {
   color:#6dbf67;font-size:0.78rem;text-align:center;outline:none;cursor:text;
 }
 
+
+/* ══ Power Animal Tiles ══ */
+.power-tile {
+  border-radius:22%!important;
+  display:flex!important; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:visible!important; contain:none!important;
+  animation:pwGlow 1.8s ease-in-out infinite;
+  cursor:pointer; z-index:4; position:relative;
+}
+/* Glow only — no scale in idle state */
+@keyframes pwGlow{
+  0%,100%{box-shadow:0 0 8px 3px var(--pw-color,#FFD700),0 5px 0 #0007;}
+  50%    {box-shadow:0 0 22px 10px var(--pw-color,#FFD700),0 5px 0 #0007;}
+}
+/* Spawn burst: tile pops in from nothing → briefly big → settles normal */
+@keyframes pwSpawn{
+  0%  {transform:scale(0);   opacity:0;}
+  50% {transform:scale(1.55);opacity:1;}
+  75% {transform:scale(0.92);}
+  100%{transform:scale(1);   opacity:1;}
+}
+/* Activate: tile swells big just before blast */
+@keyframes pwActivate{
+  0%  {transform:scale(1);}
+  60% {transform:scale(1.7) rotate(12deg);}
+  100%{transform:scale(0)   rotate(25deg); opacity:0;}
+}
+.pw-spawning { animation: pwSpawn 0.55s cubic-bezier(.2,1.4,.4,1) both !important; }
+.pw-activating { animation: pwActivate 0.28s ease-in forwards !important; }
+.pw-emoji{font-size:1.25em;line-height:1;filter:drop-shadow(0 0 8px var(--pw-color,#FFD700));display:block;width:100%;text-align:center;}
+.pw-label{
+  font-size:0.38em;font-weight:900;letter-spacing:-0.5px;
+  background:var(--pw-color,#FFD700);color:#111;
+  border-radius:3px;padding:1px 3px;margin-top:1px;line-height:1.3;display:block;opacity:0.95;
+}
+/* Spinning star ring */
+.power-tile::before{
+  content:'✦ ✦ ✦';
+  position:absolute;inset:-4px;border-radius:22%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.42em;color:var(--pw-color,#FFD700);opacity:0.8;
+  animation:pwSpin 2s linear infinite;pointer-events:none;
+  text-shadow:0 0 4px var(--pw-color,#FFD700);
+}
+@keyframes pwSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* Type backgrounds */
+.power-lion    {--pw-color:#FFD700;background:radial-gradient(circle at 30% 25%,#fff8a0,#FFD700 45%,#c85000);}
+.power-giraffe {--pw-color:#00EFFF;background:radial-gradient(circle at 30% 25%,#d0fbff,#00EFFF 45%,#003399);}
+.power-rhino   {--pw-color:#A8C8E8;background:radial-gradient(circle at 30% 25%,#eaf2ff,#A8C8E8 45%,#334455);}
+.power-leopard {--pw-color:#E070E0;background:radial-gradient(circle at 30% 25%,#ffd0ff,#E070E0 45%,#5a005a);}
+/* Double Power Combo banner */
+.combo-banner.double-power {
+  background: linear-gradient(135deg, #FFD700 0%, #FF6600 50%, #FF00FF 100%);
+  font-size: 1.25em;
+  animation: comboPop 1.8s ease-out forwards;
+  box-shadow: 0 0 30px #FFD70088, 0 0 60px #FF660066;
+  letter-spacing: 1px;
+}
+/* Power activation blast ring */
+.power-blast{
+  position:fixed;border-radius:50%;
+  width:50px;height:50px;margin:-25px;
+  pointer-events:none;z-index:9999;
+  animation:pwBlast 0.65s ease-out forwards;
+}
+@keyframes pwBlast{0%{opacity:0.95;transform:scale(1);}100%{opacity:0;transform:scale(4);}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -1512,6 +1587,16 @@ jungleAudio.setButton();
    GLOBAL STATE
 ════════════════════════════════════════════════════ */
 const ALL_ANIMALS  = ['🐯','🦌','🐐','🦅','🐍','🐒','🐘','🦚'];
+// ── Power Animal Tiles (board values 100+) ──
+const POWER_LION     = 100;
+const POWER_GIRAFFE_H= 101;
+const POWER_GIRAFFE_V= 102;
+const POWER_RHINO    = 103;
+const POWER_LEOPARD  = 104;
+const POWER_EMOJI  = {100:'🦁',101:'🦒',102:'🦒',103:'🦏',104:'🐆'};
+const POWER_NAMES  = {100:'Lion',101:'Giraffe',102:'Giraffe',103:'Rhino',104:'Leopard'};
+const POWER_COLOR  = {100:'#FFD700',101:'#00EFFF',102:'#00EFFF',103:'#A8C8E8',104:'#E070E0'};
+const POWER_LABEL  = {100:'×5',101:'ROW',102:'COL',103:'CROSS',104:'SQ+'};
 const ANIMAL_NAMES = ['Tiger','Deer','Goat','Eagle','Snake','Monkey','Elephant','Peacock'];
 const ZONE_ICONS   = { 'I':'🌾','II':'🌴','III':'💧','IV':'⛰️','V':'🌺' };
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -1668,7 +1753,22 @@ function renderBoard(iconSizeOverride, markSpawned=false) {
 /* ════════════════════════════════════════════════════
    MAKE TILE ELEMENT (shared factory)
 ════════════════════════════════════════════════════ */
-function makeTileEl(animalIdx, r, c, iSize) {
+function makeTileEl(animalIdx, r, c, iSize, skipPwSpawn=false) {
+  // ── Power tile ──
+  if (animalIdx >= 100) {
+    const kn = {100:'lion',101:'giraffe',102:'giraffe',103:'rhino',104:'leopard'}[animalIdx]||'lion';
+    const d = document.createElement('div');
+    d.className = 'candy power-tile power-'+kn;
+    d.dataset.r = r; d.dataset.c = c;
+    d.style.gridRow    = (r+1)+'';
+    d.style.gridColumn = (c+1)+'';
+    d.style.setProperty('--pw-color', POWER_COLOR[animalIdx]||'#FFD700');
+    d.style.fontSize = iSize + 'px';
+    d.innerHTML = '<span class="pw-emoji">'+POWER_EMOJI[animalIdx]+'</span>'
+                + '<span class="pw-label">'+POWER_LABEL[animalIdx]+'</span>';
+    if (!skipPwSpawn) d.classList.add('pw-spawning');
+    return d;
+  }
   const d = document.createElement('div');
   const typeClass = animalIdx >= 6 ? 'candy-0 type-'+animalIdx : 'candy-'+Math.min(animalIdx,5);
   d.className = 'candy ' + typeClass;
@@ -1758,9 +1858,52 @@ function getEl(r,c) {
 /* ════════════════════════════════════════════════════
    SWAP
 ════════════════════════════════════════════════════ */
-function doSwap(r1,c1,r2,c2) {
+async function doSwap(r1,c1,r2,c2) {
   isProcessing=true; clearSelected();
   const pan = jungleAudio.panFromCell(Math.round((c1+c2)/2));
+
+  // ── Power tile activation ──
+  const isPow1 = board[r1][c1]>=100, isPow2 = board[r2][c2]>=100;
+  if (isPow1 || isPow2) {
+    movesLeft--;
+    const mEl=document.getElementById('moves');
+    mEl.textContent=movesLeft; mEl.classList.remove('pop'); void mEl.offsetWidth; mEl.classList.add('pop');
+    jungleAudio.play('bigpop',pan);
+    const isDoubleCombo = isPow1 && isPow2;
+    // Save second power kind before first activation (first blast may clear r2,c2)
+    const _pow2Kind = isPow2 ? board[r2][c2] : -1;
+    if (isDoubleCombo) {
+      // ⚡ DOUBLE POWER COMBO — flash banner + twin blast rings
+      showComboBanner('⚡ DOUBLE POWER COMBO! ⚡');
+      showPowerBlast(r1,c1,board[r1][c1]);
+      showPowerBlast(r2,c2,board[r2][c2]);
+      drawBlastRing(r1,c1); drawBlastRing(r2,c2);
+      jungleAudio.play('bigpop',jungleAudio.panFromCell(c1));
+      await delay(300);
+    }
+    if (isPow1) await activatePowerTile(r1,c1,r2,c2);
+    if (isPow2) {
+      // Restore kind if first blast already cleared this cell
+      if (board[r2][c2] < 100) board[r2][c2] = _pow2Kind;
+      await activatePowerTile(r2,c2,r1,c1);
+    }
+    if (isDoubleCombo) {
+      // Double score bonus: +50% of current score added
+      const bonusPts = Math.floor(score * 0.5);
+      score += bonusPts;
+      updateScore();
+      showScoreFloat(Math.floor((r1+r2)/2), Math.floor((c1+c2)/2), '🔥 ×2 COMBO +'+bonusPts);
+      showMsg('🔥 DOUBLE POWER! Score ×1.5!', true);
+    }
+    // Drop and fill gaps from power blast
+    const _pwCfg = getConfig(level);
+    drop(); fill(_pwCfg.animalTypes);
+    renderBoard(undefined, true);
+    await delay(500);
+    await processMatches(false);
+    return;
+  }
+
   swapCells(r1,c1,r2,c2);
   renderBoard();
   markCells([[r1,c1],[r2,c2]],'swapping');
@@ -1797,22 +1940,37 @@ function findMatches() {
   // Horizontal
   for (let r=0;r<ROWS;r++) {
     for (let c=0;c<COLS-2;c++) {
-      const v=board[r][c]; if(v<0)continue;
+      const v=board[r][c]; if(v<0||v>=100)continue;
       if (v===board[r][c+1]&&v===board[r][c+2]) {
         const cells=[{r,c}]; let x=c+1;
         while(x<COLS&&board[r][x]===v){cells.push({r,c:x});x++;}
-        matches.push({type:v,shape:cells.length>=5?'five':'line',cells}); c=x-1;
+        matches.push({type:v,shape:cells.length>=5?'five':cells.length===4?'four_h':'three',cells}); c=x-1;
       }
     }
   }
   // Vertical
   for (let c=0;c<COLS;c++) {
     for (let r=0;r<ROWS-2;r++) {
-      const v=board[r][c]; if(v<0)continue;
+      const v=board[r][c]; if(v<0||v>=100)continue;
       if (v===board[r+1][c]&&v===board[r+2][c]) {
         const cells=[{r,c}]; let y=r+1;
         while(y<ROWS&&board[y][c]===v){cells.push({r:y,c});y++;}
-        matches.push({type:v,shape:cells.length>=5?'five':'line',cells}); r=y-1;
+        matches.push({type:v,shape:cells.length>=5?'five':cells.length===4?'four_v':'three',cells}); r=y-1;
+      }
+    }
+  }
+  // 2×2 Square detection (Leopard power)
+  const _sqSeen = new Set();
+  for (let rs=0;rs<ROWS-1;rs++) {
+    for (let cs=0;cs<COLS-1;cs++) {
+      const vs=board[rs][cs]; if(vs<0||vs>=100) continue;
+      if(board[rs][cs+1]===vs&&board[rs+1][cs]===vs&&board[rs+1][cs+1]===vs) {
+        const sqK=rs+','+cs;
+        if(!_sqSeen.has(sqK)){
+          _sqSeen.add(sqK);
+          matches.push({type:vs,shape:'square',pivot:{r:rs,c:cs},
+            cells:[{r:rs,c:cs},{r:rs,c:cs+1},{r:rs+1,c:cs},{r:rs+1,c:cs+1}]});
+        }
       }
     }
   }
@@ -1837,8 +1995,20 @@ function mergeIntersections(matches) {
     }
     const byKey=new Map();
     group.flatMap(m=>m.cells).forEach(cell=>byKey.set(cellKey(cell),cell));
-    const shape=byKey.size>=5?'five':group.length>1?'cross':group[0].shape;
-    merged.push({type:matches[i].type,shape,cells:[...byKey.values()]});
+    const _hasSq  = group.some(m=>m.shape==='square');
+    const _has5   = !_hasSq && (group.some(m=>m.shape==='five') || (byKey.size>=5 && group.every(m=>['four_h','four_v','five','three'].includes(m.shape))));
+    const _has4h  = !_hasSq && !_has5 && group.length===1 && group[0].shape==='four_h';
+    const _has4v  = !_hasSq && !_has5 && group.length===1 && group[0].shape==='four_v';
+    const _hasLT  = !_hasSq && !_has5 && !_has4h && !_has4v && group.length>1;
+    const shape = _hasSq?'square':_has5?'five':_has4h?'four_h':_has4v?'four_v':_hasLT?'lt':group[0].shape;
+    // Determine pivot cell
+    let pivot = group[0].pivot;
+    if(!pivot && group.length>1) {
+      const g0k=new Set(group[0].cells.map(cellKey));
+      pivot=group[1].cells.find(cl=>g0k.has(cellKey(cl)))||group[0].cells[Math.floor(group[0].cells.length/2)];
+    }
+    if(!pivot) pivot=group[0].cells[Math.floor(group[0].cells.length/2)];
+    merged.push({type:matches[i].type,shape,cells:[...byKey.values()],pivot});
   }
   return merged;
 }
@@ -1900,6 +2070,85 @@ function removeSkeletonCells() {
 }
 
 /* ════════════════════════════════════════════════════
+   POWER TILE ACTIVATION
+════════════════════════════════════════════════════ */
+function showPowerBlast(r,c,kind) {
+  const el=getEl(r,c); if(!el) return;
+  const rect=el.getBoundingClientRect();
+  const b=document.createElement('div');
+  b.className='power-blast';
+  b.style.cssText='left:'+(rect.left+rect.width/2)+'px;top:'+(rect.top+rect.height/2)+'px;'
+    +'background:'+POWER_COLOR[kind]+';box-shadow:0 0 30px 12px '+POWER_COLOR[kind]+';';
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(),700);
+}
+
+async function activatePowerTile(pr,pc,tr,tc) {
+  const kind=board[pr][pc]; if(kind<100) return;
+  /* ── Activate animation: tile swells big then vanishes ── */
+  const tileEl = getEl(pr,pc);
+  if (tileEl) {
+    tileEl.classList.remove('pw-spawning');
+    tileEl.classList.add('pw-activating');
+    await new Promise(res => setTimeout(res, 180));
+  }
+  showPowerBlast(pr,pc,kind);
+  showComboBanner(POWER_EMOJI[kind]+' '+POWER_NAMES[kind].toUpperCase()+' POWER!');
+
+  const blast=new Set();
+  blast.add(pr+','+pc);
+
+  if (kind===POWER_LION) {
+    const tgt=board[tr][tc];
+    const clearType = (tgt>=0&&tgt<100) ? tgt : (() => {
+      const cnt=Array(8).fill(0);
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]>=0&&board[r][c]<8) cnt[board[r][c]]++;
+      return cnt.indexOf(Math.max(...cnt));
+    })();
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]===clearType) blast.add(r+','+c);
+    showMsg('🦁 LION HUNT! All '+(ALL_ANIMALS[clearType]||'?')+' cleared!',true);
+
+  } else if (kind===POWER_GIRAFFE_H) {
+    for(let c=0;c<COLS;c++) blast.add(pr+','+c);
+    showMsg('🦒 GIRAFFE! Full row swept!',true);
+
+  } else if (kind===POWER_GIRAFFE_V) {
+    for(let r=0;r<ROWS;r++) blast.add(r+','+pc);
+    showMsg('🦒 GIRAFFE! Full column swept!',true);
+
+  } else if (kind===POWER_RHINO) {
+    for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+      for(let i=1;i<=3;i++) {
+        const nr=pr+dr*i,nc=pc+dc*i;
+        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS) blast.add(nr+','+nc);
+      }
+    }
+    showMsg('🦏 RHINO CHARGE! Cross cleared!',true);
+
+  } else if (kind===POWER_LEOPARD) {
+    for(let c=0;c<COLS;c++) blast.add(pr+','+c);
+    for(let r=0;r<ROWS;r++) blast.add(r+','+pc);
+    showMsg('🐆 LEOPARD POUNCE! Row+Col cleared!',true);
+  }
+
+  // Animate blasted tiles
+  const blastArr=[...blast].map(k=>{const[r,c]=k.split(',').map(Number);return{r,c};});
+  blastArr.forEach(({r,c},i)=>setTimeout(()=>{
+    const el=getEl(r,c);
+    if(el){el.classList.add('match-pop');spawnMatchParticles(el);}
+  },i*22));
+
+  const pts=blastArr.length*12;
+  score+=pts; updateScore();
+  showScoreFloat(pr,pc,'+'+pts);
+  drawBlastRing(pr,pc);
+  await delay(blastArr.length*22+480);
+
+  // Clear blasted cells on board
+  blast.forEach(k=>{const[r,c]=k.split(',').map(Number); board[r][c]=-1;});
+}
+
+/* ════════════════════════════════════════════════════
    PROCESS MATCHES
    Candy Crush cascade: after each resolve, re-check for new matches
    Pop → clear DOM → rebuild with drop/spawn animations → repeat
@@ -1914,9 +2163,24 @@ async function processMatches(playerTriggered=false) {
 
     const cfg = getConfig(level);
 
-    /* ── Collect matched cells ── */
+    /* ── Collect matched cells + power tile creation ── */
     const cellsToRemove = new Set();
-    matches.forEach(m => m.cells.forEach(({r,c}) => cellsToRemove.add(`${r},${c}`)));
+    const _newPowers = [];
+    matches.forEach(m => {
+      let powerKind = null;
+      if      (m.shape==='five')   powerKind = POWER_LION;
+      else if (m.shape==='four_h') powerKind = POWER_GIRAFFE_H;
+      else if (m.shape==='four_v') powerKind = POWER_GIRAFFE_V;
+      else if (m.shape==='lt')     powerKind = POWER_RHINO;
+      else if (m.shape==='square') powerKind = POWER_LEOPARD;
+      if (powerKind !== null) {
+        const piv = m.pivot || m.cells[Math.floor(m.cells.length/2)];
+        _newPowers.push({r:piv.r, c:piv.c, kind:powerKind});
+        m.cells.forEach(({r,c})=>{ if(r!==piv.r||c!==piv.c) cellsToRemove.add(r+','+c); });
+      } else {
+        m.cells.forEach(({r,c}) => cellsToRemove.add(r+','+c));
+      }
+    });
 
     /* ── Score ── */
     const cascadeBonus = cascadeCount > 0 ? 1 + cascadeCount * 0.25 : 1;
@@ -1962,6 +2226,11 @@ async function processMatches(playerTriggered=false) {
       const [r,c] = k.split(',').map(Number);
       board[r][c] = -1;
     });
+    /* ── Place new power tiles ── */
+    _newPowers.forEach(pt => {
+      board[pt.r][pt.c] = pt.kind;
+      setTimeout(()=>showComboBanner('⚡ '+POWER_EMOJI[pt.kind]+' '+POWER_NAMES[pt.kind]+' Power!'), 200);
+    });
 
     /* ── STEP 4: Compute which tiles will drop (BEFORE drop()) ── */
     const dropInfo = computeDropInfo();
@@ -1982,8 +2251,8 @@ async function processMatches(playerTriggered=false) {
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const animalIdx = board[r][c];
-        const d = makeTileEl(animalIdx, r, c, cfg.iconSize);
         const key = `${r},${c}`;
+        const d = makeTileEl(animalIdx, r, c, cfg.iconSize, !newCells.has(key));
 
         if (newCells.has(key)) {
           /* New tile: spawn from above board */
@@ -2001,6 +2270,9 @@ async function processMatches(playerTriggered=false) {
           d.style.transition = 'none';
           d.dataset.dropCount = dropCount;
           d.classList.add('tile-dropping');
+        } else {
+          /* Surviving tile: quick fade-in so no flash after innerHTML clear */
+          d.classList.add('tile-survive');
         }
 
         boardEl.appendChild(d);
@@ -2016,11 +2288,13 @@ async function processMatches(playerTriggered=false) {
       const r        = parseInt(el.dataset.r);
       const c        = parseInt(el.dataset.c);
       const dropCount = parseInt(el.dataset.dropCount) || r + 1;
-      const dur      = isSpawn ? 260 + r * 45 : 180 + dropCount * 60;
-      /* Stagger: bottom tiles land first, columns stagger slightly */
+      /* Candy Crush feel: fast drop (gravity), spawn slightly staggered by column */
+      const dur      = isSpawn ? 220 + r * 38 : 150 + dropCount * 50;
+      /* Drop: columns stagger l→r by 20ms; within col bottom lands first (no extra stagger)
+         Spawn: columns stagger, rows stagger so they fall like rain */
       const stagger  = isSpawn
-        ? c * 28 + r * 30 + 100
-        : c * 15 + (ROWS - 1 - r) * 10;
+        ? c * 32 + r * 22 + 60
+        : c * 20;
       const totalEnd = stagger + dur;
       if (totalEnd > maxAnimEnd) maxAnimEnd = totalEnd;
 
@@ -2280,6 +2554,15 @@ function clearHints() {
 ════════════════════════════════════════════════════ */
 function hasAnyValidMove() { return Boolean(findFirstValidMove()); }
 function findFirstValidMove() {
+  // Power tiles: any adjacent swap is valid
+  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
+    if (board[r][c]>=100) {
+      for (const [dr,dc] of [[1,0],[0,1],[-1,0],[0,-1]]) {
+        const nr=r+dr,nc=c+dc;
+        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc]>=0) return [{r,c},{r:nr,c:nc}];
+      }
+    }
+  }
   for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
     for (const [dr,dc] of [[1,0],[0,1]]) {
       const nr=r+dr,nc=c+dc; if(nr>=ROWS||nc>=COLS) continue;
