@@ -3,7 +3,7 @@
    Strategy: Cache-first for assets, Network-first for HTML
    ═══════════════════════════════════════════════════ */
 
-const CACHE_NAME   = 'candyboom-v1.2';
+const CACHE_NAME   = 'candyboom-v2.0';
 const STATIC_CACHE = 'candyboom-static-v1.2';
 const DATA_CACHE   = 'candyboom-data-v1.2';
 
@@ -22,7 +22,8 @@ const PRE_CACHE = [
   '/assets/levelmap_bg_frozen.png',
   '/assets/levelmap_bg_cosmic.png',
   '/manifest.json',
-  /* Google Fonts fallback handled separately */
+  '/terms.html',
+  '/assets/supabase.min.js',
 ];
 
 /* ── Install: pre-cache all static assets ── */
